@@ -1,7 +1,17 @@
-## Getting Started
+# Getting Started
 
-Install all dependencies with:
+## Installing dependencies
+
+### Install all dependencies
+
 #### `yarn install`
 
-Run the server with:
-#### `node index.js`
+## Running the server
+
+### Normal server run
+
+#### `yarn start`
+
+### Run in development environment
+
+#### `yarn run dev`
