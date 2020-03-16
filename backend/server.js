@@ -23,4 +23,4 @@ const PORT = process.env.PORT || 5000;
 // Route to frontend homepage
 app.get("/", (req, res) => res.end("Welcome to foodapp!"));
 
-app.listen(PORT, () => console.log(`server listening on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));

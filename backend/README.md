@@ -1,17 +1,21 @@
-# Getting Started
+# FoodApp Backend API 
 
-## Installing dependencies
+Backend API for the FoodApp web application, the leading online food delivery platform.
 
-### Install all dependencies
+## Getting Started
 
-#### `yarn install`
+### Installing dependencies
 
-## Running the server
+#### Install all dependencies
 
-### Normal server run
+##### `yarn install`
 
-#### `yarn start`
+### Running the server
 
-### Run in development environment
+#### Run in production
 
-#### `yarn run dev`
+##### `yarn start`
+
+#### Run in development environment
+
+##### `yarn run dev`
