@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "name": "foodapp",
   "version": "1.0.0",
@@ -16,3 +17,23 @@
     "nodemon": "^2.0.2"
   }
 }
+=======
+{
+  "name": "foodapp",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "NODE_ENV=production node server",
+    "dev": "nodemon server"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "morgan": "^1.9.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
+>>>>>>> f18aa4f63c7d78510eba122dae4430379b1e8d68
