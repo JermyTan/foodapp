@@ -36,3 +36,30 @@
     transform: rotate(360deg);
   }
 }
+
+/* .category-scrolling-food-display {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  display: flex;
+  flex-wrap: nowrap; 
+  max-height: 300px;
+  max-width: fit-content;
+}
+
+.food-item-card {
+  padding-top: 5px;
+  padding-bottom: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
+  max-width: 250px;
+  flex: 0 0 auto;
+} */
+
+.food-item-description{
+  padding: 15px
+}
+
+.order-form{
+  float: right;
+  min-width: 300px;
+}
