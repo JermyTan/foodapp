@@ -1,3 +1,5 @@
+const db = require('../db');
+
 // @desc    Get all orders
 // @route   GET /orders
 // @acess   Public
