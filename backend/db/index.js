@@ -1,13 +1,11 @@
-const { Pool } = require('pg')
-
-const pool = new Pool()
+const pool = require('./pool');
 
 module.exports = {
   query: (text, params, callback) => {
     const start = Date.now()
     return pool.query(text, params, (err, res) => {
         const duration = Date.now() - start
-        console.log('executed query', { text, params, duration, rows : res.rowCount })
+        console.log('Executed query', { text, params, duration, res : res })
         callback(err, res)
     })
   },
@@ -39,4 +37,4 @@ module.exports = {
         callback(err, client, release)
     })
   }
-}
+};
