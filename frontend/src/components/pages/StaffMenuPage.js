@@ -1,5 +1,6 @@
 import React from "react";
 import { Menu, Container } from "semantic-ui-react";
+import RestaurantMenu from "./restaurant/RestaurantMenu"
 
 function StaffMenuPage() {
   return (
@@ -8,8 +9,16 @@ function StaffMenuPage() {
       <br />
       <br />
       <Container>
-        <h1>This is the staff menu page</h1>
+        <div style={{ float: "left" }}>
+          <RestaurantMenu />
+        </div>
+        <aside style={{ float: "right" }}>
+          <Container className="order-form">
+            <p>ORDER</p>
+          </Container>
+        </aside>
       </Container>
+
     </main>
   );
 }

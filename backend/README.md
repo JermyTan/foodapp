@@ -1,10 +1,25 @@
+# FoodApp Backend API 
+
+Backend API for the FoodApp web application, the leading online food delivery platform.
+
 ## Getting Started
 
-Install all dependencies with:
-#### `yarn install`
+### Installing dependencies
 
-Run the server with:
-#### `node index.js`
+#### Install all dependencies
 
-Set up connection with db: 
-#### Under the file `db/pool.js`, adjust the fields: `user`, `host`, `database`, `password`, `port`
+##### `yarn install`
+
+### Running the server
+
+#### Run in production
+
+##### `yarn start`
+
+#### Run in development environment
+
+##### `yarn run dev`
+
+#### Set up connection with db:
+
+##### Under the file `db/pool.js`, adjust the fields: `user`, `host`, `database`, `password`, `port`
