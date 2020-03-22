@@ -6,13 +6,13 @@ const morgan = require('morgan');
 const apiRoutes = require('./routes/api-routes');
 
 // load env vars
-dotenv.config({ path : './config/config.env' });
+dotenv.config({ path: './config/config.env' });
 
 const app = express();
 
 // Dev logging middleware
 if (process.env.NODE_ENV === 'development') {
-    app.use(morgan('dev'));
+  app.use(morgan('dev'));
 }
 
 // TODO: Mount routers
