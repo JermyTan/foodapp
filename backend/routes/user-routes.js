@@ -7,22 +7,22 @@ const router = new Router();
 
 // import controllers here
 const { 
-    getOrders,
-    getOrder,
-    createOrder,
-    updateOrder,
-    deleteOrder
- } = require('../controllers/orders');
+    getUsers,
+    getUser,
+    createUser,
+    updateUser,
+    deleteUser
+ } = require('../controllers/users');
 
 // map routes to controller
 router
 .route('/')
-.get(getOrders)
-.post(createOrder);
+.get(getUsers)
+.post(createUser);
 
 router.route('/:id')
-.get(getOrder)
-.put(updateOrder)
-.delete(deleteOrder);
+.get(getUser)
+.put(updateUser)
+.delete(deleteUser);
 
 module.exports = router;
