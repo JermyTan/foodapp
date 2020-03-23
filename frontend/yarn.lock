@@ -9561,6 +9561,14 @@ semantic-ui-css@^2.4.1:
   dependencies:
     jquery x.*
 
+semantic-ui-react-numberinput@^1.3.8:
+  version "1.3.8"
+  resolved "https://registry.yarnpkg.com/semantic-ui-react-numberinput/-/semantic-ui-react-numberinput-1.3.8.tgz#3e944e1b3429d5c9206c559f22fc655625152308"
+  integrity sha512-eeCh3UIsrrKKGN9HnFDvAIB8wLVSZ1l/7h+RsKE/876oJnHf9X9bMaB/4ZEwRmYLq/z+cJdo1ETQ70yoMU0r3A==
+  dependencies:
+    lodash "^4.17.15"
+    prop-types "^15.7.2"
+
 semantic-ui-react@^0.88.2:
   version "0.88.2"
   resolved "https://registry.yarnpkg.com/semantic-ui-react/-/semantic-ui-react-0.88.2.tgz#3d4b54f8b799769b412435c8531475fd34aa4149"

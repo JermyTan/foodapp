@@ -1,7 +1,42 @@
-import React from "react";
-import { Button, Icon, Label, Input } from "semantic-ui-react";
+import React, { useState } from "react";
+import { Button, Icon, Label, Input, Item } from "semantic-ui-react";
+import FoodItemSelector from "./FoodItemSelector";
 
 function RestaurantOrder(props) {
+  const [totalPrice, setTotalPrice] = useState("0.00");
+  const selectedFoodItems = {};
+
+  /*
+  selectedFoodItems = {
+    <food name>: selectedFoodItem,
+    <food name>: selectedFoodItem,
+    ...
+  }
+
+  selectedFoodItem = {
+    name: string,
+    quantity: number,
+    price: number
+  }
+  */
+  const updateSelectedFoodItems = selectedFoodItem => {
+    if (selectedFoodItems.name === undefined) {
+      selectedFoodItems.name = selectedFoodItem;
+    } else {
+      selectedFoodItems.name.quantity = selectedFoodItem.quantity;
+    }
+    updateTotalPrice();
+  };
+
+  const updateTotalPrice = () => {
+    let totalPrice = 0;
+    for (let [key, value] of Object.entries(selectedFoodItems)) {
+      totalPrice += parseInt(value.quantity) * parseFloat(value.price);
+    }
+
+    setTotalPrice(totalPrice.toFixed(2));
+  };
+
   return (
     <>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -9,7 +44,7 @@ function RestaurantOrder(props) {
         <span>
           <Input labelPosition="left" type="text" fluid>
             <Label basic>$</Label>
-            <input disabled style={{ opacity: "1" }} />
+            <input disabled style={{ opacity: "1" }} value={totalPrice} />
           </Input>
 
           <Button.Group widths="2" style={{ minWidth: "20vw" }}>
@@ -34,7 +69,13 @@ function RestaurantOrder(props) {
         </span>
       </div>
 
-      <h1>To be implemented</h1>
+      <Item.Group divided>
+        <FoodItemSelector updateSelectedFoodItems={updateSelectedFoodItems} />
+        <FoodItemSelector updateSelectedFoodItems={updateSelectedFoodItems} />
+        <FoodItemSelector updateSelectedFoodItems={updateSelectedFoodItems} />
+        <FoodItemSelector updateSelectedFoodItems={updateSelectedFoodItems} />
+        <FoodItemSelector updateSelectedFoodItems={updateSelectedFoodItems} />
+      </Item.Group>
     </>
   );
 }
