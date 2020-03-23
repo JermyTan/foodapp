@@ -3,13 +3,6 @@ import { Item, Label } from "semantic-ui-react";
 import NumberInput from "semantic-ui-react-numberinput";
 import "../styles/FoodItemSelector.scss";
 
-const data = {
-  name: "Curry Chicken with Rice",
-  price: "6.30",
-  category: "Asian",
-  limit: 5
-};
-
 function FoodItemSelector(props) {
   const [count, setCount] = useState("0");
 
@@ -21,23 +14,23 @@ function FoodItemSelector(props) {
         <Item.Header
           style={{ display: "flex", justifyContent: "space-between" }}
         >
-          {data.name}
-          <span>${data.price}</span>
+          {props.name}
+          <span>${props.price.toFixed(2)}</span>
         </Item.Header>
         <Item.Extra>
-          <Label>{data.category}</Label>
+          <Label>{props.category}</Label>
         </Item.Extra>
         <Item.Extra>
           <NumberInput
             minValue={0}
-            maxValue={data.limit}
+            maxValue={props.limit}
             value={count}
             onChange={value => {
               setCount(value);
               props.updateSelectedFoodItems({
-                name: data.name,
-                quantity: value,
-                price: data.price
+                name: props.name,
+                quantity: parseInt(value),
+                price: props.price
               });
             }}
             className="number-input"

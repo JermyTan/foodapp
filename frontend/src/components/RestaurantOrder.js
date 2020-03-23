@@ -1,10 +1,50 @@
 import React, { useState } from "react";
 import { Button, Icon, Label, Input, Item } from "semantic-ui-react";
 import FoodItemSelector from "./FoodItemSelector";
+import CheckoutButton from "./CheckoutButton";
 
+const data = [
+  {
+    name: "Curry Chicken with Rice",
+    price: 6.3,
+    category: "Asian",
+    limit: 5
+  },
+  {
+    name: "Dry Mee Siam",
+    price: 5.6,
+    category: "Malay",
+    limit: 3
+  },
+  {
+    name: "Ice Milo",
+    price: 1.3,
+    category: "Drinks",
+    limit: 10
+  },
+  {
+    name: "Fried Bee Hoon",
+    price: 4.3,
+    category: "Asian",
+    limit: 8
+  },
+  {
+    name: "Lu Rou Fan",
+    price: 7.99,
+    category: "Asian",
+    limit: 5
+  },
+  {
+    name: "Peanut Butter Thick Toast",
+    price: 2.1,
+    category: "Asian",
+    limit: 10
+  }
+];
 function RestaurantOrder(props) {
-  const [totalPrice, setTotalPrice] = useState("0.00");
-  const selectedFoodItems = {};
+  const [total, setTotal] = useState(0);
+  const [subtotal, setSubtotal] = useState(0);
+  const [selectedFoodItems, setSelectedFoodItems] = useState({});
 
   /*
   selectedFoodItems = {
@@ -20,21 +60,27 @@ function RestaurantOrder(props) {
   }
   */
   const updateSelectedFoodItems = selectedFoodItem => {
-    if (selectedFoodItems.name === undefined) {
-      selectedFoodItems.name = selectedFoodItem;
+    if (selectedFoodItems[selectedFoodItem.name] === undefined) {
+      selectedFoodItems[selectedFoodItem.name] = selectedFoodItem;
+    } else if (selectedFoodItem.quantity <= 0) {
+      delete selectedFoodItems[selectedFoodItem.name];
     } else {
-      selectedFoodItems.name.quantity = selectedFoodItem.quantity;
+      selectedFoodItems[selectedFoodItem.name].quantity =
+        selectedFoodItem.quantity;
     }
+
+    setSelectedFoodItems(selectedFoodItems);
     updateTotalPrice();
   };
 
   const updateTotalPrice = () => {
-    let totalPrice = 0;
+    let subtotal = 0;
     for (let [key, value] of Object.entries(selectedFoodItems)) {
-      totalPrice += parseInt(value.quantity) * parseFloat(value.price);
+      subtotal += value.quantity * value.price;
     }
 
-    setTotalPrice(totalPrice.toFixed(2));
+    setSubtotal(subtotal);
+    setTotal(subtotal + props.deliveryInfo.deliveryFee);
   };
 
   return (
@@ -44,16 +90,21 @@ function RestaurantOrder(props) {
         <span>
           <Input labelPosition="left" type="text" fluid>
             <Label basic>$</Label>
-            <input disabled style={{ opacity: "1" }} value={totalPrice} />
+            <input
+              disabled
+              style={{ opacity: "1" }}
+              value={subtotal.toFixed(2)}
+            />
           </Input>
 
           <Button.Group widths="2" style={{ minWidth: "20vw" }}>
-            <Button animated="vertical" color="teal">
-              <Button.Content hidden>Checkout</Button.Content>
-              <Button.Content visible>
-                <Icon name="shop" />
-              </Button.Content>
-            </Button>
+            <CheckoutButton
+              subtotal={subtotal.toFixed(2)}
+              total={total.toFixed(2)}
+              restaurant={props.restaurant}
+              deliveryInfo={props.deliveryInfo}
+              selectedFoodItems={selectedFoodItems}
+            />
 
             <Button
               animated="fade"
@@ -70,11 +121,17 @@ function RestaurantOrder(props) {
       </div>
 
       <Item.Group divided>
-        <FoodItemSelector updateSelectedFoodItems={updateSelectedFoodItems} />
-        <FoodItemSelector updateSelectedFoodItems={updateSelectedFoodItems} />
-        <FoodItemSelector updateSelectedFoodItems={updateSelectedFoodItems} />
-        <FoodItemSelector updateSelectedFoodItems={updateSelectedFoodItems} />
-        <FoodItemSelector updateSelectedFoodItems={updateSelectedFoodItems} />
+        {data.map(value => {
+          return (
+            <FoodItemSelector
+              name={value.name}
+              price={value.price}
+              category={value.category}
+              limit={value.limit}
+              updateSelectedFoodItems={updateSelectedFoodItems}
+            />
+          );
+        })}
       </Item.Group>
     </>
   );

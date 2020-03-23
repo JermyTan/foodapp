@@ -3,6 +3,11 @@ import { Menu, Container } from "semantic-ui-react";
 import AllRestaurants from "../AllRestaurants";
 import RestaurantOrder from "../RestaurantOrder";
 
+const deliveryInfo = {
+  location: "Woodlands",
+  deliveryFee: 3.99
+};
+
 function Homepage() {
   const [selectedRestaurant, setSelectedRestaurant] = useState("");
 
@@ -14,6 +19,7 @@ function Homepage() {
           <AllRestaurants setSelectedRestaurant={setSelectedRestaurant} />
         ) : (
           <RestaurantOrder
+            deliveryInfo={deliveryInfo}
             restaurant={selectedRestaurant}
             setSelectedRestaurant={setSelectedRestaurant}
           />
