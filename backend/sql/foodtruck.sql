@@ -115,7 +115,7 @@ CREATE TABLE WWS (
     PRIMARY KEY (id, week, dayofweek, stime, etime),
     CHECK (1 <= week AND week <= 52),
     CHECK (1 <= dayofweek AND dayofweek <= 7),
-    CHECK (10 <= stime AND stime < etime AND etime <= 22)
+    CHECK (10 <= stime AND stime < etime AND etime <= 22 AND etime - stime <= 4)
 );
 
 CREATE TABLE Orders (
@@ -136,6 +136,18 @@ CREATE TABLE Orders (
 
     odatetime    INTEGER NOT NULL
                 CHECK (odatetime >= 0),
+
+    oyear       INTEGER NOT NULL
+                CHECK (oyear >= 2020),
+    
+    omonth      INTEGER NOT NULL
+                CHECK (omonth >= 1 AND omonth <= 12),
+    
+    oday        INTEGER NOT NULL
+                CHECK (omonth >= 1 AND omonth <= 31),
+    
+    ohour       INTEGER NOT NULL
+                CHECK (ohour >= 10 AND ohour <= 21),
 
     -- paymethod: 0 -> cash, 1 -> card
     paymethod   SMALLINT NOT NULL

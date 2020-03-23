@@ -19,6 +19,9 @@
 .env.production.local
 .env
 
+#dbkey
+/db/db-key.json
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
