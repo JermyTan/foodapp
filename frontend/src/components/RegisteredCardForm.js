@@ -2,22 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Form, Header, Button, Message } from "semantic-ui-react";
 
 const data = {
-  name: "Jeremy",
-  email: "helloword@gmail.com",
-  password: "helloword"
+  cardNum: "343241234241223"
 };
 
-function EditableAccountForm() {
+function RegisteredCardForm() {
   const [isEditing, setEditing] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [cardNum, setCardNum] = useState("");
   const [didUpdateSuccessfully, setUpdateSuccessfully] = useState(false);
 
   const resetState = () => {
-    setName(data.name);
-    setEmail(data.email);
-    setPassword(data.password);
+    setCardNum(data.cardNum);
   };
 
   useEffect(() => {
@@ -27,31 +21,13 @@ function EditableAccountForm() {
   return (
     <>
       <Form>
-        <Header>Account Information</Header>
+        <Header>Registered Card</Header>
         <Form.Input
-          label="Name"
-          icon="user"
+          label="Card Number"
+          icon="credit card"
           iconPosition="left"
-          value={name}
-          onChange={(event, data) => setName(data.value)}
-          disabled={!isEditing}
-        />
-        <Form.Input
-          label="Email"
-          icon="mail"
-          iconPosition="left"
-          type="email"
-          value={email}
-          onChange={(event, data) => setEmail(data.value)}
-          disabled={!isEditing}
-        />
-        <Form.Input
-          label="Password"
-          icon="lock"
-          iconPosition="left"
-          type={isEditing ? "text" : "password"}
-          value={password}
-          onChange={(event, data) => setPassword(data.value)}
+          value={cardNum}
+          onChange={(event, data) => setCardNum(data.value)}
           disabled={!isEditing}
         />
         <Button.Group widths="2">
@@ -82,4 +58,4 @@ function EditableAccountForm() {
   );
 }
 
-export default EditableAccountForm;
+export default RegisteredCardForm;
