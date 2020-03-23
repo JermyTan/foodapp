@@ -1,6 +1,6 @@
 import React from "react";
 import { Menu, Container } from "semantic-ui-react";
-import RestaurantMenu from "./restaurant/RestaurantMenu"
+import RestaurantMenu from "../restaurant/RestaurantMenu";
 
 function StaffMenuPage() {
   return (
@@ -18,7 +18,6 @@ function StaffMenuPage() {
           </Container>
         </aside>
       </Container>
-
     </main>
   );
 }

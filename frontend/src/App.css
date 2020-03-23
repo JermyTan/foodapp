@@ -1,5 +1,5 @@
 .App {
-  text-align: center;
+  background-image: linear-gradient(to right, #afaaff, #f7ccff);
 }
 
 .App-logo {
@@ -55,11 +55,11 @@
   flex: 0 0 auto;
 } */
 
-.food-item-description{
-  padding: 15px
+.food-item-description {
+  padding: 15px;
 }
 
-.order-form{
+.order-form {
   float: right;
   min-width: 300px;
 }

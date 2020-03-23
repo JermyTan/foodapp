@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { Sidebar, Menu, Header, Icon, Container } from "semantic-ui-react";
+import { Sidebar, Menu, Header, Icon } from "semantic-ui-react";
 import HomeTab from "./HomeTab";
 import HistoryTab from "./HistoryTab";
 import ProfileTab from "./ProfileTab";
@@ -23,7 +23,6 @@ function NavigationContainer({ children }) {
         onHide={() => setSidebarOpened(false)}
         vertical
         visible={sidebarOpened}
-        style={{ textAlign: "left" }}
       >
         <Header
           size="large"
