@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const db_key = require('./db-key.json');
 
 // const dotenv = require('dotenv');
 
@@ -7,13 +8,7 @@ const { Pool } = require('pg');
 // const databaseConfig = { connectionString: process.env.DATABASE_URL };
 // const pool = new Pool(databaseConfig);
 
-// Change database config details as appropriate
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'foodtruck',
-    password: 'postgres',
-    port: 5432
-});
+// Connect to db with credentials db_key
+const pool = new Pool(db_key);
 
 module.exports = pool;
