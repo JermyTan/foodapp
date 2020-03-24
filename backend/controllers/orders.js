@@ -10,10 +10,10 @@ exports.getOrders = async (req, response) => {
             throw err
         } else {
             if (!result.rows[0]) {
-                response.status(404).json({ success : false, msg : `Failed to get all orders. There could be no order yet.` })
+                response.status(404).json({ success: false, msg: `Failed to get all orders. There could be no order yet.` })
             } else {
                 console.log('Successfully get all orders')
-                response.status(200).json({ success : true, msg : result.rows})   
+                response.status(200).json({ success: true, msg: result.rows })
             }
         }
     })
@@ -31,10 +31,10 @@ exports.getOrder = async (req, response) => {
             throw err
         } else {
             if (!result.rows[0]) {
-                response.status(404).json({ success : false, msg : `Failed to get order ${id}. Order does not exist.` })
+                response.status(404).json({ success: false, msg: `Failed to get order ${id}. Order does not exist.` })
             } else {
                 console.log(`Successfully get order with oid ${oid}`)
-                response.status(200).json({ success : true, msg : result.rows[0] })
+                response.status(200).json({ success: true, msg: result.rows[0] })
             }
         }
     })
@@ -44,31 +44,27 @@ exports.getOrder = async (req, response) => {
 // @route   POST /orders
 // @acess   Private
 exports.createOrder = async (req, response) => {
-    const { location, dfee, status, fprice, odatetime, oyear, 
-        omonth, oday, ohour, paymethod, coid, rname, roid, rating, 
-        departdatetime1, arrivedatetime, departdatetime2, deliverdatetime, 
+    const { location, dfee, status, fprice, odatetime, oyear,
+        omonth, oday, ohour, paymethod, coid, rname, roid, rating,
+        departdatetime1, arrivedatetime, departdatetime2, deliverdatetime,
         reviewdatetime, review } = req.body;
     const orderType = req.order;
     const createOrderQuery = `INSERT INTO orders(location, dfee, status, fprice, odatetime, oyear, 
-            omonth, oday, ohour, paymethod, coid, rname, roid, rating, 
-            departdatetime1, arrivedatetime, departdatetime2, deliverdatetime, 
-            reviewdatetime, review) 
+            omonth, oday, ohour, paymethod, cid, rname) 
             VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, 
-                $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) returning *`
-    const values = [location, dfee, status, fprice, odatetime, oyear, 
-            omonth, oday, ohour, paymethod, coid, rname, roid, rating, 
-            departdatetime1, arrivedatetime, departdatetime2, deliverdatetime, 
-            reviewdatetime, review];
+                $10, $11) returning *`
+    const values = [location, dfee, status, fprice, odatetime, oyear,
+        omonth, oday, ohour, paymethod, cid, rname, rid];
     const rows = await db.query(createOrderQuery, values, (err, result) => {
         if (err) {
             console.error(err.stack)
             throw err
         } else {
             if (!result.rows[0]) {
-                response.status(404).json({ success : false, msg : `Failed to create new order.` })
+                response.status(404).json({ success: false, msg: `Failed to create new order.` })
             } else {
                 console.log('Successfully created order')
-                response.status(200).json({ success : true, msg : result.rows[0] })
+                response.status(200).json({ success: true, msg: result.rows[0] })
             }
         }
     });
@@ -88,10 +84,10 @@ exports.updateOrder = async (req, response) => {
             throw err
         } else {
             if (!result.rows[0]) {
-                response.status(404).json({ success : false, msg : `Failed to update order ${id}. Order does not exist.` })
+                response.status(404).json({ success: false, msg: `Failed to update order ${id}. Order does not exist.` })
             } else {
                 console.log(`Successfully updated order with oid ${oid}`)
-                response.status(200).json({ success : true, msg : result.rows[0] })
+                response.status(200).json({ success: true, msg: result.rows[0] })
             }
         }
     })
@@ -110,7 +106,7 @@ exports.deleteOrder = async (req, response) => {
             // TODO: detect case and handle when nothing is deleted
 
             console.log(`Successfully deleted order with oid ${oid}`)
-            response.status(200).json({ success : true, msg : `Successfully deleted order with oid ${oid}`})
+            response.status(200).json({ success: true, msg: `Successfully deleted order with oid ${oid}` })
         }
     })
 }
