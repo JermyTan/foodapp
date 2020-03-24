@@ -61,3 +61,19 @@ exports.createCustomer = async (req, response) => {
     response.status(500).json({ success: false, msg: 'Failed db query. Please try again.' })
   }
 }
+
+exports.getCustomer = async (req, response) => {
+  const rows = await db.query('SELECT * FROM customers NATURAL JOIN users WHERE id = $1', [req.body.id], (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      throw err
+    } else {
+      if (!result.rows[0]) {
+        response.status(404).json({ success: false, msg: `Failed to get all customer.` })
+      } else {
+        console.log('Successfully get customer')
+        response.status(200).json({ success: true, msg: result.rows })
+      }
+    }
+  })
+}
