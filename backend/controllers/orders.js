@@ -44,22 +44,34 @@ exports.getOrder = async (req, response) => {
 // @route   POST /orders
 // @acess   Private
 exports.createOrder = async (req, response) => {
-    const { location, dfee, status, fprice, odatetime,
-        paymethod, cid, rname } = req.body;
+    const { location, dfee, odatetime, paymethod, cid, rname, foodlist, fprice } = req.body;
     const createOrderQuery = `INSERT INTO orders(location, dfee, status, fprice, odatetime, paymethod, cid, rname) 
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8) returning *`
-    const values = [location, dfee, status, fprice, odatetime, oyear,
-        omonth, oday, ohour, paymethod, cid, rname];
-    const rows = await db.query(createOrderQuery, values, (err, result) => {
+            VALUES(${location}, ${dfee}, 0, ${fprice}, ${odatetime}, ${paymethod}, ${cid}, ${rname}) returning *`
+    const rows = await db.query(createOrderQuery, (err, result) => {
         if (err) {
             console.error(err.stack)
-            throw err
+            response.status(404).json({ success: false, msg: `Failed to create new order.` })
         } else {
-            if (!result.rows[0]) {
+            if (!result.rows) {
                 response.status(404).json({ success: false, msg: `Failed to create new order.` })
             } else {
                 console.log('Successfully created order')
-                response.status(200).json({ success: true, msg: result.rows[0] })
+                oid = result.rows[0].oid
+                console.log('Order id = ', oid)
+                for (var i = 0; i < foodlist.length; i += 1) {
+                    var food = foodlist[i]
+                    console.log("Food:", food)
+                    db.query(`INSERT INTO Consists (oid, fname, quantity) VALUES (${oid}, ${food.fname}, ${food.qty}) returning *;`, (err, result2) => {
+                        if (err) {
+                            console.log("Some error occured for adding ", food.fname)
+                            console.log(err.stack)
+                        } else {
+                            console.log("Added item:")
+                            console.log(result2.rows)
+                        }
+                    })
+                }
+                response.status(200).json({ success: true, msg: oid })
             }
         }
     });
