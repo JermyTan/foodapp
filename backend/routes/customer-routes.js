@@ -8,7 +8,7 @@ const router = new Router();
 // import controllers here
 const {
   getCustomers,
-  // getCustomer,
+  getCustomer,
   createCustomer,
   // updateCustomer,
   // deleteCustomer
@@ -20,9 +20,9 @@ router
   .get(getCustomers)
   .post(createCustomer);
 
-// router.route('/:id')
-//   .get(getCustomer)
-//   .put(updateCustomer)
+router.route('/:id')
+  .get(getCustomer)
+// .put(updateCustomer)
 //   .delete(deleteCustomer);
 
 module.exports = router;
