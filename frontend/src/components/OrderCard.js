@@ -5,7 +5,7 @@ function OrderCard(props) {
   const [isExpanded, setExpanded] = useState(false);
 
   return (
-    <Card fluid>
+    <Card fluid raised>
       <Card.Content>
         <Card.Header
           style={{ display: "flex", justifyContent: "space-between" }}

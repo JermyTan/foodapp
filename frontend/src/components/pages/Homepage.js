@@ -1,53 +1,30 @@
-import React from "react";
+import React, { useState } from "react";
 import { Menu, Container } from "semantic-ui-react";
+import AllRestaurants from "../AllRestaurants";
+import RestaurantOrder from "../RestaurantOrder";
+
+const deliveryInfo = {
+  location: "Woodlands",
+  deliveryFee: 3.99
+};
 
 function Homepage() {
+  const [selectedRestaurant, setSelectedRestaurant] = useState("");
+
   return (
     <main className="homepage">
-      <Menu size="huge" style={{ opacity: 0 }}></Menu>
-      <br />
-      <br />
+      <Menu size="huge" style={{ opacity: 0 }} />
       <Container>
-        <h1>This is the homepage</h1>
+        {selectedRestaurant === "" ? (
+          <AllRestaurants setSelectedRestaurant={setSelectedRestaurant} />
+        ) : (
+          <RestaurantOrder
+            deliveryInfo={deliveryInfo}
+            restaurant={selectedRestaurant}
+            setSelectedRestaurant={setSelectedRestaurant}
+          />
+        )}
       </Container>
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <h1>Test</h1>
     </main>
   );
 }
