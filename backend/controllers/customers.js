@@ -35,31 +35,27 @@ exports.createCustomer = async (req, response) => {
     VALUES((SELECT currval('users_id_seq')), 0, (SELECT NULLIF(${cardnum}, 0))) RETURNING *; 
 
     COMMIT;`
-  try {
-    const rows = await db.query(createCustomerQuery, async (err, result) => {
-      if (err) {
-        // console.error(err.stack);
-        console.log("ERROR", err.constraint)
-        if (err.constraint === 'users_email_key') {
-          response.status(400).json({ success: false, msg: 'Email already exists in DB.' })
-        } else {
-          response.status(500).json({ success: false, msg: 'Failed db query. Please try again.' })
-        }
-
+  const rows = await db.query(createCustomerQuery, async (err, result) => {
+    if (err) {
+      // console.error(err.stack);
+      console.log("ERROR", err.constraint)
+      if (err.constraint === 'users_email_key') {
+        response.status(400).json({ success: false, msg: 'Email already exists in DB.' })
       } else {
-        console.log("result", result[2].rows, result[3].rows)
-        if (result[2].rows.id == result[3].rows.id)
-          response.status(200).json({ success: true, msg: "Created user/customer with id" })
-        else {
-          db.query('ROLLBACK');
-          response.status(404).json({ success: false, msg: `Failed to create customer.` })
-        }
+        response.status(500).json({ success: false, msg: 'Failed db query. Please try again.' })
       }
-    })
-  } catch (err) {
-    console.log("ERROR", err)
-    response.status(500).json({ success: false, msg: 'Failed db query. Please try again.' })
-  }
+
+    } else {
+      console.log("result", result[2].rows, result[3].rows)
+      if (result[2].rows.id == result[3].rows.id)
+        response.status(200).json({ success: true, msg: "Created user/customer with id" })
+      else {
+        db.query('ROLLBACK');
+        response.status(404).json({ success: false, msg: `Failed to create customer.` })
+      }
+    }
+  })
+
 }
 
 exports.getCustomer = async (req, response) => {

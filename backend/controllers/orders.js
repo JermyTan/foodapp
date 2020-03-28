@@ -44,17 +44,12 @@ exports.getOrder = async (req, response) => {
 // @route   POST /orders
 // @acess   Private
 exports.createOrder = async (req, response) => {
-    const { location, dfee, status, fprice, odatetime, oyear,
-        omonth, oday, ohour, paymethod, coid, rname, roid, rating,
-        departdatetime1, arrivedatetime, departdatetime2, deliverdatetime,
-        reviewdatetime, review } = req.body;
-    const orderType = req.order;
-    const createOrderQuery = `INSERT INTO orders(location, dfee, status, fprice, odatetime, oyear, 
-            omonth, oday, ohour, paymethod, cid, rname) 
-            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, 
-                $10, $11) returning *`
+    const { location, dfee, status, fprice, odatetime,
+        paymethod, cid, rname } = req.body;
+    const createOrderQuery = `INSERT INTO orders(location, dfee, status, fprice, odatetime, paymethod, cid, rname) 
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8) returning *`
     const values = [location, dfee, status, fprice, odatetime, oyear,
-        omonth, oday, ohour, paymethod, cid, rname, rid];
+        omonth, oday, ohour, paymethod, cid, rname];
     const rows = await db.query(createOrderQuery, values, (err, result) => {
         if (err) {
             console.error(err.stack)
