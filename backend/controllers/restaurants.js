@@ -20,34 +20,35 @@ exports.getRestaurants = async (req, response) => {
 }
 
 
-// @desc    Get single restaurant and its food items
+// @desc    Get single restaurant and the food items, along with the amount available today
 // @route   GET /restaurant/:fname
 // @acess   Public
 exports.getRestaurant = async (req, response) => {
   const { rname, starttimetoday, endtimetoday } = req.body
   const getRestaurantFoodQuery =
-    `SELECT *,
-      (SELECT SUM(C.quantity) as qtysoldtoday
+    `SELECT *, flimit - COALESCE(
+      (SELECT SUM(C.quantity) AS qtysoldtoday
         FROM (
           SELECT * FROM Orders O
-          WHERE (O.odatetime >= $1 AND O.odatetime <= $2) 
+          WHERE (O.odatetime >= ${starttimetoday} AND O.odatetime <= ${endtimetoday}) 
           AND (O.status = 1 OR O.status = 2)) AS O
         JOIN Consists C ON O.oid = C.oid
         GROUP BY C.fname, O.rname
         HAVING S.fname = C.fname
-        AND S.rname = O.rname)
+        AND S.rname = O.rname), 0) as qtylefttoday
     FROM Sells S
-    WHERE S.rname = $3;`
-  const row = await db.query(getRestaurantFoodQuery, [starttimetoday, endtimetoday, rname], (err, result) => {
+    WHERE S.rname = ${rname}
+    ;`
+  const row = await db.query(getRestaurantFoodQuery, (err, result) => {
     if (err) {
       console.error(err.stack)
+      response.status(404).json({ success: false, msg: `Failed to get restaurant and food items.` })
     } else {
-      console.log(result)
+      console.log("RESULT:", result)
       if (!result.rows) {
         response.status(404).json({ success: false, msg: `Failed to get restaurant and food items.` })
       } else {
-        console.log(`Successfully create restaurant ${rname}`)
-        response.status(200).json({ success: true, msg: "Successfully create restaurant" })
+        response.status(200).json({ success: true, msg: result.rows })
       }
     }
   })
