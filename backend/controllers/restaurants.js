@@ -59,27 +59,37 @@ exports.getRestaurant = async (req, response) => {
 // @acess   Private
 exports.createRestaurant = async (req, response) => {
   const { rname, minamt } = req.body
-  const createRestaurantQuery = `INSERT INTO Restaurants (rname, minamt) VALUES ($1, $2) returning *`
+  const checkRestaurantExistsQuery = `SELECT * FROM Restaurants WHERE rname = ${rname}`
+  const createRestaurantQuery = `INSERT INTO Restaurants (${rname}, ${minamt}) VALUES ($1, $2) returning *`
 
-  const rows = await db.query(createRestaurantQuery, values, (err, result) => {
+  const rows = await db.query(checkRestaurantExistsQuery, (err, result) => {
     if (err) {
-      console.error(err.stack);
-      console.log("ERROR", err.constraint)
-      if (err.constraint === 'restaurants_pkey') {
-        response.status(400).json({ success: false, msg: 'Restaurants already exists in DB.' })
-      } else {
-        response.status(500).json({ success: false, msg: 'Unable to create restaurant. Please try again.' })
-      }
+      console.log(err.stack)
+      response.status(500).json({ success: false, msg: 'Some error occurred' })
     } else {
-      if (!result.rows) {
-        console.log(result)
-        response.status(404).json({ success: false, msg: `Failed to create new Restaurant.` })
+      if (result.rows.length !== 0) {
+        //Restaurant already registered
+        response.status(400).json({ success: false, msg: 'This restaurant is already registered.' })
       } else {
-        console.log('Successfully created restaurant')
-        response.status(200).json({ success: true, msg: result.rows })
+        db.query(createRestaurantQuery, async (err2, result2) => {
+          if (err2) {
+            console.log("Error creating restaurant", err2.stack)
+            response.status(500).json({ success: false, msg: 'Failed to create restaurant account.' })
+          } else {
+            console.log("Result", result2[2].rows, result2[3].rows)
+            if (result.rows) {
+              console.log('Successfully created restaurant')
+              response.status(200).json({ success: true, msg: "Created restaurant" })
+            }
+            else {
+              response.status(404).json({ success: false, msg: result.rows })
+            }
+          }
+        })
       }
+
     }
-  });
+  })
 }
 
 
