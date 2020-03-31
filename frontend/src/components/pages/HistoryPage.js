@@ -1,6 +1,6 @@
 import React from "react";
 import { Menu, Container, Card } from "semantic-ui-react";
-import OrderCard from "components/customers/OrderCard";
+import OrderCard from "components/customers/CustomerOrderCard";
 
 const data = [];
 
