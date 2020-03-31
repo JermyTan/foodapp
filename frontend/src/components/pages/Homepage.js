@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Menu, Container } from "semantic-ui-react";
-import AllRestaurants from "../AllRestaurants";
-import RestaurantOrder from "../RestaurantOrder";
+import AllRestaurants from "components/customers/AllRestaurants";
+import RestaurantOrder from "components/customers/RestaurantOrder";
 
 function Homepage() {
   const [selectedRestaurant, setSelectedRestaurant] = useState("");

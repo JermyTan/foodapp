@@ -1,7 +1,7 @@
 import React from "react";
 import { Menu, Container, Segment, Grid } from "semantic-ui-react";
-import EditableAccountForm from "../EditableAccountForm";
-import RegisteredCardForm from "../RegisteredCardForm";
+import EditableAccountForm from "components/customers/EditableAccountForm";
+import RegisteredCardForm from "components/customers/RegisteredCardForm";
 
 function ProfilePage() {
   return (

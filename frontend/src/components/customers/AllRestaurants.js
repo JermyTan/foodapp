@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { Card, Search, Input } from "semantic-ui-react";
 import RestaurantCard from "./RestaurantCard";
-import "../styles/AllRestaurants.scss";
+import "styles/AllRestaurants.scss";
 
 function AllRestaurants(props) {
   return (
