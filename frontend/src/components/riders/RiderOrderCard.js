@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, Step, Button } from "semantic-ui-react";
-import { getUnixTime, formatISO9075 } from "date-fns";
+import { getUnixTime, format } from "date-fns";
 
 function RiderOrderCard(props) {
   const [startDatetimeToRestaurant, setStartDatetimeToRestaurant] = useState(
@@ -44,7 +44,11 @@ function RiderOrderCard(props) {
 
             {receiveOrderCompleted && (
               <Step.Description>
-                Completed on: {formatISO9075(startDatetimeToRestaurant * 1000)}
+                Completed on:{" "}
+                {format(
+                  startDatetimeToRestaurant * 1000,
+                  "dd/MM/yyyy HH:mm:ss"
+                )}
               </Step.Description>
             )}
           </Step.Content>
@@ -72,7 +76,8 @@ function RiderOrderCard(props) {
             )}
             {goToRestaurantCompleted && (
               <Step.Description>
-                Completed on: {formatISO9075(endDatetimeToRestaurant * 1000)}
+                Completed on:{" "}
+                {format(endDatetimeToRestaurant * 1000, "dd/MM/yyyy HH:mm:ss")}
               </Step.Description>
             )}
           </Step.Content>
@@ -101,7 +106,8 @@ function RiderOrderCard(props) {
 
             {receivedFoodCompleted && (
               <Step.Description>
-                Completed on: {formatISO9075(startDatetimeToCustomer * 1000)}
+                Completed on:{" "}
+                {format(startDatetimeToCustomer * 1000, "dd/MM/yyyy HH:mm:ss")}
               </Step.Description>
             )}
           </Step.Content>
@@ -128,7 +134,8 @@ function RiderOrderCard(props) {
 
             {deliverToCustomerCompleted && (
               <Step.Description>
-                Completed on: {formatISO9075(endDatetimeToCustomer * 1000)}
+                Completed on:{" "}
+                {format(endDatetimeToCustomer * 1000, "dd/MM/yyyy HH:mm:ss")}
               </Step.Description>
             )}
           </Step.Content>
