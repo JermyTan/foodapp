@@ -28,6 +28,9 @@ function Homepage() {
           />
         )}
       </Container>
+      <br />
+      <br />
+      <br />
     </main>
   );
 }

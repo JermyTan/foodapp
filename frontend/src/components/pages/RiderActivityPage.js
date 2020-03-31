@@ -63,6 +63,9 @@ function RiderActivityPage() {
           </Segment>
         )}
       </Container>
+      <br />
+      <br />
+      <br />
     </main>
   );
 }

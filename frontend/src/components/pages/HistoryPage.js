@@ -20,6 +20,9 @@ function HistoryPage() {
           <OrderCard />
         </Card.Group>
       </Container>
+      <br />
+      <br />
+      <br />
     </main>
   );
 }

@@ -26,6 +26,9 @@ function ProfilePage() {
           </Grid>
         </Segment>
       </Container>
+      <br />
+      <br />
+      <br />
     </main>
   );
 }
