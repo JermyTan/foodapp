@@ -137,18 +137,6 @@ CREATE TABLE Orders (
     odatetime    INTEGER NOT NULL
                 CHECK (odatetime >= 0),
 
-    oyear       INTEGER NOT NULL
-                CHECK (oyear >= 2020),
-    
-    omonth      INTEGER NOT NULL
-                CHECK (omonth >= 1 AND omonth <= 12),
-    
-    oday        INTEGER NOT NULL
-                CHECK (omonth >= 1 AND omonth <= 31),
-    
-    ohour       INTEGER NOT NULL
-                CHECK (ohour >= 10 AND ohour <= 21),
-
     -- paymethod: 0 -> cash, 1 -> card
     paymethod   SMALLINT NOT NULL
                 CHECK (paymethod in (0, 1)),
@@ -185,7 +173,7 @@ CREATE TABLE Sells (
 );
 
 CREATE TABLE Consists (
-    oid         INTEGER REFERENCES Orders,
+    oid         INTEGER REFERENCES Orders ON DELETE CASCADE,
     fname       VARCHAR REFERENCES Food,
     quantity    INTEGER NOT NULL,
     CHECK (quantity > 0)
