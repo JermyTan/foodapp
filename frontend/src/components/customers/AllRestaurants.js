@@ -16,6 +16,7 @@ function AllRestaurants(props) {
         <h1>Restaurants</h1>
         <span>
           <Input
+            className="rounded-input"
             placeholder="Enter location..."
             iconPosition="left"
             icon="location arrow"

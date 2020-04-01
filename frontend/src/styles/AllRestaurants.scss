@@ -1,3 +1,7 @@
-.ui.input > input {
+.rounded-input.ui.input > input {
+  border-radius: 500rem;
+}
+
+.rounded-input .ui.input > input {
   border-radius: 500rem;
 }
