@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Menu, Container, Statistic, Icon } from "semantic-ui-react";
+import {
+  Menu,
+  Container,
+  Statistic,
+  Icon,
+  Segment,
+  Label
+} from "semantic-ui-react";
 import { MonthRangeInput } from "semantic-ui-calendar-react";
 import { parse, isBefore, format } from "date-fns";
 import "styles/AllRestaurants.scss";
@@ -27,6 +34,12 @@ const restaurant = {
     orders: 101
   }
 };
+
+const promoData = [
+  "10% off on all food (14/2/2020 - 14/3/2020)",
+  "Free delivery (19/2/2020 - 31/3/2020)",
+  "5% off on all food (15/3/2020 - 15/4/2020)"
+];
 
 function StaffSummaryPage() {
   const [selectedMonths, setSelectedMonths] = useState("");
@@ -72,7 +85,7 @@ function StaffSummaryPage() {
           />
         </div>
 
-        {period.length > 0 && (
+        {period.length > 0 ? (
           <>
             <h1>
               Period{" "}
@@ -163,9 +176,6 @@ function StaffSummaryPage() {
             <br />
             <br />
             <br />
-            <br />
-            <br />
-            <br />
             <Statistic.Group widths="1" size="huge">
               <Statistic>
                 <Statistic.Label>Top</Statistic.Label>
@@ -225,7 +235,51 @@ function StaffSummaryPage() {
               </Statistic>
             </Statistic.Group>
           </>
+        ) : (
+          <Segment
+            size="massive"
+            basic
+            placeholder
+            content="You have not selected a period"
+            textAlign="center"
+          />
         )}
+
+        <h1>Promotional Campaigns</h1>
+        {promoData.map(promo => {
+          return (
+            <>
+              <h2>{promo}</h2>
+
+              <Statistic.Group
+                widths="3"
+                size="small"
+                style={{ margin: "1em 0 1em 0" }}
+              >
+                <Statistic>
+                  <Statistic.Value>30</Statistic.Value>
+                  <Statistic.Label>Days</Statistic.Label>
+                </Statistic>
+
+                <Statistic size>
+                  <Statistic.Label>Total orders</Statistic.Label>
+                  <Statistic.Value>
+                    <Icon name="food" />
+                    3432
+                  </Statistic.Value>
+                </Statistic>
+
+                <Statistic>
+                  <Statistic.Label>Average orders</Statistic.Label>
+                  <Statistic.Value>
+                    <Icon name="food" />
+                    34
+                  </Statistic.Value>
+                </Statistic>
+              </Statistic.Group>
+            </>
+          );
+        })}
       </Container>
       <br />
       <br />
