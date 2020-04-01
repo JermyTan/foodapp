@@ -10,6 +10,9 @@ function ManagerSummaryPage() {
       <Container>
         <h1>This is the manager summary page</h1>
       </Container>
+      <br />
+      <br />
+      <br />
     </main>
   );
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, Image, Rating } from "semantic-ui-react";
-import "../styles/reactive.scss";
+import "styles/reactive.scss";
 
 const data = {
   name: "Toast Box (West Coast Plaza)",
@@ -18,7 +18,7 @@ function RestaurantCard(props) {
       onClick={() => props.setSelectedRestaurant(data.name)}
     >
       <Image
-        src={require("../images/toast-box.jpg")}
+        src={require("images/toast-box.jpg")}
         ui="false"
         style={{ maxHeight: "25vh" }}
       />
