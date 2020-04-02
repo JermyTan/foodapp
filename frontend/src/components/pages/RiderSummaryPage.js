@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Menu, Container, Statistic, Icon } from "semantic-ui-react";
 import { MonthRangeInput } from "semantic-ui-calendar-react";
 import { parse, isBefore, format } from "date-fns";
+import "styles/AllRestaurants.scss";
 
 function RiderSummaryPage() {
   const [selectedMonths, setSelectedMonths] = useState("");
@@ -32,6 +33,7 @@ function RiderSummaryPage() {
         <div style={{ display: "flex", flexWrap: "wrap" }}>
           <h1 style={{ marginInlineEnd: "1rem" }}>Performance summary for</h1>
           <MonthRangeInput
+            className="rounded-input"
             clearable
             placeholder="Select month(s)"
             popupPosition="bottom center"
