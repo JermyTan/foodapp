@@ -4,19 +4,147 @@ const db = require('../db')
 // @route   GET /restaurants
 // @acess   Public
 exports.getRestaurants = async (req, response) => {
-  const rows = await db.query('SELECT * FROM restaurants', (err, result) => {
-    if (err) {
-      console.error(err.stack);
-      throw err
-    } else {
-      if (!result.rows[0]) {
-        response.status(404).json({ success: false, msg: `Failed to get all restaurants. There could be no restaurants yet.` })
+  // const getRating = 'SELECT AVG(rating)'
+  const getCategoriesQuery =
+    `SELECT DISTINCT cat FROM food f NATURAL JOIN sells s
+  WHERE s.rname = $1`
+
+  const getRatingQuery = ``
+
+  const data = { restaurants: [] };
+
+  await db.query(
+    "SELECT DISTINCT rname FROM restaurants",
+    async (err, result) => {
+      if (err) {
+        console.error(err.stack);
+        throw err;
       } else {
-        console.log('Successfully get all restaurants')
-        response.status(200).json({ success: true, msg: result.rows })
+        if (!result.rows[0]) {
+          response.status(404).json({
+            success: false,
+            msg: `Failed to get all restaurants. There could be no restaurants yet.`
+          });
+        } else {
+          // for every restaurant
+          for (var i = 0; i < result.rows.length; i++) {
+            const rinfo = {};
+            rinfo.rname = result.rows[i].rname;
+            rinfo.categories = [];
+
+            let temp = async () => {
+              await db.query(getCategoriesQuery, [rinfo.rname], (err, catresult) => {
+                if (err) {
+                  console.error(err.stack);
+                  response.status(404).json({
+                    success: false,
+                    msg:
+                      `Failed to get restaurant categories for ` + rinfo.rname
+                  });
+                } else {
+                  var catlist = catresult.rows;
+                  for (var c = 0; c < catlist.length; c++) {
+                    rinfo.categories.push(catlist[c].cat);
+                  }
+                  data.restaurants.push(rinfo);
+                  console.log(data);
+                }
+                console.log("hello", i);
+              });
+            };
+            await temp();
+
+            console.log("world", i);
+          }
+        }
       }
     }
-  })
+  );
+  console.log(data);
+  response.status(200).json(data);
+
+
+  // const data = { restaurants: [] }
+  // const rows = db.query('SELECT DISTINCT rname FROM restaurants', (err, result) => {
+  //   if (err) {
+  //     console.error(err.stack);
+  //     throw err
+  //   } else {
+  //     if (!result.rows[0]) {
+  //       response.status(404).json({ success: false, msg: `Failed to get all restaurants. There could be no restaurants yet.` })
+  //     } else {
+  //       // for every restaurant
+  //       for (var i = 0; i < result.rows.length; i++) {
+  //         const rinfo = {}
+  //         rinfo.rname = result.rows[i].rname
+  //         rinfo.categories = []
+  //         const morerows = db.query(getCategoriesQuery, [rinfo.rname], function res(err, catresult) {
+  //           if (err) {
+  //             console.error(err.stack)
+  //             response.status(404).json({ success: false, msg: `Failed to get restaurant categories for ` + rinfo.rname })
+  //           } else {
+  //             var catlist = catresult.rows
+  //             for (var c = 0; c < catlist.length; c++) {
+  //               rinfo.categories.push(catlist[c].cat)
+  //             }
+  //             data.restaurants.push(rinfo)
+  //             console.log(data)
+  //           }
+  //         })
+  //         if (i === result.rows.length - 1) {
+  //           response.status(200).json(data)
+  //         }
+  //       }
+  //       // console.log(data)
+  //       // response.status(200).json(data)
+
+  //     }
+
+  //   }
+  // })
+
+
+
+
+
+
+  // var promise = db.query('SELECT DISTINCT rname FROM restaurants', async (err, result) => {
+  //   if (err) {
+  //     console.error(err.stack);
+  //     throw err
+  //   } else {
+  //     if (!result.rows[0]) {
+  //       response.status(404).json({ success: false, msg: `Failed to get all restaurants. There could be no restaurants yet.` })
+  //     } else {
+  //       // for every restaurant
+  //       for (var i = 0; i < result.rows.length; i++) {
+  //         const rinfo = {}
+  //         rinfo.rname = result.rows[i].rname
+  //         rinfo.categories = []
+
+  //         db.query(getCategoriesQuery, [rinfo.rname], async function res(err, catresult) {
+  //           if (err) {
+  //             console.error(err.stack)
+  //             response.status(404).json({ success: false, msg: `Failed to get restaurant categories for ` + rinfo.rname })
+  //           } else {
+  //             var catlist = catresult.rows
+  //             for (var c = 0; c < catlist.length; c++) {
+  //               rinfo.categories.push(catlist[c].cat)
+  //             }
+  //             data.restaurants.push(rinfo)
+  //           }
+  //         })
+  //       }
+  //       console.log(data)
+  //     }
+  //   }
+  // })
+
+  // response.status(200).json(data)
+
+
+
+
 }
 
 
