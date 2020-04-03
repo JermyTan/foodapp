@@ -44,7 +44,7 @@ exports.createCustomer = async (req, response) => {
       response.status(500).json({ success: false, msg: 'Failed to create customer account.' })
     } else {
       if (result.rows.length !== 0) {
-        //If email already exists in customers table
+        //If email already exists in users table
         response.status(400).json({ success: false, msg: 'This email is already registered.' })
       } else {
         db.query(createCustomerQuery, async (err2, result2) => {
@@ -65,6 +65,9 @@ exports.createCustomer = async (req, response) => {
   })
 }
 
+// @desc    Get a customer
+// @route   GET /customers
+// @acess   Private
 exports.getCustomer = async (req, response) => {
   const rows = await db.query('SELECT * FROM customers NATURAL JOIN users WHERE id = $1', [req.body.id], (err, result) => {
     if (err) {
@@ -80,3 +83,4 @@ exports.getCustomer = async (req, response) => {
     }
   })
 }
+
