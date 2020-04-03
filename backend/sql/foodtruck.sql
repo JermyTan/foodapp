@@ -154,14 +154,14 @@ CREATE TABLE Orders (
     departdatetime1 INTEGER CHECK (odatetime <= departdatetime1),
     arrivedatetime  INTEGER CHECK (departdatetime1 <= arrivedatetime),
     departdatetime2 INTEGER CHECK (arrivedatetime <= departdatetime2),
-    deliverdatetime INTEGER CHECK (departdatetime2 <= deliverdatetime),
+    deliverdatetime INTEGER CHECK (departdatetime2 <= deliverdatetime)
 
-    reviewdatetime  INTEGER CHECK (deliverdatetime <= reviewdatetime),
-    review          VARCHAR CHECK (review <> ''),
-    CHECK (
-        (reviewdatetime IS NULL AND review IS NULL) 
-        OR (reviewdatetime IS NOT NULL AND review IS NOT NULL)
-    )
+    -- reviewdatetime  INTEGER CHECK (deliverdatetime <= reviewdatetime),
+    -- review          VARCHAR CHECK (review <> ''),
+    -- CHECK (
+    --     (reviewdatetime IS NULL AND review IS NULL) 
+    --     OR (reviewdatetime IS NOT NULL AND review IS NOT NULL)
+    -- )
 );
 
 CREATE TABLE Ratings (
