@@ -16,6 +16,7 @@ DROP TABLE IF EXISTS Orders CASCADE;
 DROP TABLE IF EXISTS Sells CASCADE;
 DROP TABLE IF EXISTS Consists CASCADE;
 DROP TABLE IF EXISTS Offers CASCADE;
+DROP TABLE IF EXISTS FDSOffers CASCADE;
 
 CREATE TABLE Users (
     id          SERIAL PRIMARY KEY,
@@ -70,21 +71,21 @@ CREATE TABLE Managers (
 );
 
 CREATE TABLE Promotions (
-    pid         INTEGER PRIMARY KEY,
+    pid         SERIAL PRIMARY KEY,
     sdatetime   INTEGER NOT NULL,
     edatetime   INTEGER NOT NULL,
-    description VARCHAR NOT NULL,
+    discount    DECIMAL(5, 2) NOT NULL,
     CHECK (pid > 0),
     CHECK (0 <= sdatetime AND sdatetime < edatetime),
-    CHECK (description <> '')
+    CHECK(discount > 0 AND discount <= 1)
 );
 
 CREATE TABLE FDSPromotions (
-    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE
+    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
 );
 
 CREATE TABLE RPromotions (
-    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE
+    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
 );
 
 CREATE TABLE Food (
@@ -180,9 +181,14 @@ CREATE TABLE Consists (
 );
 
 CREATE TABLE Offers (
+    pid         INTEGER REFERENCES Promotions,
     rname       VARCHAR REFERENCES Restaurants,
+    fname       VARCHAR REFERENCES Food,
+    PRIMARY KEY (pid, rname, fname)
+);
+
+CREATE TABLE FDSOffers (
     pid         INTEGER REFERENCES Promotions,
     oid         INTEGER REFERENCES Orders,
-    fname       VARCHAR REFERENCES Food,
-    PRIMARY KEY (rname, pid, oid, fname)
+    PRIMARY KEY (pid, oid)
 );
