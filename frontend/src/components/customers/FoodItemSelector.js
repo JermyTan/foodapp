@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { Item, Label } from "semantic-ui-react";
 import NumberInput from "semantic-ui-react-numberinput";
-import "../styles/FoodItemSelector.scss";
+import "styles/FoodItemSelector.scss";
 
 function FoodItemSelector(props) {
   const [count, setCount] = useState("0");
 
   return (
     <Item>
-      <Item.Image src={require("../images/curry-chicken.jpg")} />
+      <Item.Image src={require("images/curry-chicken.jpg")} />
 
       <Item.Content>
         <Item.Header

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card, Button } from "semantic-ui-react";
 
-function OrderCard(props) {
+function CustomerOrderCard(props) {
   const [isExpanded, setExpanded] = useState(false);
 
   return (
@@ -78,4 +78,4 @@ function OrderCard(props) {
   );
 }
 
-export default OrderCard;
+export default CustomerOrderCard;

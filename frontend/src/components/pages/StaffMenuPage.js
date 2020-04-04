@@ -6,8 +6,6 @@ function StaffMenuPage() {
   return (
     <main className="staff-menu-page">
       <Menu size="huge" style={{ opacity: 0 }}></Menu>
-      <br />
-      <br />
       <Container>
         <div style={{ float: "left" }}>
           <RestaurantMenu />

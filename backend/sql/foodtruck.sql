@@ -16,6 +16,7 @@ DROP TABLE IF EXISTS Orders CASCADE;
 DROP TABLE IF EXISTS Sells CASCADE;
 DROP TABLE IF EXISTS Consists CASCADE;
 DROP TABLE IF EXISTS Offers CASCADE;
+DROP TABLE IF EXISTS FDSOffers CASCADE;
 
 CREATE TABLE Users (
     id          SERIAL PRIMARY KEY,
@@ -70,21 +71,21 @@ CREATE TABLE Managers (
 );
 
 CREATE TABLE Promotions (
-    pid         INTEGER PRIMARY KEY,
+    pid         SERIAL PRIMARY KEY,
     sdatetime   INTEGER NOT NULL,
     edatetime   INTEGER NOT NULL,
-    description VARCHAR NOT NULL,
+    discount    DECIMAL(5, 2) NOT NULL,
     CHECK (pid > 0),
     CHECK (0 <= sdatetime AND sdatetime < edatetime),
-    CHECK (description <> '')
+    CHECK(discount > 0 AND discount <= 1)
 );
 
 CREATE TABLE FDSPromotions (
-    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE
+    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
 );
 
 CREATE TABLE RPromotions (
-    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE
+    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
 );
 
 CREATE TABLE Food (
@@ -137,18 +138,6 @@ CREATE TABLE Orders (
     odatetime    INTEGER NOT NULL
                 CHECK (odatetime >= 0),
 
-    oyear       INTEGER NOT NULL
-                CHECK (oyear >= 2020),
-    
-    omonth      INTEGER NOT NULL
-                CHECK (omonth >= 1 AND omonth <= 12),
-    
-    oday        INTEGER NOT NULL
-                CHECK (omonth >= 1 AND omonth <= 31),
-    
-    ohour       INTEGER NOT NULL
-                CHECK (ohour >= 10 AND ohour <= 21),
-
     -- paymethod: 0 -> cash, 1 -> card
     paymethod   SMALLINT NOT NULL
                 CHECK (paymethod in (0, 1)),
@@ -185,16 +174,21 @@ CREATE TABLE Sells (
 );
 
 CREATE TABLE Consists (
-    oid         INTEGER REFERENCES Orders,
+    oid         INTEGER REFERENCES Orders ON DELETE CASCADE,
     fname       VARCHAR REFERENCES Food,
     quantity    INTEGER NOT NULL,
     CHECK (quantity > 0)
 );
 
 CREATE TABLE Offers (
+    pid         INTEGER REFERENCES Promotions,
     rname       VARCHAR REFERENCES Restaurants,
+    fname       VARCHAR REFERENCES Food,
+    PRIMARY KEY (pid, rname, fname)
+);
+
+CREATE TABLE FDSOffers (
     pid         INTEGER REFERENCES Promotions,
     oid         INTEGER REFERENCES Orders,
-    fname       VARCHAR REFERENCES Food,
-    PRIMARY KEY (rname, pid, oid, fname)
+    PRIMARY KEY (pid, oid)
 );
