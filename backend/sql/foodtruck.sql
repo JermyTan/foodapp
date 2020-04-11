@@ -17,6 +17,8 @@ DROP TABLE IF EXISTS Sells CASCADE;
 DROP TABLE IF EXISTS Consists CASCADE;
 DROP TABLE IF EXISTS Offers CASCADE;
 DROP TABLE IF EXISTS FDSOffers CASCADE;
+DROP TABLE IF EXISTS Reviews CASCADE;
+DROP TABLE IF EXISTS Ratings CASCADE;
 
 CREATE TABLE Users (
     id          SERIAL PRIMARY KEY,
@@ -146,21 +148,35 @@ CREATE TABLE Orders (
     rname       VARCHAR NOT NULL REFERENCES Restaurants,
 
     rid         INTEGER REFERENCES Riders,
-    rating      SMALLINT
-                CHECK (0 <= rating AND rating <= 5),
+    -- rating      SMALLINT
+    --             CHECK (0 <= rating AND rating <= 5),
     
     departdatetime1 INTEGER CHECK (odatetime <= departdatetime1),
     arrivedatetime  INTEGER CHECK (departdatetime1 <= arrivedatetime),
     departdatetime2 INTEGER CHECK (arrivedatetime <= departdatetime2),
-    deliverdatetime INTEGER CHECK (departdatetime2 <= deliverdatetime),
+    deliverdatetime INTEGER CHECK (departdatetime2 <= deliverdatetime)
 
-    reviewdatetime  INTEGER CHECK (deliverdatetime <= reviewdatetime),
-    review          VARCHAR CHECK (review <> ''),
-    CHECK (
-        (reviewdatetime IS NULL AND review IS NULL) 
-        OR (reviewdatetime IS NOT NULL AND review IS NOT NULL)
-    )
+    -- reviewdatetime  INTEGER CHECK (deliverdatetime <= reviewdatetime),
+    -- review          VARCHAR CHECK (review <> ''),
+    -- CHECK (
+    --     (reviewdatetime IS NULL AND review IS NULL) 
+    --     OR (reviewdatetime IS NOT NULL AND review IS NOT NULL)
+    -- )
 );
+
+CREATE TABLE Ratings (
+    oid         INTEGER PRIMARY KEY REFERENCES Orders,
+    rating      SMALLINT
+                CHECK (0 <= rating AND rating <= 5)
+);
+
+CREATE TABLE Reviews (
+    oid         INTEGER PRIMARY KEY REFERENCES Orders,
+    review      VARCHAR NOT NULL
+                CHECK (review <> ''),
+    reviewdatetime INTEGER NOT NULL
+);
+
 
 CREATE TABLE Sells (
     fname       VARCHAR REFERENCES Food,

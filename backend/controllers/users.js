@@ -71,30 +71,74 @@ exports.createUser = async (req, response) => {
 // @desc    Update new user
 // @route   PUT /users/:id
 // @acess   Private
+// exports.updateUser = async (req, response) => {
+//     const id = req.params.id
+//     const { name, email } = req.body
+//     var values = [name, email, id]
+//     for (ele of values) {
+//         if (typeof ele === 'undefined') {
+//             ele = null
+//         }
+//     }
+//     // TODO: handle update of variable number of fields
+
+//     const row = await db.query('UPDATE users SET name = $1, email = $2 WHERE id = $3 returning *', values, (err, result) => {
+//         if (err) {
+//             console.error(err.stack)
+//             throw err
+//         } else {
+//             if (!result.rows[0]) {
+//                 response.status(404).json({ success: false, msg: `Failed to update user ${id}. User does not exist.` })
+//             } else {
+//                 console.log(`Successfully updated user with id ${id}`)
+//                 response.status(200).json({ success: true, msg: result.rows[0] })
+//             }
+//         }
+//     })
+// }
+
+// @desc    Update user info
+// @route   PUT /users/:id
+// @acess   Public
 exports.updateUser = async (req, response) => {
     const id = req.params.id
-    const { name, email } = req.body
-    var values = [name, email, id]
-    for (ele of values) {
-        if (typeof ele === 'undefined') {
-            ele = null
-        }
-    }
-    // TODO: handle update of variable number of fields
+    const { email, name } = req.body
+    const checkUserEmailQuery = `SELECT * FROM Users WHERE email = ${email}`
 
-    const row = await db.query('UPDATE users SET name = $1, email = $2 WHERE id = $3 returning *', values, (err, result) => {
+    const updateUserQuery =
+        `UPDATE users
+    SET email = ${email},
+    name = ${name}
+    WHERE id = ${id}
+    RETURNING *;`
+
+    db.query(checkUserEmailQuery, async (err, result) => {
+        console.log("Checking if email exists:", result.rows)
         if (err) {
-            console.error(err.stack)
-            throw err
+            console.log("Error:", err.stack)
+            response.status(500).json({ success: false, msg: 'Failed to verify if email exists.' })
         } else {
-            if (!result.rows[0]) {
-                response.status(404).json({ success: false, msg: `Failed to update user ${id}. User does not exist.` })
+            if (result.rows.length !== 0) {
+                //If email already exists in users table
+                response.status(400).json({ success: false, msg: 'This email is already registered.' })
             } else {
-                console.log(`Successfully updated user with id ${id}`)
-                response.status(200).json({ success: true, msg: result.rows[0] })
+                db.query(updateUserQuery, async (err2, result2) => {
+                    if (err2) {
+                        console.log("Error creating customer", err2.stack)
+                        response.status(500).json({ success: false, msg: 'Failed to update user account.' })
+                    } else {
+                        console.log("Update:", result2)
+                        if (result2.rows)
+                            response.status(200).json({ success: true, msg: `Updated customer with id ${id}` })
+                        else {
+                            response.status(404).json({ success: false, msg: `Failed to create customer.` })
+                        }
+                    }
+                })
             }
         }
     })
+
 }
 
 // @desc    Delete user
