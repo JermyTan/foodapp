@@ -7,8 +7,8 @@ const router = new Router();
 
 // import controllers here
 const {
-  // getCustomers,
-  // getCustomer,
+  getRiders,
+  // getRider,
   createRider,
   // updateCustomer,
   // deleteCustomer
@@ -17,7 +17,7 @@ const {
 // map routes to controller
 router
   .route('/')
-  // .get(getCustomers)
+  .get(getRiders)
   .post(createRider);
 
 // router.route('/:id')
