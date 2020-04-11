@@ -141,10 +141,6 @@ exports.getRestaurants = async (req, response) => {
   // })
 
   // response.status(200).json(data)
-
-
-
-
 }
 
 
@@ -261,5 +257,33 @@ exports.addFoodToSells = async (req, response) => {
   });
 }
 
+const groupBy = key => array =>
+  array.reduce((objectsByKeyValue, obj) => {
+    const value = obj[key];
+    objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
+    return objectsByKeyValue;
+  }, {});
 
 
+// @desc    View all orders made to restaurant
+// @route   GET /restaurants/orders/rname
+// @acess   Private
+exports.viewNewOrders = async (req, response) => {
+  const { rname } = req.body
+  const viewNewOrdersQuery = `SELECT O.oid, O.status, C.fname, C.quantity
+  FROM Orders O NATURAL JOIN Consists C
+  WHERE O.rname = ${rname};`
+
+  db.query(viewNewOrdersQuery, (err, result) => {
+    if (err) {
+      console.log(err.stack)
+      response.status(500).json({ success: false, msg: 'Unable to view orders.' })
+    } else {
+      console.log(result.rows)
+      const groupByOid = groupBy("oid")
+      const data = groupByOid(result.rows)
+      response.status(200).json(data)
+    }
+  })
+
+}
