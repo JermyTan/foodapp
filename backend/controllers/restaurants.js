@@ -4,33 +4,65 @@ const db = require('../db')
 // @route   GET /restaurants
 // @acess   Public
 exports.getRestaurants = async (req, response) => {
-  // const getRating = 'SELECT AVG(rating)'
-  const getCategoriesQuery =
-    `SELECT DISTINCT cat FROM food f NATURAL JOIN sells s
-  WHERE s.rname = $1`
-
-  const getRatingQuery = ``
-
-  const data = { restaurant: [] }
-
   const rows = await db.query(
-    "SELECT DISTINCT rname FROM restaurants",
+    "SELECT * FROM getrestaurants()", // NOTE : Run file sql/query-fn.sql in db before using this
     async (err, result) => {
       if (err) {
         console.error(err.stack);
-        throw err;
+        response.status(401).json({
+          msg: `Bad request.`
+        });
       } else {
-        if (!result.rows[0]) { // case when no restaurants retrieved
-          response.status(404).json({
-            success: false,
-            msg: `Failed to get all restaurants. There could be no restaurants yet.`
-          });
-        } else {
-          console.log(result.rows)
-          const restCatPromises = await result.rows.map(async rnameJson => {
-              const restName = rnameJson.rname
+        console.log(result.rows);
+        result.rows.map(restJson => {
+          restJson.cat = [restJson.cat];
+          return restJson;
+        })
+        // result.rows.reduce((a, b) => {
+        //   if (a.rname === b.rname) {
+        //     console.log("duplicate restaurant found: " + b.rname);
+        //     a.cat.concat(b.cat);
+        //     return a;
+        //   } else {
+        //     return a;
+        //   }
+        // });
+        response.status(200).json({
+          success: true,
+          msg: result.rows
+        });
+      }
+    })
+  }
+
+  // const getRating = 'SELECT AVG(rating)'
+  // const getCategoriesQuery =
+  //   `SELECT DISTINCT cat FROM food f NATURAL JOIN sells s
+  // WHERE s.rname = $1`
+
+  // const getRatingQuery = ``
+
+  // const data = { restaurant: [] }
+
+
+  // const rows = await db.query(
+    // "SELECT DISTINCT rname FROM restaurants",
+    // async (err, result) => {
+    //   if (err) {
+    //     console.error(err.stack);
+    //     throw err;
+    //   } else {
+    //     if (!result.rows[0]) { // case when no restaurants retrieved
+    //       success: false,
+    //          response.status(404).json({
+    //         msg: `Failed to get all restaurants. There could be no restaurants yet.`
+    //       });
+    //     } else {
+    //       console.log(result.rows)
+    //       const restCatPromises = await result.rows.map(async rnameJson => {
+    //           const restName = rnameJson.rname
               // short form
-              return await db.query(getCategoriesQuery, [restName])
+              // return await db.query(getCategoriesQuery, [restName])
 
               // long form
               // return await db.query(getCategoriesQuery, [restName], (err, result2) => {
@@ -49,12 +81,12 @@ exports.getRestaurants = async (req, response) => {
               //   }
               // })
               // return rnameJson
-            })
+            // })
           
-          console.log(restCatPromises);
-          const restCat = await Promise.all(restCatPromises)
-          console.log(restCat)
-          response.status(200).json(restCat)
+          // console.log(restCatPromises);
+          // const restCat = await Promise.all(restCatPromises)
+          // console.log(restCat)
+          // response.status(200).json(restCat)
 
 
 
@@ -95,10 +127,10 @@ exports.getRestaurants = async (req, response) => {
           // }
           // console.log("final data: " + data);
           // response.status(200).json(data);      
-        }
-      }
-    }
-  );
+  //       }
+  //     }
+  //   }
+  // );
 
 
   // const data = { restaurants: [] }
@@ -140,11 +172,6 @@ exports.getRestaurants = async (req, response) => {
   //   }
   // })
 
-
-
-
-
-
   // var promise = db.query('SELECT DISTINCT rname FROM restaurants', async (err, result) => {
   //   if (err) {
   //     console.error(err.stack);
@@ -178,7 +205,9 @@ exports.getRestaurants = async (req, response) => {
   // })
 
   // response.status(200).json(data)
+// }
 }
+
 
 
 // @desc    Get single restaurant and the food items, along with the amount available today
