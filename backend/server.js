@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const dotenv = require('dotenv');
 const morgan = require('morgan');
+const cors = require('cors');
 
 // TODO: Require route files
 const apiRoutes = require('./routes/api-routes');
@@ -12,6 +13,10 @@ dotenv.config({ path: './config/config.env' });
 const app = express();
 
 app.use(bodyParser.json());
+// enable CORS
+
+app.use(cors());
+
 
 // Dev logging middleware
 if (process.env.NODE_ENV === 'development') {
