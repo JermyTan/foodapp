@@ -14,22 +14,17 @@ exports.getRestaurants = async (req, response) => {
         });
       } else {
         console.log(result.rows);
-        result.rows.map(restJson => {
-          restJson.cat = [restJson.cat];
-          return restJson;
-        })
-        // result.rows.reduce((a, b) => {
-        //   if (a.rname === b.rname) {
-        //     console.log("duplicate restaurant found: " + b.rname);
-        //     a.cat.concat(b.cat);
-        //     return a;
-        //   } else {
-        //     return a;
-        //   }
-        // });
+        const res = result.rows.reduce((a, b) => {
+          const restName = b['rname']
+          if (!a[restName]) {
+            a[restName] = [];
+          }
+          a[restName].push(b.cat);
+          return a;
+        }, {});
         response.status(200).json({
           success: true,
-          msg: result.rows
+          msg: res
         });
       }
     })
