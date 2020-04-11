@@ -100,6 +100,7 @@ exports.getCustomerOrders = async (req, response) => {
     'dfee', dfee,
     'rname', rname,
     'odatetime', odatetime,
+    'status', status,
     'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', (${getItemPriceQuery})))
               FROM Consists C
               WHERE C.oid = O.oid))

@@ -1,9 +1,22 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Search, Input } from "semantic-ui-react";
 import RestaurantCard from "./RestaurantCard";
 import "styles/AllRestaurants.scss";
+import Axios from "axios";
 
 function AllRestaurants(props) {
+  const [restaurantsData, setRestaurantData] = useState([]);
+  const url = `http://localhost:5000/api/restaurants`
+  useEffect(() => {
+    Axios.get(url)
+      .then(response => {
+        console.log("response", response.data)
+        setRestaurantData(response.data)
+      })
+      .catch(error => {
+        console.log("Error retrieving past orders:", error);
+      })
+  }, [])
   return (
     <>
       <div
