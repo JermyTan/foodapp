@@ -88,13 +88,18 @@ exports.getCustomer = async (req, response) => {
 // @acess   Private
 exports.getCustomerOrders = async (req, response) => {
   const { cid } = req.body
-  // const getCustomerOrdersQuery = `SELECT oid, rname, status, location, fprice, dfee, odatetime, deliverdatetime, name
-  // FROM Orders O JOIN Users U ON (U.id = O.rid)
-  // WHERE O.cid = ${cid};`;
 
-  const getCustomerOrdersQuery = `SELECT *
-  FROM Orders O
-  WHERE O.cid = ${cid};`
+  const getCustomerOrdersQuery =
+    `SELECT json_build_object(
+    'oid', oid, 
+    'items', (SELECT array_agg(json_build_object('name', fname, 'qty', quantity))
+              FROM Consists C
+              WHERE C.oid = O.oid))
+    AS order
+    FROM Orders O
+    WHERE O.cid = 1
+    ORDER BY O.odatetime
+;`
 
   const getOrderItemsQuery = `SELECT fname, quantity
   FROM Consists C
@@ -103,28 +108,30 @@ exports.getCustomerOrders = async (req, response) => {
   const rows = await db.query(getCustomerOrdersQuery, async (err, result) => {
     if (err) {
       console.error(err.stack);
-      response.status(404).json({ success: false, msg: `Failed to get orders.` })
+      response.status(404).json({ success: false, msg: `Failed to get customer's orders.` })
     } else {
-      console.log("Result.rows for order id:", result.rows);
-      const orderItemsPromises = await result.rows.map(async orderJson => {
-        const oid = orderJson.oid
-        await db.query(getOrderItemsQuery, [oid], async (err, result2) => {
-          if (err) {
-            console.log(err.stack)
-            response.status(404).json({
-              success: false,
-              msg: `Failed to get order items for ` + oid
-            })
-          } else {
-            orderJson.items = result2.rows.map(itemJson => itemJson.fname)
-          }
-        })
-
-      })
-      console.log(orderItemsPromises)
-      const final = await Promise.all(orderItemsPromises)
-      console.log(final)
-      response.status(200).json(final)
+      response.status(200).json(result.rows)
+      // console.log("Result.rows for order id:", result.rows);
+      // const orderItemsPromises = await result.rows.map(async orderJson => {
+      //   //console.log("order json", orderJson);
+      //   const oid = orderJson.oid
+      //   await db.query(getOrderItemsQuery, [oid], async (err, result2) => {
+      //     if (err) {
+      //       console.log(err.stack)
+      //       response.status(404).json({
+      //         success: false,
+      //         msg: `Failed to get order items for ` + oid
+      //       })
+      //     } else {
+      //       orderJson.items = result2.rows
+      //       console.log("orderJson", orderJson)
+      //     }
+      //   })
+      // })
+      // console.log("orderitems", orderItemsPromises)
+      // const final = await Promise.all(orderItemsPromises)
+      // console.log("FINAL", final)
+      // response.status(200).json(final)
     }
 
   })
