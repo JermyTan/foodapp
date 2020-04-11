@@ -44,7 +44,7 @@ exports.createCustomer = async (req, response) => {
       response.status(500).json({ success: false, msg: 'Failed to create customer account.' })
     } else {
       if (result.rows.length !== 0) {
-        //If email already exists in customers table
+        //If email already exists in users table
         response.status(400).json({ success: false, msg: 'This email is already registered.' })
       } else {
         db.query(createCustomerQuery, async (err2, result2) => {
@@ -65,14 +65,16 @@ exports.createCustomer = async (req, response) => {
   })
 }
 
+// @desc    Get a customer
+// @route   GET /customers
+// @acess   Private
 exports.getCustomer = async (req, response) => {
-  const rows = await db.query('SELECT * FROM customers NATURAL JOIN users WHERE id = $1', [req.body.id], (err, result) => {
+  const rows = await db.query('SELECT * FROM customers NATURAL JOIN users WHERE id = $1', [req.params.id], (err, result) => {
     if (err) {
       console.error(err.stack);
-      throw err
     } else {
       if (!result.rows[0]) {
-        response.status(404).json({ success: false, msg: `Failed to get all customer.` })
+        response.status(404).json({ success: false, msg: `Failed to get customer.` })
       } else {
         console.log('Successfully get customer')
         response.status(200).json({ success: true, msg: result.rows })
@@ -80,3 +82,65 @@ exports.getCustomer = async (req, response) => {
     }
   })
 }
+
+// @desc    Get all orders and related information made by a customer
+// @route   GET /customer/:id/orders
+// @acess   Private
+exports.getCustomerOrders = async (req, response) => {
+  const cid = req.params.id
+
+  //scalar subquery to obtain individual prices of items sold by a restaurant
+  const getItemPriceQuery = `SELECT price FROM Sells S WHERE S.rname = O.rname AND S.fname = C.fname`
+
+  const getCustomerOrdersQuery =
+    `SELECT json_build_object(
+    'oid', oid,
+    'fprice', fprice,
+    'location', location,
+    'dfee', dfee,
+    'rname', rname,
+    'odatetime', odatetime,
+    'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', (${getItemPriceQuery})))
+              FROM Consists C
+              WHERE C.oid = O.oid))
+    AS order
+    FROM Orders O
+    WHERE O.cid = ${cid}
+    ORDER BY O.odatetime
+    ;`
+
+  const rows = await db.query(getCustomerOrdersQuery, async (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json({ success: false, msg: `Failed to get customer's orders.` })
+    } else {
+      response.status(200).json(result.rows)
+      // console.log("Result.rows for order id:", result.rows);
+      // const orderItemsPromises = await result.rows.map(async orderJson => {
+      //   //console.log("order json", orderJson);
+      //   const oid = orderJson.oid
+      //   await db.query(getOrderItemsQuery, [oid], async (err, result2) => {
+      //     if (err) {
+      //       console.log(err.stack)
+      //       response.status(404).json({
+      //         success: false,
+      //         msg: `Failed to get order items for ` + oid
+      //       })
+      //     } else {
+      //       orderJson.items = result2.rows
+      //       console.log("orderJson", orderJson)
+      //     }
+      //   })
+      // })
+      // console.log("orderitems", orderItemsPromises)
+      // const final = await Promise.all(orderItemsPromises)
+      // console.log("FINAL", final)
+      // response.status(200).json(final)
+    }
+
+  })
+}
+
+
+
+
