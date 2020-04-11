@@ -1,8 +1,28 @@
 const db = require('../db')
 
+// @desc    Get all riders
+// @route   GET /riders
+// @access   Public
+exports.getRiders = async (req, response) => {
+  const rows = await db.query('SELECT * FROM riders', (err, result) => {
+      if (err) {
+          console.error(err.stack);
+          throw err
+      } else {
+          if (!result.rows[0]) {
+              response.status(404).json({ success: false, msg: `Failed to get all riders. There could be no rider created yet.` })
+          } else {
+              console.log('Successfully get all riders')
+              response.status(200).json({ success: true, msg: result.rows })
+          }
+      }
+  })
+
+}
+
 // @desc    Create new rider
 // @route   POST /riders
-// @acess   Public
+// @access   Public
 exports.createRider = async (req, response) => {
   const { email, name, isFT } = req.body
   const checkRiderEmailQuery = `SELECT * FROM Users WHERE email = ${email}`
@@ -32,7 +52,7 @@ exports.createRider = async (req, response) => {
         //If email already exists in customers table
         response.status(400).json({ success: false, msg: 'This email is already registered.' })
       } else {
-        db.query(createRiderQuery, async (err2, result2) => {
+        await db.query(createRiderQuery, (err2, result2) => {
           if (err2) {
             console.log("Error creating rider", err2.stack)
             response.status(500).json({ success: false, msg: 'Failed to create rider account.' })
