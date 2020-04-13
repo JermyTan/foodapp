@@ -8,6 +8,7 @@ const restaurantRoute = require('./restaurant-routes');
 const staffRoute = require('./staff-routes');
 const riderRoute = require('./rider-routes');
 const managerRoute = require('./manager-routes');
+const promotionRoute = require('./promotion-routes');
 
 // map URI to file route
 router.use('/orders', orderRoute);
@@ -17,5 +18,6 @@ router.use('/restaurants', restaurantRoute);
 router.use('/staffs', staffRoute);
 router.use('/riders', riderRoute);
 router.use('/managers', managerRoute);
+router.use('/promotions', promotionRoute);
 
 module.exports = router;
