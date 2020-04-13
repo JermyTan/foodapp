@@ -44,15 +44,21 @@ function AllRestaurants(props) {
         </span>
       </div>
 
-      {props.location && (
-        <Card.Group>
+      {/* {props.location && ( */}
+      <Card.Group>
+        {restaurantsData.map((value, index) => {
+          return <RestaurantCard
+            key={index}
+            restaurant={value}
+            setSelectedRestaurant={props.setSelectedRestaurant}
+          />
+        })}
+
+        {/* <RestaurantCard setSelectedRestaurant={props.setSelectedRestaurant} />
           <RestaurantCard setSelectedRestaurant={props.setSelectedRestaurant} />
           <RestaurantCard setSelectedRestaurant={props.setSelectedRestaurant} />
-          <RestaurantCard setSelectedRestaurant={props.setSelectedRestaurant} />
-          <RestaurantCard setSelectedRestaurant={props.setSelectedRestaurant} />
-          <RestaurantCard setSelectedRestaurant={props.setSelectedRestaurant} />
-        </Card.Group>
-      )}
+          <RestaurantCard setSelectedRestaurant={props.setSelectedRestaurant} /> */}
+      </Card.Group>
     </>
   );
 }

@@ -19,7 +19,7 @@ function CustomerOrderCard(props) {
   }
 
   return (
-    <Card fluid raised color={order.status == 2 ? 'green' : 'yellow'}>
+    <Card fluid raised color={order.status === 2 ? 'green' : 'yellow'}>
       <Card.Content>
         <Card.Header
           style={{ display: "flex", justifyContent: "space-between" }}
@@ -32,7 +32,7 @@ function CustomerOrderCard(props) {
         <Card.Description>
           {format(order.odatetime, 'MM/dd/yyyy hh:mm aa')}
           {<Label
-            color={order.status == 2 ? 'green' : order.status == 3 ? "grey" : 'yellow'}
+            color={order.status === 2 ? 'green' : order.status === 3 ? "grey" : 'yellow'}
             style={{ marginLeft: "30px" }}>
             {getStatus()}
           </Label>}

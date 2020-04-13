@@ -17,7 +17,7 @@ function HistoryPage() {
       .catch(error => {
         console.log("Error retrieving past orders:", error);
       })
-  }, [])
+  }, [url])
 
 
   return (

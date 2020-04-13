@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Icon, Label, Input, Item } from "semantic-ui-react";
 import FoodItemSelector from "./FoodItemSelector";
 import CheckoutButton from "./CheckoutButton";
+import Axios from "axios";
 
 const data = [
   {
@@ -45,6 +46,24 @@ function RestaurantOrder(props) {
   const [total, setTotal] = useState(0);
   const [subtotal, setSubtotal] = useState(0);
   const [selectedFoodItems, setSelectedFoodItems] = useState({});
+  const [data, setRestaurantData] = useState([]);
+  const rname = props.restaurant
+  const start = 0 //10am today
+  const end = 123445120003 //10pm today
+
+  const url = `http://localhost:5000/api/restaurants/'${rname}'/${start}/${end}`
+  useEffect(() => {
+    Axios.get(url)
+      .then(response => {
+        console.log("response", response.data.msg)
+        setRestaurantData(response.data.msg)
+      })
+      .catch(error => {
+        console.log(rname)
+        console.log("Error retrieving restaurant items:", error);
+      })
+  }, [url])
+
 
   /*
   selectedFoodItems = {
@@ -121,13 +140,15 @@ function RestaurantOrder(props) {
       </div>
 
       <Item.Group divided>
-        {data.map(value => {
+        {data.map((value, index) => {
           return (
             <FoodItemSelector
-              name={value.name}
+              key={index}
+              name={value.fname}
               price={value.price}
-              category={value.category}
+              category={value.categories}
               limit={value.limit}
+              qtyleft={value.qtylefttoday}
               updateSelectedFoodItems={updateSelectedFoodItems}
             />
           );
