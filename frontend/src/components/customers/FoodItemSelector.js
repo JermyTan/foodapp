@@ -15,7 +15,7 @@ function FoodItemSelector(props) {
           style={{ display: "flex", justifyContent: "space-between" }}
         >
           {props.name}
-          <span>${props.price.toFixed(2)}</span>
+          <span>${props.price}</span>
         </Item.Header>
         <Item.Extra>
           <Label>{props.category}</Label>

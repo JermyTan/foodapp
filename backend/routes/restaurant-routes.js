@@ -11,6 +11,7 @@ const {
   getRestaurant,
   createRestaurant,
   addFoodToSells,
+  viewNewOrders
   // updateRestaurant,
   // deleteRestaurant
 } = require('../controllers/restaurants');
@@ -21,10 +22,16 @@ router
   .get(getRestaurants)
   .post(createRestaurant);
 
-router.route('/:rname')
+router.route('/:rname/:start/:end')
   .get(getRestaurant)
+
+router.route('/:rname')
   .post(addFoodToSells)
+
 // .put(updateRestaurant)
 // .delete(deleteRestaurant);
+
+router.route('/:rname/orders')
+  .get(viewNewOrders)
 
 module.exports = router;
