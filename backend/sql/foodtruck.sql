@@ -74,8 +74,8 @@ CREATE TABLE Managers (
 
 CREATE TABLE Promotions (
     pid         SERIAL PRIMARY KEY,
-    sdatetime   INTEGER NOT NULL,
-    edatetime   INTEGER NOT NULL,
+    sdatetime   BIGINT NOT NULL,
+    edatetime   BIGINT NOT NULL,
     discount    DECIMAL(5, 2) NOT NULL,
     CHECK (pid > 0),
     CHECK (0 <= sdatetime AND sdatetime < edatetime),

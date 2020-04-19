@@ -20,12 +20,13 @@ const {
 router
     .route('/')
     .get(getPromotions)
-    // .post(createPromotion);
-    .post(orderDiscount);
+    .post(createPromotion);
+// .post(orderDiscount);
 
 router.route('/:id')
     // .get(getOrder)
     .put(freeDeliveryPromo)
 // .delete(deleteOrder);
+
 
 module.exports = router;

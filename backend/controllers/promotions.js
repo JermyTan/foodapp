@@ -4,7 +4,17 @@ const db = require('../db')
 // @route   GET /promotions
 // @acess   Public
 exports.getPromotions = async (req, response) => {
-    const rows = await db.query('SELECT * FROM Promotions', (err, result) => {
+    const getPromotionQuery =
+        `SELECT json_build_object(
+    'pid', pid,
+    'sdatetime', sdatetime,
+    'edatetime', edatetime,
+    'discount', discount
+    )
+    AS promo
+    FROM Promotions
+    ;`
+    const rows = await db.query(getPromotionQuery, (err, result) => {
         if (err) {
             console.error(err.stack);
             throw err
@@ -13,7 +23,8 @@ exports.getPromotions = async (req, response) => {
                 response.status(404).json({ success: false, msg: `Failed to get all Promotions.` })
             } else {
                 console.log('Successfully get all promotions')
-                response.status(200).json({ success: true, msg: result.rows })
+                // console.log("Result", result.rows)
+                response.status(200).json(result.rows)
             }
         }
     })
