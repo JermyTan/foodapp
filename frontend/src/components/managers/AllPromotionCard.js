@@ -1,14 +1,14 @@
 import React from "react";
 import { Card, Label } from "semantic-ui-react";
-import { format, fromUnixTime } from 'date-fns'
+import { format } from 'date-fns'
 
 function PromotionCard(props) {
-    const promo = props.promo
+    // const promo = props.promo
 
     function checkTime() {
-        if ((Date.now() - promo.edatetime) > 0) {
+        if ((Date.now() - props.edatetime) > 0) {
             return 1;
-        } else if ((Date.now() - promo.sdatetime) < 0) {
+        } else if ((Date.now() - props.sdatetime) < 0) {
             return 2;
         } else {
             return 0;
@@ -31,14 +31,15 @@ function PromotionCard(props) {
             <Card.Content>
                 <Card.Header
                     style={{ display: "flex", justifyContent: "space-between" }}>
-                    Promotion ID: {promo.pid}
+                    Promotion ID: {props.pid}
                 </Card.Header>
             </Card.Content>
             <Card.Content>
                 <Card.Description>
                     <div style={{ fontWeight: 'bold' }}>
-                        {format(promo.sdatetime, 'dd/MM/yyyy hh:mm aa ')} -
-                        {format(promo.edatetime, ' dd/MM/yyyy hh:mm aa')}
+                        Start: {format(props.sdatetime, 'dd/MM/yyyy hh:mm aa ')}
+                        <br />
+                        End: {format(props.edatetime, ' dd/MM/yyyy hh:mm aa')}
                     </div>
                     <span>
                         {<Label
@@ -49,7 +50,7 @@ function PromotionCard(props) {
                     </span>
                     <br />
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
-                        Promotion details: {promo.discount * 100}% discount
+                        Promotion details: {(props.discount * 100).toPrecision(2)}% discount
                     </div>
                 </Card.Description>
             </Card.Content>

@@ -36,18 +36,19 @@ function CreatePromotionButton() {
                 <Modal.Description>
                     <Form>
                         <Form.Input
-                            label="Start Date (format: MM/dd/yyyy hh:mm aa GMT)"
+                            label="Start Date (format: MM/dd/yyyy hh:mm aa)"
                             value={startdate}
                             onChange={(event, data) => {
                                 setStartdate(data.value);
                             }}
                         />
                         <Form.Input
-                            label="End Date (format: MM/dd/yyyy hh:mm aa GMT)"
+                            label="End Date (format: MM/dd/yyyy hh:mm aa)"
                             value={enddate}
                             onChange={(event, data) => {
                                 setEnddate(data.value);
                             }}
+
                         />
                         <Form.Input
                             label="Discount (eg. input 50 for 50% off)"
@@ -80,7 +81,14 @@ function CreatePromotionButton() {
                 <Button
                     color="red"
                     content="Cancel"
-                    onClick={() => setModalOpened(false)}
+                    onClick={() => {
+                        setModalOpened(false)
+                        setCreateSuccessfully(false)
+                        setCreateError(false)
+                        setDiscount("")
+                        setStartdate("")
+                        setEnddate("")
+                    }}
                 />
                 <Button
                     color="blue"

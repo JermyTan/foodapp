@@ -14,6 +14,7 @@ exports.getPromotions = async (req, response) => {
     AS promo
     FROM Promotions
     ;`
+
     const rows = await db.query(getPromotionQuery, (err, result) => {
         if (err) {
             console.error(err.stack);

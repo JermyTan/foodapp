@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import Axios from "axios";
 
 function SavePromotion(value1, value2, value3, setCreateError, setCreateSuccessfully) {
