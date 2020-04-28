@@ -170,5 +170,4 @@ exports.viewNewOrders = async (req, response) => {
       response.status(200).json(data)
     }
   })
-
 }
