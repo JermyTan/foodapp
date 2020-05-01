@@ -99,25 +99,19 @@ CREATE TABLE Food (
 
 CREATE TABLE MWS (
     id          INTEGER REFERENCES FTRiders ON DELETE CASCADE,
-    month       SMALLINT,
-    dayofweek   SMALLINT,
+    stdom       DATE,
     stime       INTEGER,
     etime       INTEGER,
-    PRIMARY KEY (id, month, dayofweek, stime, etime),
-    CHECK (1 <= month AND month <= 12),
-    CHECK (1 <= dayofweek AND dayofweek <= 7),
+    PRIMARY KEY (id, stdom, stime, etime),
     CHECK (10 <= stime AND stime < etime AND etime <= 22)
 );
 
 CREATE TABLE WWS (
     id          INTEGER REFERENCES PTRiders ON DELETE CASCADE,
-    week        SMALLINT,
-    dayofweek   SMALLINT,
+    dmy         DATE,
     stime       INTEGER,
     etime       INTEGER,
-    PRIMARY KEY (id, week, dayofweek, stime, etime),
-    CHECK (1 <= week AND week <= 52),
-    CHECK (1 <= dayofweek AND dayofweek <= 7),
+    PRIMARY KEY (id, dmy, stime, etime),
     CHECK (10 <= stime AND stime < etime AND etime <= 22 AND etime - stime <= 4)
 );
 
