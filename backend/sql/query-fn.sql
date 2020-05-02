@@ -87,29 +87,83 @@ CREATE OR REPLACE VIEW day_gen AS
 	FROM generate_series(1, 7, 1) as dayofweek, generate_series(10, 22, 1) as starthour, generate_series(0, 53, 1) as weeknum, 
 	generate_series(1970, 2050, 1) as year;
 
--- Checks the combined daily hourly count of riders for all existing entries in wws and mws
-CREATE OR REPLACE VIEW count_daily_hourly_rider AS
-	WITH RiderCount AS
-		(SELECT t.yr AS yr, t.wknum AS wknum, t.dow AS dow, sthour AS sthour, count(*) AS cnt
-		FROM st_hr_gen AS dsh
-		LEFT OUTER JOIN CombinedTable t on sthour <@ t.timerange
-		group by t.yr, t.wknum, t.dow, sthour
-		order by t.yr, t.wknum, t.dow, sthour)
-	SELECT *
-	FROM RiderCount rc
--- 	to work on this part
--- 	union
--- 	SELECT dg.year, dg.weeknum, dg.dow, dg.starthour, 0 AS cnt
--- 	FROM day_gen dg, RiderCount rc
--- 	WHERE rc.yr = dg.year
--- 	AND rc.wknum = dg.weeknum
--- 	AND rc.dayofweek = dg.dow
--- 	AND dg.starthour NOT IN (
--- 	SELECT dg.sthour)
-	;
+-- Checks the combined daily hourly count of riders for all existing entries in wws and mws 
+CREATE OR REPLACE VIEW count_daily_hourly_rider_for_week AS 
+	WITH RiderCount AS (
+		SELECT
+			t.yr AS yr,
+			t.wknum AS wknum,
+			t.dow AS dow,
+			sthour AS sthour,
+			count(*) AS cnt
+		FROM
+			st_hr_gen AS dsh
+		LEFT OUTER JOIN CombinedTable t ON sthour <@ t.timerange
+	GROUP BY
+		t.yr,
+		t.wknum,
+		t.dow,
+		sthour
+	ORDER BY
+		t.yr,
+		t.wknum,
+		t.dow,
+		sthour
+	), RiderWeekDailyHourlyCount AS (
+		SELECT
+			*
+		FROM
+			RiderCount rc
+		UNION
+		SELECT
+			dg.year,
+			dg.weeknum,
+			dg.dayofweek,
+			dg.starthour,
+			0 AS cnt
+		FROM
+			day_gen dg
+		WHERE
+			dg.year IN(
+				SELECT
+					rc.yr FROM RiderCount rc)
+			AND dg.weeknum IN(
+				SELECT
+					rc.wknum FROM RiderCount rc)
+			AND dg.dayofweek IN(
+				SELECT
+					rc.dow FROM RiderCount rc)
+			AND dg.starthour NOT IN(
+				SELECT
+					rc2.sthour FROM RiderCount rc2
+				WHERE
+					rc2.yr = dg.year
+					AND rc2.wknum = dg.weeknum
+					AND rc2.dow = dg.dayofweek
+			)
+		OR
+			dg.year IN(
+				SELECT
+					rc.yr FROM RiderCount rc)
+			AND dg.weeknum IN(
+				SELECT
+					rc.wknum FROM RiderCount rc)
+			AND dg.dayofweek NOT IN(
+				SELECT
+					rc2.dow FROM RiderCount rc2
+				WHERE
+					rc2.yr = dg.year
+					AND rc2.wknum = dg.weeknum
+			)
+	)
+	SELECT
+		*
+	FROM
+		RiderWeekDailyHourlyCount
+	ORDER BY yr, wknum, dow, sthour;
 
 
--- SELECT * from count_daily_hourly_rider;
+SELECT * from count_daily_hourly_rider_for_week;
 
 -- Checks 5 riders are assigned for every hour for a particular day
 DROP FUNCTION IF EXISTS check_wws_constraint() CASCADE;
