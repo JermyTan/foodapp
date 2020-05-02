@@ -151,8 +151,36 @@ exports.orderDiscount = async (req, response) => {
     })
 }
 
-  // const getCustomerWithOfferQuery =
-    //     `SELECT cid FROM Orders 
-    //     GROUP BY cid
-    //     HAVING ((SELECT extract(epoch from now())) - MAX(odatetime) >= 3 * 2592000)
-    //     RETURNING *`
+// const getCustomerWithOfferQuery =
+// @desc    Get customers who have not placed order for last 3 months
+// @route   GET /promotions/customers
+// @acess   Public
+exports.getCustomers = async (req, response) => {
+    const getCustomerQuery =
+        `SELECT json_build_object(
+    'cid', U.id,
+    'name', U.name
+    )
+    AS customer
+    FROM Orders O join Users U on (O.cid = U.id)
+    WHERE oid IN (SELECT oid FROM Orders
+        WHERE (SELECT EXTRACT(epoch from now())) -
+        odatetime >= 3 * 2592000)
+    ;`
+
+    const rows = await db.query(getCustomerQuery, (err, result) => {
+        if (err) {
+            console.error(err.stack);
+            throw err
+        } else {
+            if (!result.rows[0]) {
+                response.status(404).json({ success: false, msg: `Failed to get customers.` })
+            } else {
+                console.log('Successfully get customers')
+                // console.log("Result", result.rows)
+                response.status(200).json(result.rows)
+            }
+        }
+    })
+
+}

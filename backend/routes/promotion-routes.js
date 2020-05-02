@@ -11,8 +11,8 @@ const {
     // getOrder,
     createPromotion,
     freeDeliveryPromo,
-    orderDiscount
-    // updateOrder,
+    orderDiscount,
+    getCustomers
     // deleteOrder
 } = require('../controllers/promotions');
 
@@ -28,5 +28,7 @@ router.route('/:id')
     .put(freeDeliveryPromo)
 // .delete(deleteOrder);
 
+router.route('/customers')
+    .get(getCustomers)
 
 module.exports = router;

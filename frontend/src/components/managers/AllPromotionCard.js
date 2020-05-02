@@ -26,6 +26,15 @@ function PromotionCard(props) {
         }
     }
 
+    function getDescription() {
+        switch (props.discount) {
+            case 1:
+                return "Free Delivery"
+            default:
+                return ((props.discount * 100).toPrecision(2)) + "% discount"
+        }
+    }
+
     return (
         <Card fluid raised color={'purple'}>
             <Card.Content>
@@ -50,7 +59,7 @@ function PromotionCard(props) {
                     </span>
                     <br />
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
-                        Promotion details: {(props.discount * 100).toPrecision(2)}% discount
+                        Promotion details: {getDescription()}
                     </div>
                 </Card.Description>
             </Card.Content>

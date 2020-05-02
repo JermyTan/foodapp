@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Form, Modal, Message } from "semantic-ui-react";
+import { Button, Form, Modal, Message, Radio, Checkbox } from "semantic-ui-react";
 import SavePromotion from "components/managers/SavePromotion";
 
 function CreatePromotionButton() {
@@ -9,10 +9,23 @@ function CreatePromotionButton() {
     const [discount, setDiscount] = useState("");
     const [didCreateSuccessfully, setCreateSuccessfully] = useState(false);
     const [createError, setCreateError] = useState(false);
+    const [toggle, setToggle] = useState(1);
+    const [isChecked, setChecked] = useState(false);
 
     var finalDiscount = discount / 100;
     var epochStartDate = new Date(startdate.toString()).getTime();
     var epochEndDate = new Date(enddate.toString()).getTime();
+
+    function toggleCheckBox() {
+        switch (toggle) {
+            case 0:
+                setDiscount("")
+                return false
+            case 1:
+                setDiscount(100)
+                return true
+        }
+    }
 
     return (
         <Modal
@@ -58,6 +71,14 @@ function CreatePromotionButton() {
                                 setDiscount(data.value);
                             }}
                         />
+                        <Form.Checkbox
+                            label="Free Delivery Promotion"
+                            onChange={(event, data) => {
+                                setChecked(toggleCheckBox())
+                                setToggle(Math.abs(toggle - 1))
+                            }}
+                            checked={isChecked}
+                        />
                     </Form>
 
                     {didCreateSuccessfully && (
@@ -69,8 +90,8 @@ function CreatePromotionButton() {
 
                     {createError && (
                         <Message error
-                            header="Something went wrong"
-                            content="Please fill in the form again"
+                            header="Invalid input"
+                            content="Please follow the format for each field"
                         />
                     )}
 

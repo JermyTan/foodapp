@@ -63,7 +63,8 @@ function ManagerPromotionPage() {
                     </span>
                     <span>
                         <Button.Group>
-                            <CreatePromotionButton />
+                            <CreatePromotionButton
+                            />
                         </Button.Group>
                     </span>
                 </div>
