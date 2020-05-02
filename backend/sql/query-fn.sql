@@ -124,15 +124,6 @@ CREATE OR REPLACE VIEW count_daily_hourly_rider AS
 		FROM
 			day_gen dg
 		WHERE
--- 			dg.year IN(
--- 				SELECT
--- 					rc.yr FROM RiderCount rc)
--- 			AND dg.weeknum IN(
--- 				SELECT
--- 					rc.wknum FROM RiderCount rc)
--- 			AND dg.dayofweek IN(
--- 				SELECT
--- 					rc.dow FROM RiderCount rc)
 			(dg.year, dg.weeknum, dg.dayofweek) IN (
 				SELECT
 					yr, wknum, dow FROM RiderCount rc)
