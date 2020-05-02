@@ -5,9 +5,9 @@ const db = require('../db')
 // @acess   Public
 exports.getRestaurants = async (req, response) => {
   const getRestaurantsQuery =
-    `SELECT rname, 
+    `SELECT rname, imgurl,
     ARRAY_AGG (DISTINCT cat) as categories
-    FROM Sells NATURAL JOIN Food
+    FROM Restaurants NATURAL JOIN Sells NATURAL JOIN Food
     GROUP BY rname`
   const rows = await db.query(getRestaurantsQuery, async (err, result) => {
     if (err) {
@@ -106,7 +106,7 @@ exports.createRestaurant = async (req, response) => {
 // @route   POST /restaurant
 // @acess   Private
 exports.addFoodToSells = async (req, response) => {
-  const { fname, rname, price, cat, flimit } = req.body
+  const { fname, rname, price, cat, flimit, imgurl } = req.body
   const addFoodToSellsQuery =
     `BEGIN;
     SET CONSTRAINTS ALL DEFERRED;
@@ -117,8 +117,8 @@ exports.addFoodToSells = async (req, response) => {
     LIMIT 1
     returning *;
 
-    INSERT INTO Sells (fname, rname, avail, flimit, price)
-    VALUES(${fname}, ${rname}, ${flimit}, ${price})
+    INSERT INTO Sells (fname, rname, flimit, price, imgurl)
+    VALUES(${fname}, ${rname}, ${flimit}, ${price}, ${imgurl})
     returning *;
     COMMIT;`
   const rows = await db.query(addFoodToSellsQuery, (err, result) => {

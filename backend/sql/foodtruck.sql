@@ -179,6 +179,7 @@ CREATE TABLE Sells (
     rname       VARCHAR REFERENCES Restaurants,
     flimit      INTEGER NOT NULL,
     price       NUMERIC(12, 2) NOT NULL,
+    imgurl      VARCHAR DEFAULT 'https://platerate.com/images/tempfoodnotext.png',
     PRIMARY KEY (fname, rname),
     CHECK (flimit >= 0),
     CHECK (price >= 0)
