@@ -68,8 +68,8 @@ SELECT
 		EXTRACT(YEAR FROM m.stdom))) AS yr,
 	CASE 
 		WHEN m.stdom IS NULL 
-		THEN int4range(w.stime, w.etime, '[]') 
-		ELSE int4range(m.stime, m.etime, '[]')
+		THEN int4range(w.stime, w.etime, '[)') 
+		ELSE int4range(m.stime, m.etime, '[)')
 	END AS timerange,
 	w.dmy,
 	m.stdom
@@ -88,7 +88,7 @@ CREATE OR REPLACE VIEW day_gen AS
 	generate_series(1970, 2050, 1) as year;
 
 -- Checks the combined daily hourly count of riders for all existing entries in wws and mws 
-CREATE OR REPLACE VIEW count_daily_hourly_rider_for_week AS 
+CREATE OR REPLACE VIEW count_daily_hourly_rider AS 
 	WITH RiderCount AS (
 		SELECT
 			t.yr AS yr,
@@ -109,7 +109,7 @@ CREATE OR REPLACE VIEW count_daily_hourly_rider_for_week AS
 		t.wknum,
 		t.dow,
 		sthour
-	), RiderWeekDailyHourlyCount AS (
+	), RiderDailyHourlyCount AS (
 		SELECT
 			*
 		FROM
@@ -141,50 +141,78 @@ CREATE OR REPLACE VIEW count_daily_hourly_rider_for_week AS
 					AND rc2.wknum = dg.weeknum
 					AND rc2.dow = dg.dayofweek
 			)
-		OR
-			dg.year IN(
-				SELECT
-					rc.yr FROM RiderCount rc)
-			AND dg.weeknum IN(
-				SELECT
-					rc.wknum FROM RiderCount rc)
-			AND dg.dayofweek NOT IN(
-				SELECT
-					rc2.dow FROM RiderCount rc2
-				WHERE
-					rc2.yr = dg.year
-					AND rc2.wknum = dg.weeknum
-			)
 	)
 	SELECT
 		*
 	FROM
-		RiderWeekDailyHourlyCount
+		RiderDailyHourlyCount
 	ORDER BY yr, wknum, dow, sthour;
 
+-- Checks 5 riders are assigned hourly, daily for the day
+DROP FUNCTION IF EXISTS check_min_daily_hourly_rider_for_day() CASCADE;
 
-SELECT * from count_daily_hourly_rider_for_week;
-
--- Checks 5 riders are assigned for every hour for a particular day
-DROP FUNCTION IF EXISTS check_wws_constraint() CASCADE;
-
-CREATE OR REPLACE FUNCTION check_wws_constraint()
+CREATE OR REPLACE FUNCTION check_min_daily_hourly_rider_for_day()
 RETURNS TRIGGER
 AS $$
 DECLARE
-	
+r1 record;
 BEGIN
-
-	IF weeknum, daynum, sthour IS NOT NULL THEN
-		RAISE exception 'Less than 5 riders';
+	SELECT * INTO r1
+	FROM count_daily_hourly_rider
+	WHERE cnt < 5;
+	IF r1 IS NOT NULL THEN
+		RAISE exception 'Less than 5 riders for record %', r1;
 	END IF;
 	RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
 -- Create trigger that activates on CRUD of wws/mws
-DROP TRIGGER IF EXISTS wws_trigger ON wws CASCADE;
-CREATE CONSTRAINT TRIGGER wws_trigger
-	AFTER UPDATE OR DELETE OR INSERT ON wws
-	DEFERRABLE INITIALLY DEFERRED
-	FOR EACH ROW EXECUTE FUNCTION check_wws_constraint();
+DROP TRIGGER IF EXISTS wws_ins_trigger ON wws CASCADE;
+DROP TRIGGER IF EXISTS wws_upd_trigger ON wws CASCADE;
+DROP TRIGGER IF EXISTS wws_del_trigger ON wws CASCADE;
+DROP TRIGGER IF EXISTS mws_ins_trigger ON mws CASCADE;
+DROP TRIGGER IF EXISTS mws_upd_trigger ON mws CASCADE;
+DROP TRIGGER IF EXISTS mws_del_trigger ON mws CASCADE;
+
+-- CREATE TRIGGER wws_ins_trigger
+-- 	AFTER INSERT 
+-- 	ON wws 
+-- 	REFERENCING NEW TABLE AS new_table
+-- 	FOR EACH STATEMENT 
+-- 	EXECUTE PROCEDURE check_min_daily_hourly_rider_for_week();
+
+-- CREATE TRIGGER wws_upd_trigger
+-- 	AFTER UPDATE 
+-- 	ON wws 
+-- 	REFERENCING OLD TABLE AS old_table
+-- 	FOR EACH STATEMENT 
+-- 	EXECUTE PROCEDURE check_min_daily_hourly_rider_for_week();
+
+-- CREATE TRIGGER wws_del_trigger
+-- 	AFTER DELETE 
+-- 	ON wws 
+-- 	REFERENCING OLD TABLE AS old_table
+-- 	FOR EACH STATEMENT 
+-- 	EXECUTE PROCEDURE check_min_daily_hourly_rider_for_week();
+
+-- CREATE TRIGGER mws_ins_trigger
+-- 	AFTER INSERT 
+-- 	ON mws 
+-- 	REFERENCING NEW TABLE AS new_table
+-- 	FOR EACH STATEMENT 
+-- 	EXECUTE PROCEDURE check_min_daily_hourly_rider_for_week();
+
+-- CREATE TRIGGER mws_upd_trigger
+-- 	AFTER UPDATE 
+-- 	ON mws 
+-- 	REFERENCING OLD TABLE AS old_table
+-- 	FOR EACH STATEMENT 
+-- 	EXECUTE PROCEDURE check_min_daily_hourly_rider_for_week();
+
+-- CREATE TRIGGER mws_del_trigger
+-- 	AFTER DELETE 
+-- 	ON mws
+-- 	REFERENCING OLD TABLE AS old_table
+-- 	FOR EACH STATEMENT 
+-- 	EXECUTE PROCEDURE check_min_daily_hourly_rider_for_week();
