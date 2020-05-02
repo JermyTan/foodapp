@@ -6,3 +6,4 @@ export const STAFF_MENU_PATH = "/staff/menu";
 export const RIDER_SUMMARY_PATH = "/rider/summary";
 export const RIDER_ACTIVITY_PATH = "/rider/activity";
 export const MANAGER_SUMMARY_PATH = "/manager/summary";
+export const MANAGER_PROMOTION_PATH = "/manager/promotion";

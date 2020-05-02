@@ -16,7 +16,8 @@ import {
   RIDER_SUMMARY_PATH,
   STAFF_MENU_PATH,
   STAFF_SUMMARY_PATH,
-  MANAGER_SUMMARY_PATH
+  MANAGER_SUMMARY_PATH,
+  MANAGER_PROMOTION_PATH
 } from "./utils/Constants";
 import Homepage from "./components/pages/Homepage";
 import HistoryPage from "./components/pages/HistoryPage";
@@ -26,6 +27,7 @@ import RiderSummaryPage from "./components/pages/RiderSummaryPage";
 import StaffSummaryPage from "./components/pages/StaffSummaryPage";
 import StaffMenuPage from "./components/pages/StaffMenuPage";
 import ManagerSummaryPage from "./components/pages/ManagerSummaryPage";
+import ManagerPromotionPage from "./components/pages/ManagerPromotionPage";
 
 function App() {
   return (
@@ -56,6 +58,11 @@ function App() {
               path={MANAGER_SUMMARY_PATH}
               exact
               component={ManagerSummaryPage}
+            />
+            <Route
+              path={MANAGER_PROMOTION_PATH}
+              exact
+              component={ManagerPromotionPage}
             />
             <Route>
               <Redirect to={HOME_PATH} />
