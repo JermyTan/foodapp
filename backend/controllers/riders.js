@@ -1,6 +1,6 @@
 const db = require('../db')
 
-// @desc    Get all riders
+// @desc    Get all riders id and their base salaries
 // @route   GET /riders
 // @access   Public
 exports.getRiders = async (req, response) => {
@@ -18,6 +18,25 @@ exports.getRiders = async (req, response) => {
       }
   })
 
+}
+
+// @desc    Get a rider information with past work schedule and salaries
+// @route   GET /riders
+// @access   Private
+// TODO: WIP
+exports.getRider = async (req, response) => {
+  const rows = await db.query('SELECT * FROM rider_info WHERE id = $1', [req.params.id], (err, result) => {
+    if (err) {
+      console.error(err.stack);
+    } else {
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to get rider.`)
+      } else {
+        console.log('Successfully get rider')
+        response.status(200).json(result.rows)
+      }
+    }
+  })
 }
 
 // @desc    Create new rider
@@ -49,7 +68,7 @@ exports.createRider = async (req, response) => {
       response.status(500).json('Failed to create rider account - email check.')
     } else {
       if (result.rows.length !== 0) {
-        //If email already exists in customers table
+        //If email already exists in users table
         response.status(400).json('This email is already registered.')
       } else {
         await db.query(createRiderQuery, (err2, result2) => {

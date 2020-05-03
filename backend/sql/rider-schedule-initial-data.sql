@@ -21,11 +21,11 @@ INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currv
 INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-04-2020', '13', '15');
 INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '19', '21');
 INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '20', '22');
-INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-10-2020', '10', '12');
-INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-10-2020', '13', '15');
-INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-10-2020', '16', '18');
-INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-11-2020', '10', '12');
-INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-11-2020', '13', '15');
+-- INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-10-2020', '10', '12');
+-- INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-10-2020', '13', '15');
+-- INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-10-2020', '16', '18');
+-- INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-11-2020', '10', '12');
+-- INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-11-2020', '13', '15');
 
 
 INSERT INTO "public"."users" ("email", "name") VALUES ('ptride1@gmail.com', 'PtRide1');
@@ -211,4 +211,9 @@ INSERT INTO "public"."mws" ("id", "stdom", "stime", "etime") VALUES ((SELECT cur
 INSERT INTO "public"."mws" ("id", "stdom", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '13', '17');
 INSERT INTO "public"."mws" ("id", "stdom", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '18', '22');
 
+COMMIT;
+
+-- To demo min 5 rider per week, exception will be thrown
+BEGIN;
+DELETE FROM wws where dmy = '2020-03-02' and stime = '10' and etime = '12';
 COMMIT;
