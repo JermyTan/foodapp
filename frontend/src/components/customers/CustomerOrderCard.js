@@ -30,7 +30,7 @@ function CustomerOrderCard(props) {
           style={{ display: "flex", justifyContent: "space-between" }}
         >
           {order.rname}
-          <span>${order.fprice + order.dfee}</span>
+          <span>${(order.fprice + order.dfee).toFixed(2)}</span>
         </Card.Header>
       </Card.Content>
       <Card.Content>
@@ -82,7 +82,7 @@ function CustomerOrderCard(props) {
                     style={{ display: "flex", justifyContent: "space-between" }}
                   >
                     {`${value.qty}x ${value.fname}`}
-                    <span>${value.qty * value.price}</span>
+                    <span>${(value.qty * value.price).toFixed(2)}</span>
                   </div>
                 );
               })}
@@ -92,11 +92,11 @@ function CustomerOrderCard(props) {
             <Card.Description>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 Subtotal
-                <span>${order.fprice}</span>
+                <span>${order.fprice.toFixed(2)}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 Delivery fee
-                <span>${order.dfee}</span>
+                <span>${order.dfee.toFixed(2)}</span>
               </div>
               <br />
               <strong>
@@ -104,7 +104,7 @@ function CustomerOrderCard(props) {
                   style={{ display: "flex", justifyContent: "space-between" }}
                 >
                   Total
-                  <span>${order.fprice + order.dfee}</span>
+                  <span>${(order.fprice + order.dfee).toFixed(2)}</span>
                 </div>
               </strong>
             </Card.Description>

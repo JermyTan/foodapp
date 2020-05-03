@@ -48,28 +48,28 @@ function AllRestaurants(props) {
         </span>
       </div>
 
-      {/* {props.location && ( */}
-      {loading ? (
-        <Segment
-          size="massive"
-          basic
-          placeholder
-          loading={loading}
-          textAlign="center"
-        />
-      ) : (
-        <Card.Group>
-          {restaurantsData.map((value, index) => {
-            return (
-              <RestaurantCard
-                key={index}
-                restaurant={value}
-                setSelectedRestaurant={props.setSelectedRestaurant}
-              />
-            );
-          })}
-        </Card.Group>
-      )}
+      {props.location &&
+        (loading ? (
+          <Segment
+            size="massive"
+            basic
+            placeholder
+            loading={loading}
+            textAlign="center"
+          />
+        ) : (
+          <Card.Group>
+            {restaurantsData.map((value, index) => {
+              return (
+                <RestaurantCard
+                  key={index}
+                  restaurant={value}
+                  setSelectedRestaurant={props.setSelectedRestaurant}
+                />
+              );
+            })}
+          </Card.Group>
+        ))}
     </>
   );
 }

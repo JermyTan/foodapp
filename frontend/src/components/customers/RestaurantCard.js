@@ -1,6 +1,7 @@
 import React from "react";
-import { Card, Image, Rating } from "semantic-ui-react";
+import { Card, Image, Rating, Button } from "semantic-ui-react";
 import "styles/reactive.scss";
+import ReviewsButton from "./ReviewsButton";
 
 const data = {
   name: "Toast Box (West Coast Plaza)",
@@ -13,16 +14,17 @@ function RestaurantCard(props) {
   const restaurant = props.restaurant;
 
   return (
-    <Card
-      fluid
-      raised
-      className="reactive-card"
-      onClick={() => props.setSelectedRestaurant(restaurant.rname)}
-    >
-      <Image src={restaurant.imgurl} ui="false" style={{ maxHeight: "25vh" }} />
+    <Card fluid raised className="reactive-card" onClick={() => {}}>
+      <Image
+        src={restaurant.imgurl}
+        ui="false"
+        style={{ maxHeight: "25vh" }}
+        onClick={() => props.setSelectedRestaurant(restaurant.rname)}
+      />
       <Card.Content>
         <Card.Header
           style={{ display: "flex", justifyContent: "space-between" }}
+          onClick={() => props.setSelectedRestaurant(restaurant.rname)}
         >
           {restaurant.rname}
           <span>
@@ -30,10 +32,16 @@ function RestaurantCard(props) {
           </span>
         </Card.Header>
 
-        <Card.Meta>{restaurant.categories.join(", ")}</Card.Meta>
+        <Card.Meta style={{ display: "flex", justifyContent: "space-between" }}>
+          {restaurant.categories.join(", ")}
+
+          <ReviewsButton rname={restaurant.rname} />
+        </Card.Meta>
 
         <br />
-        <Card.Description>
+        <Card.Description
+          onClick={() => props.setSelectedRestaurant(restaurant.rname)}
+        >
           $3.99 delivery fee
           {data.promotions.map((value) => {
             return (
