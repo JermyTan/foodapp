@@ -47,7 +47,7 @@ function RestaurantOrder(props) {
   const [total, setTotal] = useState(0);
   const [subtotal, setSubtotal] = useState(0);
   const [selectedFoodItems, setSelectedFoodItems] = useState({});
-  const [data, setRestaurantData] = useState([]);
+  const [restaurantFoodItems, setRestaurantFoodItems] = useState([]);
   const rname = props.restaurant
   //TODO: set to 10am to 10pm today
   const start = 0 //10am today
@@ -59,14 +59,18 @@ function RestaurantOrder(props) {
       `http://localhost:5000/api/restaurants/'${rname}'?start=${start}&end=${end}`
     Axios.get(url)
       .then(response => {
-        console.log("Retrieve restaurant and food items:", response.data)
         let processedData = []
         response.data.forEach(item => {
-          item.price = parseFloat(item.price)
-          item.qtylefttoday = parseInt(item.qtylefttoday)
-          processedData.push(item)
+          let processedItem = {}
+          processedItem.name = item.fname
+          processedItem.limit = parseInt(item.qtylefttoday)
+          processedItem.imgurl = item.imgurl
+          processedItem.price = parseFloat(item.price)
+          processedItem.category = item.categories[0]
+          processedData.push(processedItem)
         });
-        setRestaurantData(processedData)
+        setRestaurantFoodItems(processedData)
+        console.log("Retrieved restaurant food items:", processedData)
       })
       .catch((error) => {
         console.log(rname);
@@ -150,17 +154,17 @@ function RestaurantOrder(props) {
       </div>
 
       <Item.Group divided>
-        {data.map((value, index) => {
+        {restaurantFoodItems.map((foodItem, index) => {
           return (
             <FoodItemSelector
               key={index}
-              name={value.fname}
-              price={value.price}
-              category={value.categories}
-              limit={value.limit}
+              name={foodItem.name}
+              price={foodItem.price}
+              category={foodItem.category}
+              limit={foodItem.limit}
               count={0}
               updateSelectedFoodItems={updateSelectedFoodItems}
-              imgurl={value.imgurl}
+              imgurl={foodItem.imgurl}
             />
           );
         })}

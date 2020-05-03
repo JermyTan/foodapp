@@ -49,6 +49,7 @@ CREATE TABLE Customers (
     DEFERRABLE INITIALLY IMMEDIATE,
     rpoints     INTEGER NOT NULL DEFAULT 0,
     cardnum     INTEGER,
+    joindate    INTEGER,
     CHECK (rpoints >= 0),
     CHECK (cardnum >= 0)
 );
@@ -58,6 +59,7 @@ CREATE TABLE Customers (
 CREATE TABLE Restaurants (
     rname       VARCHAR PRIMARY KEY,
     minamt      FLOAT NOT NULL,
+    imgurl      VARCHAR DEFAULT 'https://zabas.com/wp-content/uploads/2017/01/food-placeholder.png',
     CHECK (rname <> ''),
     CHECK (minamt >= 0)
 );
@@ -175,7 +177,6 @@ CREATE TABLE Reviews (
 CREATE TABLE Sells (
     fname       VARCHAR REFERENCES Food,
     rname       VARCHAR REFERENCES Restaurants,
-    avail       BOOLEAN NOT NULL,
     flimit      INTEGER NOT NULL,
     price       NUMERIC(12, 2) NOT NULL,
     imgurl      VARCHAR DEFAULT 'https://platerate.com/images/tempfoodnotext.png',

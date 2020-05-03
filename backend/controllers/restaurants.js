@@ -23,7 +23,7 @@ exports.getRestaurants = async (req, response) => {
 
 
 // @desc    Get single restaurant and the food items, along with the amount available today
-// @route   GET /restaurant/:rname/:start/:end
+// @route   GET /restaurant/:rname?start=:start&end=:end 
 // @acess   Public
 exports.getRestaurant = async (req, response) => {
   //const rname = req.params.rname
