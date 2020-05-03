@@ -44,13 +44,13 @@ function RestaurantCard(props) {
         >
           $3.99 delivery fee
           {data.promotions.map((value) => {
-            return (
-              <>
-                <br />
-                <strong style={{ color: "#0d97ff" }}>{value}</strong>
-              </>
-            );
-          })}
+          return (
+            <>
+              <br />
+              <strong style={{ color: "#0d97ff" }}>{value}</strong>
+            </>
+          );
+        })}
         </Card.Description>
       </Card.Content>
     </Card>
