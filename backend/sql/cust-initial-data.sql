@@ -5,14 +5,14 @@ VALUES('foodlover@gmail.com', 'Aaron');
 
 INSERT INTO Customers (id, rpoints, cardnum, joindate)
 VALUES((
-	SELECT currval('users_id_seq')), 80, 111,  (select extract(epoch from now()))*1000);
+	SELECT currval('users_id_seq')), 80, 111, (select extract(epoch from now()))*1000);
 
 INSERT INTO Users (email, name)
 		VALUES('moarfood@gmail.com', 'Betty');
-INSERT INTO Customers (id, rpoints, cardnum)
+INSERT INTO Customers (id, rpoints, cardnum, joindate)
 		VALUES((
 			SELECT
-				currval('users_id_seq')), 110, 987);
+				currval('users_id_seq')), 110, 987, (select extract(epoch from now()))*1000);
 INSERT INTO Users (email, name)
 		VALUES('casey@gmail.com', 'Casey');
 INSERT INTO Customers (id, cardnum)
