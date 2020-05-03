@@ -5,10 +5,10 @@ const db = require('../db')
 // @acess   Public
 exports.getRestaurants = async (req, response) => {
   const getRestaurantsQuery =
-    `SELECT rname, 
+    `SELECT R.rname, R.imgurl,
     ARRAY_AGG (DISTINCT cat) as categories
-    FROM Sells NATURAL JOIN Food
-    GROUP BY rname`
+    FROM Restaurants R JOIN Sells S ON (R.rname = S.rname) NATURAL JOIN Food
+    GROUP BY R.rname`
   const rows = await db.query(getRestaurantsQuery, async (err, result) => {
     if (err) {
       console.error(err.stack);
@@ -23,13 +23,13 @@ exports.getRestaurants = async (req, response) => {
 
 
 // @desc    Get single restaurant and the food items, along with the amount available today
-// @route   GET /restaurant/:rname/:start/:end
+// @route   GET /restaurant/:rname?start=:start&end=:end 
 // @acess   Public
 exports.getRestaurant = async (req, response) => {
   //const rname = req.params.rname
   //start and end refer to 10am and 10pm on the day the request is made
-  const { rname, start, end } = req.params
-  console.log("PARAMS", req.params)
+  let rname = req.params.rname
+  let { start, end } = req.query
 
   const getFoodCategoriesQuery = `SELECT ARRAY_AGG(DISTINCT cat) FROM Food F WHERE F.fname = S.fname`
   const getRestaurantFoodQuery =
@@ -104,7 +104,7 @@ exports.createRestaurant = async (req, response) => {
 // @route   POST /restaurant
 // @acess   Private
 exports.addFoodToSells = async (req, response) => {
-  const { fname, rname, price, cat, flimit } = req.body
+  const { fname, rname, price, cat, flimit, imgurl } = req.body
   const addFoodToSellsQuery =
     `BEGIN;
     SET CONSTRAINTS ALL DEFERRED;
@@ -115,8 +115,8 @@ exports.addFoodToSells = async (req, response) => {
     LIMIT 1
     returning *;
 
-    INSERT INTO Sells (fname, rname, avail, flimit, price)
-    VALUES(${fname}, ${rname}, ${flimit}, ${price})
+    INSERT INTO Sells (fname, rname, flimit, price, imgurl)
+    VALUES(${fname}, ${rname}, ${flimit}, ${price}, ${imgurl})
     returning *;
     COMMIT;`
   const rows = await db.query(addFoodToSellsQuery, (err, result) => {

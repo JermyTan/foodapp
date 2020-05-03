@@ -22,11 +22,19 @@ router
   .get(getRestaurants)
   .post(createRestaurant);
 
-router.route('/:rname/:start/:end')
-  .get(getRestaurant)
+// router.route('/:rname?start=:start&end=:end')
+
+// router.route('/:rname', function (req, res) {
+//   var start = req.param('start');
+//   var end = req.param('end');
+//   res.send(req.params);
+// }).get(getRestaurant)
+
 
 router.route('/:rname')
   .post(addFoodToSells)
+  .get(getRestaurant)
+
 
 // .put(updateRestaurant)
 // .delete(deleteRestaurant);

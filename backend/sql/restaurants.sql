@@ -1,7 +1,7 @@
 
 --PIZZA HUT--
-INSERT INTO Restaurants(rname, minamt, 'https://media.glassdoor.com/l/b2/e6/60/55/pizza-hut-takeaway.jpg')
-VALUES('Pizza Hut', 30);
+INSERT INTO Restaurants(rname, minamt, imgurl)
+VALUES('Pizza Hut', 30, 'https://media.glassdoor.com/l/b2/e6/60/55/pizza-hut-takeaway.jpg');
 
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
@@ -10,7 +10,7 @@ SELECT * FROM (SELECT 'Pepperoni Pizza', 'Pizza') AS tmp
 WHERE NOT EXISTS (SELECT fname FROM Food WHERE fname = 'Pepperoni Pizza') LIMIT 1;
 
 INSERT INTO Sells
-VALUES('Pepperoni Pizza', 'Pizza Hut', 10, 20.90);
+VALUES('Pepperoni Pizza', 'Pizza Hut', 10, 20.90, 'https://s3.amazonaws.com/secretsaucefiles/photos/images/000/183/731/large/c700x420.jpg?1508553054');
 COMMIT;
 
 BEGIN;
@@ -20,7 +20,7 @@ SELECT * FROM (SELECT 'Hawaiian Pizza', 'Pizza') AS tmp
 WHERE NOT EXISTS (SELECT fname FROM Food WHERE fname = 'Hawaiian Pizza') LIMIT 1;
 
 INSERT INTO Sells
-VALUES('Hawaiian Pizza', 'Pizza Hut', 10, 18.90);
+VALUES('Hawaiian Pizza', 'Pizza Hut', 10, 18.90, 'https://i.ytimg.com/vi/ncdJny9PsrM/hqdefault.jpg');
 COMMIT;
 
 BEGIN;
