@@ -7,25 +7,26 @@ const router = new Router();
 
 // import controllers here
 const {
-    getPromotions,
+    getFDSPromotions,
     // getOrder,
-    createPromotion,
-    freeDeliveryPromo,
+    createFDSPromotion,
+    // freeDeliveryPromo,
     orderDiscount,
-    getCustomers
-    // deleteOrder
+    getCustomers,
+    getRPromotions,
+    createRPromotion
 } = require('../controllers/promotions');
 
 // map routes to controller
 router
     .route('/')
-    .get(getPromotions)
-    .post(createPromotion);
+    .get(getFDSPromotions)
+    .post(createFDSPromotion);
 // .post(orderDiscount);
 
-router.route('/:id')
-    // .get(getOrder)
-    .put(freeDeliveryPromo)
+router.route('/:rname')
+    .get(getRPromotions)
+    .post(createRPromotion);
 // .delete(deleteOrder);
 
 router.route('/customers')

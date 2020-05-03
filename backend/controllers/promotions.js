@@ -1,9 +1,9 @@
 const db = require('../db')
 
-// @desc    Get all promotions
+// @desc    Get all FDS promotions
 // @route   GET /promotions
 // @acess   Public
-exports.getPromotions = async (req, response) => {
+exports.getFDSPromotions = async (req, response) => {
     const getPromotionQuery =
         `SELECT json_build_object(
     'pid', pid,
@@ -12,7 +12,7 @@ exports.getPromotions = async (req, response) => {
     'discount', discount
     )
     AS promo
-    FROM Promotions
+    FROM Promotions NATURAL JOIN FDSPromotions
     ;`
 
     const rows = await db.query(getPromotionQuery, (err, result) => {
@@ -29,13 +29,12 @@ exports.getPromotions = async (req, response) => {
             }
         }
     })
-
 }
 
-// @desc    Create new promotion
+// @desc    Create new FDS promotion
 // @route   POST /promotions
 // @acess   Private
-exports.createPromotion = async (req, response) => {
+exports.createFDSPromotion = async (req, response) => {
     const { sdatetime, edatetime, discount } = req.body;
     const createPromotionQuery =
         `BEGIN;
@@ -49,9 +48,6 @@ exports.createPromotion = async (req, response) => {
 
       COMMIT;`
 
-    // const now = new Date();
-    // const currEpochTime = Math.round(now.getTime() / 1000);
-    // console.log(currEpochTime);
     const rows = await db.query(createPromotionQuery, (err, result) => {
         if (err) {
             console.error("Error creating promotion", err.stack)
@@ -61,54 +57,6 @@ exports.createPromotion = async (req, response) => {
             console.log("Result", result[2].rows, result[3].rows)
             if (result[2].rows.pid == result[3].rows.pid) {
                 response.status(200).json({ success: true, msg: `Successfully created promotion.` })
-            }
-            // else if (result[2].rows[0].sdatetime < currEpochTime) {
-            //     response.status(400).json({ success: false, msg: `Please enter valid date time` })
-            // }
-            //  else {
-            //     response.status(200).json({ success: true, msg: `Successfully created promotion.` })
-            // }
-        }
-    })
-}
-
-//frontend check that sdatetime <= odatetime <= edatetime 
-exports.freeDeliveryPromo = async (req, response) => {
-    const { pid, oid } = req.body;
-    const freeDeliveryPromoQuery =
-
-        //   INSERT INTO FDSOffers
-        //   SELECT * FROM
-        //   (SELECT ${pid}, ${oid}) AS tmp
-        //   WHERE EXISTS (SELECT oid FROM Orders 
-        //     WHERE oid = ${oid}
-        //     AND odatetime >= (SELECT sdatetime FROM Promotions 
-        //         WHERE pid IN (SELECT pid FROM FDSPromotions WHERE pid = ${pid}))
-        //         AND odatetime <= (SELECT edatetime FROM Promotions 
-        //             WHERE pid IN (SELECT pid FROM FDSPromotions WHERE pid = ${pid})))
-        //   RETURNING *;
-
-        `BEGIN;
-
-      INSERT INTO FDSOffers
-      VALUES(${pid}, ${oid}) RETURNING *;
-
-      UPDATE Orders O
-      SET dfee = 0
-      WHERE oid = ${oid} RETURNING oid;
-
-      COMMIT;`
-
-    const rows = await db.query(freeDeliveryPromoQuery, (err, result) => {
-        if (err) {
-            console.log("Error:", err.stack)
-            response.status(500).json({ success: false, msg: 'Failed to apply promotion.' })
-        } else {
-            console.log("Results:", result[1].rows, result[2].rows)
-            if (result[1].rows.oid == result[2].rows.oid) {
-                response.status(200).json({ success: true, msg: 'Promotion applied to order.' })
-            } else {
-                response.status(404).json({ success: false, msg: 'Failed to apply promotion.' })
             }
         }
     })
@@ -182,5 +130,73 @@ exports.getCustomers = async (req, response) => {
             }
         }
     })
+}
 
+// @desc    Get all promotions of a restaurant
+// @route   GET /promotions/:rname
+// @acess   Public
+exports.getRPromotions = async (req, response) => {
+    const rname = req.params.rname
+    const getPromotionQuery =
+        `SELECT json_build_object(
+    'pid', pid,
+    'fname', fname,
+    'sdatetime', sdatetime,
+    'edatetime', edatetime,
+    'discount', discount
+    )
+    AS rpromo
+    FROM Promotions NATURAL JOIN Offers
+    WHERE rname = ${rname}
+    ;`
+
+    const rows = await db.query(getPromotionQuery, (err, result) => {
+        if (err) {
+            console.error(err.stack);
+            throw err
+        } else {
+            if (!result.rows[0]) {
+                response.status(404).json({ success: false, msg: `Failed to get Restaurant Promotions.` })
+            } else {
+                console.log('Successfully get promotions')
+                // console.log("Result", result.rows)
+                response.status(200).json(result.rows)
+            }
+        }
+    })
+}
+
+// @desc    Create new Restaurant promotion
+// @route   POST /promotions/:rname
+// @acess   Private
+exports.createRPromotion = async (req, response) => {
+    const { sdatetime, edatetime, discount, fname } = req.body;
+    const rname = req.params.rname
+    const createPromotionQuery =
+        `BEGIN;
+
+      SET CONSTRAINTS ALL DEFERRED;
+      INSERT INTO Promotions (sdatetime, edatetime, discount)
+      VALUES(${sdatetime}, ${edatetime}, ${discount}) RETURNING *;
+
+      INSERT INTO RPromotions
+      VALUES((SELECT currval('promotions_pid_seq'))) RETURNING *;
+
+      INSERT INTO Offers
+      VALUES((SELECT currval('promotions_pid_seq')), ${rname}, ${fname}) RETURNING *;
+
+      COMMIT;`
+
+    const rows = await db.query(createPromotionQuery, (err, result) => {
+        if (err) {
+            console.error("Error creating promotion", err.stack)
+            response.status(500).json({ success: false, msg: `Failed to create new promotion.` })
+        }
+        else {
+            console.log("Result", result[2].rows, result[3].rows)
+            if (result[2].rows.pid == result[3].rows.pid) {
+                response.status(200).json({ success: true, msg: `Successfully created promotion.` })
+            }
+        }
+    })
 }
