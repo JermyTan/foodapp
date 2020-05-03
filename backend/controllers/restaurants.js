@@ -5,10 +5,10 @@ const db = require('../db')
 // @acess   Public
 exports.getRestaurants = async (req, response) => {
   const getRestaurantsQuery =
-    `SELECT rname, imgurl,
+    `SELECT R.rname, R.imgurl,
     ARRAY_AGG (DISTINCT cat) as categories
-    FROM Restaurants NATURAL JOIN Sells NATURAL JOIN Food
-    GROUP BY rname`
+    FROM Restaurants R JOIN Sells S ON (R.rname = S.rname) NATURAL JOIN Food
+    GROUP BY R.rname`
   const rows = await db.query(getRestaurantsQuery, async (err, result) => {
     if (err) {
       console.error(err.stack);
@@ -30,8 +30,8 @@ exports.getRestaurants = async (req, response) => {
 exports.getRestaurant = async (req, response) => {
   //const rname = req.params.rname
   //start and end refer to 10am and 10pm on the day the request is made
-  const { rname, start, end } = req.params
-  console.log("PARAMS", req.params)
+  let rname = req.params.rname
+  let { start, end } = req.query
 
   const getFoodCategoriesQuery = `SELECT ARRAY_AGG(DISTINCT cat) FROM Food F WHERE F.fname = S.fname`
   const getRestaurantFoodQuery =
@@ -57,7 +57,7 @@ exports.getRestaurant = async (req, response) => {
         response.status(404).json({ success: false, msg: `Failed to get restaurant and food items.` })
       } else {
         console.log(result.rows)
-        response.status(200).json({ success: true, msg: result.rows })
+        response.status(200).json(result.rows)
       }
     }
   })

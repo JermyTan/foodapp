@@ -1,7 +1,7 @@
 
 --PIZZA HUT--
-INSERT INTO Restaurants(rname, minamt, 'https://media.glassdoor.com/l/b2/e6/60/55/pizza-hut-takeaway.jpg')
-VALUES('Pizza Hut', 30);
+INSERT INTO Restaurants(rname, minamt, imgurl)
+VALUES('Pizza Hut', 30, 'https://media.glassdoor.com/l/b2/e6/60/55/pizza-hut-takeaway.jpg');
 
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;

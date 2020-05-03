@@ -48,21 +48,30 @@ function RestaurantOrder(props) {
   const [selectedFoodItems, setSelectedFoodItems] = useState({});
   const [data, setRestaurantData] = useState([]);
   const rname = props.restaurant
+  //TODO: set to 10am to 10pm today
   const start = 0 //10am today
   const end = 123445120003 //10pm today
 
-  const url = `http://localhost:5000/api/restaurants/'${rname}'/${start}/${end}`
+
   useEffect(() => {
+    const url =
+      `http://localhost:5000/api/restaurants/'${rname}'?start=${start}&end=${end}`
     Axios.get(url)
       .then(response => {
-        console.log("response", response.data.msg)
-        setRestaurantData(response.data.msg)
+        console.log("Retrieve restaurant and food items:", response.data)
+        let processedData = []
+        response.data.forEach(item => {
+          item.price = parseFloat(item.price)
+          item.qtylefttoday = parseInt(item.qtylefttoday)
+          processedData.push(item)
+        });
+        setRestaurantData(processedData)
       })
       .catch(error => {
         console.log(rname)
         console.log("Error retrieving restaurant items:", error);
       })
-  }, [url])
+  }, [])
 
 
   /*
@@ -150,6 +159,7 @@ function RestaurantOrder(props) {
               limit={value.limit}
               qtyleft={value.qtylefttoday}
               updateSelectedFoodItems={updateSelectedFoodItems}
+              imgurl={value.imgurl}
             />
           );
         })}
