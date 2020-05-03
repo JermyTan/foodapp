@@ -15,6 +15,7 @@ function NewReviewButton(props) {
           color="teal"
           onClick={() => setModalOpened(true)}
           content="Review"
+          style={props.style}
         />
       }
     >
