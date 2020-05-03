@@ -2,6 +2,6 @@
   "user": "postgres",
   "host": "localhost",
   "database": "foodtruck",
-  "password": "17343616",
+  "password": "12345678",
   "port": 5432
 }
