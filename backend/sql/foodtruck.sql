@@ -49,7 +49,7 @@ CREATE TABLE Customers (
     DEFERRABLE INITIALLY IMMEDIATE,
     rpoints     INTEGER NOT NULL DEFAULT 0,
     cardnum     INTEGER,
-    joindate    INTEGER,
+    joindate    INTEGER NOT NULL,
     CHECK (rpoints >= 0),
     CHECK (cardnum >= 0)
 );
