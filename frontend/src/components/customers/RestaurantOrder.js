@@ -9,61 +9,61 @@ const data = [
     name: "Curry Chicken with Rice",
     price: 6.3,
     category: "Asian",
-    limit: 5
+    limit: 5,
   },
   {
     name: "Dry Mee Siam",
     price: 5.6,
     category: "Malay",
-    limit: 3
+    limit: 3,
   },
   {
     name: "Ice Milo",
     price: 1.3,
     category: "Drinks",
-    limit: 10
+    limit: 10,
   },
   {
     name: "Fried Bee Hoon",
     price: 4.3,
     category: "Asian",
-    limit: 8
+    limit: 8,
   },
   {
     name: "Lu Rou Fan",
     price: 7.99,
     category: "Asian",
-    limit: 5
+    limit: 5,
   },
   {
     name: "Peanut Butter Thick Toast",
     price: 2.1,
     category: "Asian",
-    limit: 10
-  }
+    limit: 10,
+  },
 ];
+
 function RestaurantOrder(props) {
   const [total, setTotal] = useState(0);
   const [subtotal, setSubtotal] = useState(0);
   const [selectedFoodItems, setSelectedFoodItems] = useState({});
   const [data, setRestaurantData] = useState([]);
-  const rname = props.restaurant
-  const start = 0 //10am today
-  const end = 123445120003 //10pm today
+  const rname = props.restaurant;
+  const start = 0; //10am today
+  const end = 123445120003; //10pm today
 
-  const url = `http://localhost:5000/api/restaurants/'${rname}'/${start}/${end}`
   useEffect(() => {
+    const url = `http://localhost:5000/api/restaurants/'${rname}'/${start}/${end}`;
     Axios.get(url)
-      .then(response => {
-        console.log("response", response.data.msg)
-        setRestaurantData(response.data.msg)
+      .then((response) => {
+        console.log("response", response.data.msg);
+        setRestaurantData(response.data.msg);
       })
-      .catch(error => {
-        console.log(rname)
+      .catch((error) => {
+        console.log(rname);
         console.log("Error retrieving restaurant items:", error);
-      })
-  }, [url])
-
+      });
+  }, []);
 
   /*
   selectedFoodItems = {
@@ -78,7 +78,7 @@ function RestaurantOrder(props) {
     price: number
   }
   */
-  const updateSelectedFoodItems = selectedFoodItem => {
+  const updateSelectedFoodItems = (selectedFoodItem) => {
     if (selectedFoodItems[selectedFoodItem.name] === undefined) {
       selectedFoodItems[selectedFoodItem.name] = selectedFoodItem;
     } else if (selectedFoodItem.quantity <= 0) {
@@ -148,7 +148,7 @@ function RestaurantOrder(props) {
               price={value.price}
               category={value.categories}
               limit={value.limit}
-              qtyleft={value.qtylefttoday}
+              count={0}
               updateSelectedFoodItems={updateSelectedFoodItems}
             />
           );

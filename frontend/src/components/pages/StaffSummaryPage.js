@@ -234,6 +234,9 @@ function StaffSummaryPage() {
                 </Statistic.Label>
               </Statistic>
             </Statistic.Group>
+            <br />
+            <br />
+            <br />
           </>
         ) : (
           <Segment
@@ -244,9 +247,6 @@ function StaffSummaryPage() {
             textAlign="center"
           />
         )}
-        <br />
-        <br />
-        <br />
         <h1>Promotional Campaigns</h1>
         {promoData.map((promo) => {
           return (
