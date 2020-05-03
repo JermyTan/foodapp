@@ -39,6 +39,37 @@ exports.getRider = async (req, response) => {
   })
 }
 
+// @desc    Get a rider's past monthly or weekly salary (depending on ft or pt resp)
+// @route   GET /riders/:id/salary
+// @access   Private
+// TODO: WIP
+exports.getRiderSalary = async (req, response) => {
+  const id = req.params.id
+  const getRiderSalaryQuery = 
+  `With CombinedSalTable AS (
+    SELECT id, wkmthyr AS st_mth_wk, wk_sal AS sal
+    FROM ptr_wk_sal
+    UNION
+    SELECT id, mthyr AS st_mth_wk, mth_sal AS sal
+    FROM ftr_mth_sal)
+    SELECT * 
+    FROM CombinedSalTable
+    WHERE id = ${id};`
+  const rows = await db.query(getRiderSalaryQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json(`Failed to get rider.`)
+    } else {
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to get rider.`)
+      } else {
+        console.log('Successfully get rider')
+        response.status(200).json(result.rows)
+      }
+    }
+  })
+}
+
 // @desc    Create new rider
 // @route   POST /riders
 // @access   Public
