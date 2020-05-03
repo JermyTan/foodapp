@@ -1,10 +1,10 @@
 const db = require('../db')
 
-// @desc    Get all riders id and their base salaries
+// @desc    Get all riders id, bsalary, email, name, isft
 // @route   GET /riders
 // @access   Public
 exports.getRiders = async (req, response) => {
-  const rows = await db.query('SELECT * FROM riders', (err, result) => {
+  const rows = await db.query('SELECT * FROM rider_info', (err, result) => {
       if (err) {
           console.error(err.stack);
           throw err
@@ -20,8 +20,8 @@ exports.getRiders = async (req, response) => {
 
 }
 
-// @desc    Get a rider information with past work schedule and salaries
-// @route   GET /riders
+// @desc    Get a rider's permanent information
+// @route   GET /riders/:id
 // @access   Private
 // TODO: WIP
 exports.getRider = async (req, response) => {
@@ -89,20 +89,48 @@ exports.createRider = async (req, response) => {
   })
 }
 
+// @desc    Get all orders and related information made by a rider
+// @route   GET /riders/:id/orders
+// @acess   Private
+exports.getRiderOrders = async (req, response) => {
+  const rid = req.params.id
 
-exports.viewAssignedOrders = async (req, response) => {
-  const { email, name, isFT } = req.body;
+  //scalar subquery to obtain individual prices of items sold by a restaurant
+  const getItemPriceQuery = `SELECT price FROM Sells S WHERE S.rname = O.rname AND S.fname = C.fname`
 
-  const getOrdersQuery = ``
+  const getRiderOrdersQuery =
+    `SELECT json_build_object(
+    'oid', oid,
+    'fprice', fprice,
+    'location', location,
+    'dfee', dfee,
+    'rname', rname,
+    'odatetime', odatetime,
+    'status', status,
+    'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', (${getItemPriceQuery})))
+              FROM Consists C
+              WHERE C.oid = O.oid))
+    AS order
+    FROM Orders O
+    WHERE O.rid = ${rid}
+    ORDER BY O.odatetime DESC
+    ;`
 
-
+  const rows = await db.query(getRiderOrdersQuery, async (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json(`Failed to get rider's orders.`)
+    } else {
+      console.log(result.rows)
+      let allRiderOrders = []
+      result.rows.forEach(item => {
+        allRiderOrders.push(item.order)
+      })
+      response.status(200).json(allRiderOrders)
+    }
+  })
 }
-
 
 exports.acceptOrder = async (req, response) => {
   const { rid, oid, datetime } = req.body
-
-
-
-
 }

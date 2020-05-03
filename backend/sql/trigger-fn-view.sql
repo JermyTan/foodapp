@@ -18,30 +18,28 @@ SELECT r.id, bsalary, email, name, 1 AS isFT FROM riders r NATURAL JOIN users u 
 
 -- Gives all PAST monthly or weekly salaries of FT and PT riders respectively
 CREATE OR REPLACE VIEW ftr_mth_sal AS
-WITH FTRiderSalary AS (
+WITH FTRiderPastSalary AS (
 	SELECT ft.id, bsalary, dfee, (SELECT to_timestamp(deliverdatetime)) AS dldatetime
 	FROM ftriders ft JOIN riders r
 	ON ft.id = r.id
 	JOIN orders o
 	ON ft.id = o.rid
 	WHERE status = 2)
-SELECT id, (SELECT date_trunc('month', dldatetime)) AS mthyr, sum(dfee) AS dfee_earned 
-FROM FTRiderSalary 
-GROUP BY id, (SELECT date_trunc('month', dldatetime))
-HAVING (SELECT date_trunc('month', dldatetime)) < (SELECT date_trunc('month', CURRENT_TIMESTAMP));
+SELECT id, (SELECT date_trunc('month', dldatetime)) AS mthyr, round(sum(dfee) + avg(bsalary), 2) AS mth_sal
+FROM FTRiderPastSalary 
+GROUP BY id, (SELECT date_trunc('month', dldatetime));
 
 CREATE OR REPLACE VIEW ptr_wk_sal AS
-WITH PTRiderSalary AS (
+WITH PTRiderPastSalary AS (
 	SELECT pt.id, bsalary, dfee, (SELECT to_timestamp(deliverdatetime)) AS dldatetime
 	FROM ptriders pt JOIN riders r
 	ON pt.id = r.id
 	JOIN orders o
 	ON pt.id = o.rid
 	WHERE status = 2)
-SELECT id, (SELECT date_trunc('week', dldatetime)) AS wkmthyr, sum(dfee) AS dfee_earned 
-FROM PTRiderSalary 
-GROUP BY id, (SELECT date_trunc('week', dldatetime))
-HAVING (SELECT date_trunc('week', dldatetime)) < (SELECT date_trunc('week', CURRENT_TIMESTAMP));
+SELECT id, (SELECT date_trunc('week', dldatetime)) AS wkmthyr, round(sum(dfee) + avg(bsalary), 2) AS wk_sal
+FROM PTRiderPastSalary 
+GROUP BY id, (SELECT date_trunc('week', dldatetime));
 
 -- Combined mws and wws table
 CREATE OR REPLACE VIEW CombinedTable AS
