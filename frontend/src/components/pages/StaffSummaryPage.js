@@ -5,7 +5,7 @@ import {
   Statistic,
   Icon,
   Segment,
-  Label
+  Label,
 } from "semantic-ui-react";
 import { MonthRangeInput } from "semantic-ui-calendar-react";
 import { parse, isBefore, format } from "date-fns";
@@ -15,36 +15,36 @@ const restaurant = {
   name: "Toast Box",
   food1: {
     name: "Curry Chicken with Rice",
-    orders: 193
+    orders: 193,
   },
   food2: {
     name: "Mee Siam",
-    orders: 183
+    orders: 183,
   },
   food3: {
     name: "Lu Rou Fan",
-    orders: 129
+    orders: 129,
   },
   food4: {
     name: "Peanut Butter Thick Toast",
-    orders: 110
+    orders: 110,
   },
   food5: {
     name: "Ice Milo",
-    orders: 101
-  }
+    orders: 101,
+  },
 };
 
 const promoData = [
   "10% off on all food (14/2/2020 - 14/3/2020)",
   "Free delivery (19/2/2020 - 31/3/2020)",
-  "5% off on all food (15/3/2020 - 15/4/2020)"
+  "5% off on all food (15/3/2020 - 15/4/2020)",
 ];
 
 function StaffSummaryPage() {
   const [selectedMonths, setSelectedMonths] = useState("");
 
-  const getPeriod = selectedMonths => {
+  const getPeriod = (selectedMonths) => {
     let period = selectedMonths.split(" - ");
     console.log(period);
     if (period.length < 2 || period[0] === "" || period[1] === "") {
@@ -234,6 +234,9 @@ function StaffSummaryPage() {
                 </Statistic.Label>
               </Statistic>
             </Statistic.Group>
+            <br />
+            <br />
+            <br />
           </>
         ) : (
           <Segment
@@ -244,9 +247,8 @@ function StaffSummaryPage() {
             textAlign="center"
           />
         )}
-
         <h1>Promotional Campaigns</h1>
-        {promoData.map(promo => {
+        {promoData.map((promo) => {
           return (
             <>
               <h2>{promo}</h2>

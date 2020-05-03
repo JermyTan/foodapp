@@ -47,7 +47,7 @@ CREATE TABLE FTRiders (
 CREATE TABLE Customers (
     id          INTEGER PRIMARY KEY REFERENCES Users ON DELETE CASCADE
     DEFERRABLE INITIALLY IMMEDIATE,
-    rpoints     INTEGER NOT NULL,
+    rpoints     INTEGER NOT NULL DEFAULT 0,
     cardnum     INTEGER,
     CHECK (rpoints >= 0),
     CHECK (cardnum >= 0)

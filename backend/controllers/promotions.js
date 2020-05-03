@@ -21,7 +21,7 @@ exports.getPromotions = async (req, response) => {
             throw err
         } else {
             if (!result.rows[0]) {
-                response.status(404).json({ success: false, msg: `Failed to get all Promotions.` })
+                response.status(404).json(`Failed to get all Promotions.`)
             } else {
                 console.log('Successfully get all promotions')
                 // console.log("Result", result.rows)
@@ -55,18 +55,18 @@ exports.createPromotion = async (req, response) => {
     const rows = await db.query(createPromotionQuery, (err, result) => {
         if (err) {
             console.error("Error creating promotion", err.stack)
-            response.status(500).json({ success: false, msg: `Failed to create new promotion.` })
+            response.status(500).json(`Failed to create new promotion.`)
         }
         else {
             console.log("Result", result[2].rows, result[3].rows)
             if (result[2].rows.pid == result[3].rows.pid) {
-                response.status(200).json({ success: true, msg: `Successfully created promotion.` })
+                response.status(200).json(`Successfully created promotion.`)
             }
             // else if (result[2].rows[0].sdatetime < currEpochTime) {
-            //     response.status(400).json({ success: false, msg: `Please enter valid date time` })
+            //     response.status(400).json(`Please enter valid date time`)
             // }
             //  else {
-            //     response.status(200).json({ success: true, msg: `Successfully created promotion.` })
+            //     response.status(200).json(`Successfully created promotion.`)
             // }
         }
     })
@@ -102,13 +102,13 @@ exports.freeDeliveryPromo = async (req, response) => {
     const rows = await db.query(freeDeliveryPromoQuery, (err, result) => {
         if (err) {
             console.log("Error:", err.stack)
-            response.status(500).json({ success: false, msg: 'Failed to apply promotion.' })
+            response.status(500).json('Failed to apply promotion.')
         } else {
             console.log("Results:", result[1].rows, result[2].rows)
             if (result[1].rows.oid == result[2].rows.oid) {
-                response.status(200).json({ success: true, msg: 'Promotion applied to order.' })
+                response.status(200).json('Promotion applied to order.')
             } else {
-                response.status(404).json({ success: false, msg: 'Failed to apply promotion.' })
+                response.status(404).json('Failed to apply promotion.')
             }
         }
     })
@@ -134,15 +134,15 @@ exports.orderDiscount = async (req, response) => {
     const rows = await db.query(orderDiscountQuery, (err, result) => {
         if (err) {
             console.log(err.stack)
-            response.status(500).json({ success: false, msg: 'Failed to apply promotion.' })
+            response.status(500).json('Failed to apply promotion.')
         } else {
             db.query(checkOutPriceQuery, (err1, result1) => {
                 if (err1) {
                     console.log(err1.stack)
-                    response.status(500).json({ success: false, msg: 'Failed to apply promotion.' })
+                    response.status(500).json('Failed to apply promotion.')
                 } else {
                     console.log("Result:", result.rows, "Result1:", result1.rows)
-                    response.status(200).json({ success: true, msg: 'Promotion applied to order.' })
+                    response.status(200).json('Promotion applied to order.')
                     const checkOutPrice = result1.rows[0].total * (1 - result1.rows[0].discount)
                     console.log(checkOutPrice)
                 }
@@ -174,7 +174,7 @@ exports.getCustomers = async (req, response) => {
             throw err
         } else {
             if (!result.rows[0]) {
-                response.status(404).json({ success: false, msg: `Failed to get customers.` })
+                response.status(404).json(`Failed to get customers.`)
             } else {
                 console.log('Successfully get customers')
                 // console.log("Result", result.rows)

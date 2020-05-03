@@ -20,7 +20,7 @@ function RestaurantCard(props) {
       onClick={() => props.setSelectedRestaurant(data.rname)}
     >
       <Image
-        src={require("images/toast-box.jpg")}
+        src={data.imgurl}
         ui="false"
         style={{ maxHeight: "25vh" }}
       />
