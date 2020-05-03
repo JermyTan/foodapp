@@ -18,6 +18,7 @@ function CustomerOrderCard(props) {
         return ["Cancelled", "grey"];
       default:
         console.log("Unknown status");
+        return ["Unknown", "black"];
     }
   };
 
