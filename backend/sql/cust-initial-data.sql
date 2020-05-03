@@ -1,11 +1,12 @@
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
 INSERT INTO Users (email, name)
-		VALUES('foodlover@gmail.com', 'Aaron');
-INSERT INTO Customers (id, rpoints, cardnum)
-		VALUES((
-			SELECT
-				currval('users_id_seq')), 80, 111);
+VALUES('foodlover@gmail.com', 'Aaron');
+
+INSERT INTO Customers (id, rpoints, cardnum, joindate)
+VALUES((
+	SELECT currval('users_id_seq')), 80, 111,  (select extract(epoch from now()))*1000);
+
 INSERT INTO Users (email, name)
 		VALUES('moarfood@gmail.com', 'Betty');
 INSERT INTO Customers (id, rpoints, cardnum)

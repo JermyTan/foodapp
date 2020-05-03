@@ -49,6 +49,7 @@ CREATE TABLE Customers (
     DEFERRABLE INITIALLY IMMEDIATE,
     rpoints     INTEGER NOT NULL DEFAULT 0,
     cardnum     INTEGER,
+    joindate    INTEGER NOT NULL,
     CHECK (rpoints >= 0),
     CHECK (cardnum >= 0)
 );
@@ -74,8 +75,8 @@ CREATE TABLE Managers (
 
 CREATE TABLE Promotions (
     pid         SERIAL PRIMARY KEY,
-    sdatetime   BIGINT NOT NULL,
-    edatetime   BIGINT NOT NULL,
+    sdatetime   INTEGER NOT NULL,
+    edatetime   INTEGER NOT NULL,
     discount    DECIMAL(5, 2) NOT NULL,
     CHECK (pid > 0),
     CHECK (0 <= sdatetime AND sdatetime < edatetime),

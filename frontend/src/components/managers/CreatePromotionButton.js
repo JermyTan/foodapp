@@ -115,7 +115,7 @@ function CreatePromotionButton() {
                     color="blue"
                     content="Create"
                     onClick={() => {
-                        SavePromotion(epochStartDate, epochEndDate, finalDiscount, setCreateError, setCreateSuccessfully)
+                        SavePromotion(epochStartDate / 1000, epochEndDate / 1000, finalDiscount, setCreateError, setCreateSuccessfully)
                     }}
                 />
             </Modal.Actions>
