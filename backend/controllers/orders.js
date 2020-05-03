@@ -10,10 +10,10 @@ exports.getOrders = async (req, response) => {
             throw err
         } else {
             if (!result.rows[0]) {
-                response.status(404).json({ success: false, msg: `Failed to get all orders. There could be no order yet.` })
+                response.status(404).json(`Failed to get all orders. There could be no order yet.`)
             } else {
                 console.log('Successfully get all orders')
-                response.status(200).json({ success: true, msg: result.rows })
+                response.status(200).json(result.rows)
             }
         }
     })
@@ -31,10 +31,10 @@ exports.getOrder = async (req, response) => {
             throw err
         } else {
             if (!result.rows[0]) {
-                response.status(404).json({ success: false, msg: `Failed to get order ${id}. Order does not exist.` })
+                response.status(404).json(`Failed to get order ${id}. Order does not exist.`)
             } else {
                 console.log(`Successfully get order with oid ${oid}`)
-                response.status(200).json({ success: true, msg: result.rows[0] })
+                response.status(200).json(result.rows[0])
             }
         }
     })
@@ -50,10 +50,10 @@ exports.createOrder = async (req, response) => {
     const rows = await db.query(createOrderQuery, (err, result) => {
         if (err) {
             console.error(err.stack)
-            response.status(404).json({ success: false, msg: `Failed to create new order.` })
+            response.status(404).json(`Failed to create new order.`)
         } else {
             if (!result.rows) {
-                response.status(404).json({ success: false, msg: `Failed to create new order.` })
+                response.status(404).json(`Failed to create new order.`)
             } else {
                 console.log('Successfully created order')
                 oid = result.rows[0].oid
@@ -71,7 +71,7 @@ exports.createOrder = async (req, response) => {
                         }
                     })
                 }
-                response.status(200).json({ success: true, msg: oid })
+                response.status(200).json(oid)
             }
         }
     });
@@ -91,10 +91,10 @@ exports.updateOrder = async (req, response) => {
             throw err
         } else {
             if (!result.rows[0]) {
-                response.status(404).json({ success: false, msg: `Failed to update order ${id}. Order does not exist.` })
+                response.status(404).json(`Failed to update order ${id}. Order does not exist.`)
             } else {
                 console.log(`Successfully updated order with oid ${oid}`)
-                response.status(200).json({ success: true, msg: result.rows[0] })
+                response.status(200).json(result.rows[0])
             }
         }
     })
@@ -113,7 +113,7 @@ exports.deleteOrder = async (req, response) => {
             // TODO: detect case and handle when nothing is deleted
 
             console.log(`Successfully deleted order with oid ${oid}`)
-            response.status(200).json({ success: true, msg: `Successfully deleted order with oid ${oid}` })
+            response.status(200).json(`Successfully deleted order with oid ${oid}`)
         }
     })
 }

@@ -10,10 +10,10 @@ exports.getUsers = async (req, response) => {
             throw err
         } else {
             if (!result.rows[0]) {
-                response.status(404).json({ success: false, msg: `Failed to get all users. There could be no user created yet.` })
+                response.status(404).json(`Failed to get all users. There could be no user created yet.`)
             } else {
                 console.log('Successfully get all users')
-                response.status(200).json({ success: true, msg: result.rows })
+                response.status(200).json(result.rows)
             }
         }
     })
@@ -31,10 +31,10 @@ exports.getUser = async (req, response) => {
             throw err
         } else {
             if (!result.rows[0]) {
-                response.status(404).json({ success: false, msg: `Failed to get user ${id}. User does not exist.` })
+                response.status(404).json(`Failed to get user ${id}. User does not exist.`)
             } else {
                 console.log(`Successfully get user with id ${id}`)
-                response.status(200).json({ success: true, msg: result.rows[0] })
+                response.status(200).json(result.rows[0])
             }
         }
     })
@@ -55,16 +55,16 @@ exports.createUser = async (req, response) => {
             } else {
                 console.log(result);
                 if (!result.rows[0]) {
-                    response.status(404).json({ success: false, msg: `Failed to create new user.` })
+                    response.status(404).json(`Failed to create new user.`)
                 } else {
                     console.log('Successfully created user')
-                    response.status(200).json({ success: true, msg: result.rows[0] })
+                    response.status(200).json(result.rows[0])
                 }
             }
         })
     } catch (err) {
         console.log("an error occured");
-        response.status(409).json({ success: false, msg: `Something went wrong. Duplicate email?` })
+        response.status(409).json(`Something went wrong. Duplicate email?`)
     }
 }
 
@@ -88,10 +88,10 @@ exports.createUser = async (req, response) => {
 //             throw err
 //         } else {
 //             if (!result.rows[0]) {
-//                 response.status(404).json({ success: false, msg: `Failed to update user ${id}. User does not exist.` })
+//                 response.status(404).json(`Failed to update user ${id}. User does not exist.`)
 //             } else {
 //                 console.log(`Successfully updated user with id ${id}`)
-//                 response.status(200).json({ success: true, msg: result.rows[0] })
+//                 response.status(200).json(result.rows[0])
 //             }
 //         }
 //     })
@@ -116,22 +116,22 @@ exports.updateUser = async (req, response) => {
         console.log("Checking if email exists:", result.rows)
         if (err) {
             console.log("Error:", err.stack)
-            response.status(500).json({ success: false, msg: 'Failed to verify if email exists.' })
+            response.status(500).json('Failed to verify if email exists.')
         } else {
             if (result.rows.length !== 0) {
                 //If email already exists in users table
-                response.status(400).json({ success: false, msg: 'This email is already registered.' })
+                response.status(400).json('This email is already registered.')
             } else {
                 db.query(updateUserQuery, async (err2, result2) => {
                     if (err2) {
                         console.log("Error creating customer", err2.stack)
-                        response.status(500).json({ success: false, msg: 'Failed to update user account.' })
+                        response.status(500).json('Failed to update user account.')
                     } else {
                         console.log("Update:", result2)
                         if (result2.rows)
-                            response.status(200).json({ success: true, msg: `Updated customer with id ${id}` })
+                            response.status(200).json(`Updated customer with id ${id}`)
                         else {
-                            response.status(404).json({ success: false, msg: `Failed to create customer.` })
+                            response.status(404).json(`Failed to create customer.`)
                         }
                     }
                 })
@@ -154,7 +154,7 @@ exports.deleteUser = async (req, response) => {
             // TODO: detect case and handle when nothing is deleted
 
             console.log(`Successfully deleted user with id ${id}`)
-            response.status(200).json({ success: true, msg: `Successfully deleted user with id ${id}` })
+            response.status(200).json(`Successfully deleted user with id ${id}`)
         }
     })
 }
