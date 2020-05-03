@@ -49,7 +49,7 @@ function RestaurantOrder(props) {
   const [subtotal, setSubtotal] = useState(0);
   const [selectedFoodItems, setSelectedFoodItems] = useState({});
   const [restaurantFoodItems, setRestaurantFoodItems] = useState([]);
-  const rname = props.restaurant
+  const rname = props.restaurant;
   //TODO: set to 10am to 10pm today
   const start = getUnixTime(addHours(startOfToday(), 10))  //10am today
   const end = getUnixTime(addHours(startOfToday(), 22)) //10pm today
@@ -59,29 +59,27 @@ function RestaurantOrder(props) {
 
 
   useEffect(() => {
-    const url =
-      `http://localhost:5000/api/restaurants/'${rname}'?start=${start}&end=${end}`
+    const url = `http://localhost:5000/api/restaurants/'${rname}'?start=${start}&end=${end}`;
     Axios.get(url)
-      .then(response => {
-        let processedData = []
-        response.data.forEach(item => {
-          let processedItem = {}
-          processedItem.name = item.fname
-          processedItem.limit = parseInt(item.qtylefttoday)
-          processedItem.imgurl = item.imgurl
-          processedItem.price = parseFloat(item.price)
-          processedItem.category = item.categories[0]
-          processedData.push(processedItem)
+      .then((response) => {
+        let processedData = [];
+        response.data.forEach((item) => {
+          let processedItem = {};
+          processedItem.name = item.fname;
+          processedItem.limit = parseInt(item.qtylefttoday);
+          processedItem.imgurl = item.imgurl;
+          processedItem.price = parseFloat(item.price);
+          processedItem.category = item.categories[0];
+          processedData.push(processedItem);
         });
-        setRestaurantFoodItems(processedData)
-        console.log("Retrieved restaurant food items:", processedData)
+        setRestaurantFoodItems(processedData);
+        console.log("Retrieved restaurant food items:", processedData);
       })
       .catch((error) => {
         console.log(rname);
         console.log("Error retrieving restaurant items:", error);
-      })
-  }, [])
-
+      });
+  }, []);
 
   /*
   selectedFoodItems = {

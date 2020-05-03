@@ -71,15 +71,15 @@ function ManagerPromotionPage() {
                 {period.length > 0 ? (
                     <Container>
                         <Card.Group>
-                            {promotionsData.filter(date => date.promo.sdatetime >= new Date(period[0].toString()).getTime() &&
-                                date.promo.sdatetime <= new Date(period[1].toString()).getTime())
+                            {promotionsData.filter(date => date.promo.sdatetime * 1000 >= new Date(period[0].toString()).getTime() &&
+                                date.promo.sdatetime * 1000 <= new Date(period[1].toString()).getTime())
                                 .map((value, index) => {
                                     return (
                                         <AllPromotionCard
                                             key={index}
                                             pid={value.promo.pid}
-                                            edatetime={value.promo.edatetime}
-                                            sdatetime={value.promo.sdatetime}
+                                            edatetime={value.promo.edatetime * 1000}
+                                            sdatetime={value.promo.sdatetime * 1000}
                                             discount={value.promo.discount}
                                         />
                                     )
@@ -95,8 +95,8 @@ function ManagerPromotionPage() {
                                             key={index}
                                             // promo={value.promo}
                                             pid={value.promo.pid}
-                                            edatetime={value.promo.edatetime}
-                                            sdatetime={value.promo.sdatetime}
+                                            edatetime={value.promo.edatetime * 1000}
+                                            sdatetime={value.promo.sdatetime * 1000}
                                             discount={value.promo.discount}
                                         />
                                     );

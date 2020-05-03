@@ -44,37 +44,72 @@ exports.getOrder = async (req, response) => {
 // @route   POST /orders
 // @acess   Private
 exports.createOrder = async (req, response) => {
+    //TODO: Check that order reaches minimum amount
+    //TODO: Check that customer can only pay by card if customer has a card
+
     const { location, dfee, odatetime, paymethod, cid, rname, foodlist, fprice } = req.body;
     const createOrderQuery = `INSERT INTO orders(location, dfee, status, fprice, odatetime, paymethod, cid, rname) 
             VALUES(${location}, ${dfee}, 0, ${fprice}, ${odatetime}, ${paymethod}, ${cid}, ${rname}) returning *`
-    const rows = await db.query(createOrderQuery, (err, result) => {
+
+    const checkMinAmt = `SELECT minamt FROM Restaurants WHERE rname = ${rname}`
+    const checkCard = `SELECT cardnum FROM Customers WHERE id = ${cid}`
+
+    await db.query(checkMinAmt, (err, result) => {
         if (err) {
             console.error(err.stack)
-            response.status(404).json(`Failed to create new order.`)
+            response.status(404).json({ msg: `Unable to check min amt` })
         } else {
-            if (!result.rows) {
-                response.status(404).json(`Failed to create new order.`)
+            let minamt = result.rows.minamt
+            if (minamt > fprice) {
+                response.status(400).json({ msg: 'Min amount not met, order cannot be made' })
             } else {
-                console.log('Successfully created order')
-                oid = result.rows[0].oid
-                console.log('Order id = ', oid)
-                for (var i = 0; i < foodlist.length; i += 1) {
-                    var food = foodlist[i]
-                    console.log("Food:", food)
-                    db.query(`INSERT INTO Consists (oid, fname, quantity) VALUES (${oid}, ${food.fname}, ${food.qty}) returning *;`, (err, result2) => {
-                        if (err) {
-                            console.log("Some error occured for adding ", food.fname)
-                            console.log(err.stack)
+                db.query(checkCard, (err, result2) => {
+                    if (err) {
+                        console.error(err.stack)
+                        response.status(404).json({ msg: `Unable to check customer card` })
+                    } else {
+                        console.log(result2.rows[0].cardnum)
+                        if (result2.rows[0].cardnum === null && paymethod == 1) {
+                            console.log("Error: card payment selected but no card available")
+                            response.status(400).json({ msg: `No card available for payment` })
                         } else {
-                            console.log("Added item:")
-                            console.log(result2.rows)
+                            //passed both checks
+                            db.query(createOrderQuery, (err, result) => {
+                                if (err) {
+                                    console.error(err.stack)
+                                    response.status(404).json(`Failed to create new order.`)
+                                } else {
+                                    if (!result.rows) {
+                                        response.status(404).json(`Failed to create new order.`)
+                                    } else {
+                                        console.log('Successfully created order')
+                                        oid = result.rows[0].oid
+                                        console.log('Order id = ', oid)
+                                        for (var i = 0; i < foodlist.length; i += 1) {
+                                            var food = foodlist[i]
+                                            console.log("Food:", food)
+                                            db.query(`INSERT INTO Consists (oid, fname, quantity) VALUES (${oid}, ${food.fname}, ${food.qty}) returning *;`, (err, result2) => {
+                                                if (err) {
+                                                    console.log("Some error occured for adding ", food.fname)
+                                                    console.log(err.stack)
+                                                } else {
+                                                    console.log("Added item:")
+                                                    console.log(result2.rows)
+                                                }
+                                            })
+                                        }
+                                        response.status(200).json({ msg: `Successfully created order with oid ${oid}` })
+                                    }
+                                }
+                            });
                         }
-                    })
-                }
-                response.status(200).json(oid)
+                    }
+                })
+
             }
         }
-    });
+
+    })
 }
 
 // @desc    Update existing order's location

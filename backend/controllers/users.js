@@ -129,9 +129,9 @@ exports.updateUser = async (req, response) => {
                     } else {
                         console.log("Update:", result2)
                         if (result2.rows)
-                            response.status(200).json(`Updated customer with id ${id}`)
+                            response.status(200).json({ msg: `Updated customer with id ${id}` })
                         else {
-                            response.status(404).json(`Failed to create customer.`)
+                            response.status(404).json({ msg: `Failed to create customer.` })
                         }
                     }
                 })
