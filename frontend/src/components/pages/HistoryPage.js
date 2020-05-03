@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Menu, Container, Card } from "semantic-ui-react";
+import { Menu, Container, Card, Segment } from "semantic-ui-react";
 import OrderCard from "components/customers/CustomerOrderCard";
 import Axios from "axios";
 
@@ -112,6 +112,7 @@ const data = [
 
 function HistoryPage() {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     //need props for user id
@@ -122,6 +123,7 @@ function HistoryPage() {
         console.log("response", response.data);
         // TODO: switch to load from api when db is populated
         setOrders(data);
+        setLoading(false);
       })
       .catch((error) => {
         console.log("Error retrieving past orders:", error);
@@ -134,12 +136,22 @@ function HistoryPage() {
       <Container>
         <h1>Past Orders</h1>
 
-        <Card.Group>
-          {orders.map((value, index) => {
-            console.log(orders);
-            return <OrderCard key={index} order={value} />;
-          })}
-        </Card.Group>
+        {loading ? (
+          <Segment
+            size="massive"
+            basic
+            placeholder
+            loading={loading}
+            textAlign="center"
+          />
+        ) : (
+          <Card.Group>
+            {orders.map((value, index) => {
+              console.log(orders);
+              return <OrderCard key={index} order={value} />;
+            })}
+          </Card.Group>
+        )}
       </Container>
       <br />
       <br />

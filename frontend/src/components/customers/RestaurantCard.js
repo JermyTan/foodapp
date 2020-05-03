@@ -6,31 +6,31 @@ const data = {
   name: "Toast Box (West Coast Plaza)",
   categories: ["Asian", "Noodle", "Soup"],
   rating: 4.5,
-  promotions: ["10% off all users", "$7 off first-time users"]
+  promotions: ["10% off all users", "$7 off first-time users"],
 };
 
 function RestaurantCard(props) {
-  const restaurantInfo = props.restaurant;
+  const restaurant = props.restaurant;
 
   return (
     <Card
       fluid
       raised
       className="reactive-card"
-      onClick={() => props.setSelectedRestaurant(restaurantInfo.rname)}
+      onClick={() => props.setSelectedRestaurant(restaurant.rname)}
     >
-      <Image src={restaurantInfo.imgurl} ui="false" style={{ maxHeight: "25vh" }} />
+      <Image src={restaurant.imgurl} ui="false" style={{ maxHeight: "25vh" }} />
       <Card.Content>
         <Card.Header
           style={{ display: "flex", justifyContent: "space-between" }}
         >
-          {restaurantInfo.rname}
+          {restaurant.rname}
           <span>
-            {restaurantInfo.rating} <Rating icon="star" disabled defaultRating="1" />
+            {data.rating} <Rating icon="star" disabled defaultRating="1" />
           </span>
         </Card.Header>
 
-        <Card.Meta>{restaurantInfo.categories.join(", ")}</Card.Meta>
+        <Card.Meta>{restaurant.categories.join(", ")}</Card.Meta>
 
         <br />
         <Card.Description>
