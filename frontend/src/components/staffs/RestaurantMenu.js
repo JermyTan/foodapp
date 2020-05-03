@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Item, Button, Message } from "semantic-ui-react";
 import FoodItemEditor from "./FoodItemEditor";
+import NewItemButton from "./NewItemButton";
 
 const data = [
   {
@@ -75,6 +76,10 @@ function RestaurantMenu() {
     setRestaurantFoodItems(clone);
   };
 
+  const createFoodItem = (foodItem) => {
+    setRestaurantFoodItems([foodItem].concat(restaurantFoodItems));
+  };
+
   const handleSaveChanges = () => {
     // API call to patch new changes
     // if success
@@ -97,7 +102,7 @@ function RestaurantMenu() {
           <Button color="blue" onClick={handleSaveChanges}>
             Save changes
           </Button>
-          <Button color="teal" icon="plus" />
+          <NewItemButton createFoodItem={createFoodItem} />
         </span>
       </div>
 

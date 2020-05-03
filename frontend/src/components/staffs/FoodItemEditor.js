@@ -58,14 +58,16 @@ function FoodItemEditor(props) {
             }}
             className="number-input"
           />
-          <Button
-            floated="right"
-            icon="close"
-            color="red"
-            onClick={() => {
-              props.deleteFoodItem(props.index);
-            }}
-          />
+          {props.deleteFoodItem && (
+            <Button
+              floated="right"
+              icon="close"
+              color="red"
+              onClick={() => {
+                props.deleteFoodItem(props.index);
+              }}
+            />
+          )}
         </Item.Extra>
       </Item.Content>
     </Item>
