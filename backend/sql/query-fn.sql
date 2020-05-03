@@ -84,7 +84,7 @@ CREATE OR REPLACE VIEW st_hr_gen AS
 
 CREATE OR REPLACE VIEW day_gen AS
 	SELECT *
-	FROM generate_series(1, 7, 1) as dayofweek, generate_series(10, 22, 1) as starthour, generate_series(0, 53, 1) as weeknum, 
+	FROM generate_series(1, 7, 1) as dayofweek, generate_series(10, 21, 1) as starthour, generate_series(0, 53, 1) as weeknum, 
 	generate_series(1970, 2050, 1) as year;
 
 -- Checks the combined daily hourly count of riders for all existing entries in wws and mws 
@@ -124,15 +124,9 @@ CREATE OR REPLACE VIEW count_daily_hourly_rider AS
 		FROM
 			day_gen dg
 		WHERE
-			dg.year IN(
+			(dg.year, dg.weeknum, dg.dayofweek) IN (
 				SELECT
-					rc.yr FROM RiderCount rc)
-			AND dg.weeknum IN(
-				SELECT
-					rc.wknum FROM RiderCount rc)
-			AND dg.dayofweek IN(
-				SELECT
-					rc.dow FROM RiderCount rc)
+					yr, wknum, dow FROM RiderCount rc)
 			AND dg.starthour NOT IN(
 				SELECT
 					rc2.sthour FROM RiderCount rc2

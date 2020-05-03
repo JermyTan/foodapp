@@ -67,9 +67,9 @@ exports.getRestaurant = async (req, response) => {
 // @route   POST /restaurant
 // @acess   Private
 exports.createRestaurant = async (req, response) => {
-  const { rname, minamt } = req.body
+  const { rname, minamt, imgurl } = req.body
   const checkRestaurantExistsQuery = `SELECT * FROM Restaurants WHERE rname = ${rname}`
-  const createRestaurantQuery = `INSERT INTO Restaurants (${rname}, ${minamt}) VALUES ($1, $2) returning *`
+  const createRestaurantQuery = `INSERT INTO Restaurants (rname, minamt, imgurl) VALUES (${rname}, ${minamt}, ${imgurl}) returning *`
 
   const rows = await db.query(checkRestaurantExistsQuery, (err, result) => {
     if (err) {
@@ -118,7 +118,7 @@ exports.addFoodToSells = async (req, response) => {
     returning *;
 
     INSERT INTO Sells (fname, rname, avail, flimit, price)
-    VALUES(${fname}, ${rname}, TRUE, ${flimit}, ${price})
+    VALUES(${fname}, ${rname}, ${flimit}, ${price})
     returning *;
     COMMIT;`
   const rows = await db.query(addFoodToSellsQuery, (err, result) => {
