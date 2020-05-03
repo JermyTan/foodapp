@@ -67,39 +67,3 @@ WHERE NOT EXISTS (SELECT fname FROM Food WHERE fname = 'Pepperoni Pizza') LIMIT 
 INSERT INTO Sells
 VALUES('Pepperoni Pizza', 'Dominos', true, 20, 18.90);
 COMMIT;
-
-BEGIN;
-SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO "public"."users" ("email", "name") 
-VALUES ('manager@fds.com','ManagerTan');
-
-INSERT INTO "public"."managers"
-VALUES((SELECT currval('users_id_seq'))); 
-COMMIT;
-
-BEGIN;
-SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO Promotions (sdatetime, edatetime, discount) 
-VALUES(1588420800000, 1591099200000, 0.3);
-
-INSERT INTO FDSPromotions
-VALUES((SELECT currval('promotions_pid_seq')));
-COMMIT;
-
-BEGIN;
-SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO Promotions (sdatetime, edatetime, discount) 
-VALUES(1585834200000, 1588426200000, 1);
-
-INSERT INTO FDSPromotions
-VALUES((SELECT currval('promotions_pid_seq')));
-COMMIT;
-
-BEGIN;
-SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO Promotions (sdatetime, edatetime, discount) 
-VALUES(1593167400000, 1595766600000, 0.2);
-
-INSERT INTO FDSPromotions
-VALUES((SELECT currval('promotions_pid_seq')));
-COMMIT;

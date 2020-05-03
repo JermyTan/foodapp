@@ -191,7 +191,7 @@ CREATE TABLE Consists (
 );
 
 CREATE TABLE Offers (
-    pid         INTEGER REFERENCES Promotions,
+    pid         INTEGER REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE,
     rname       VARCHAR REFERENCES Restaurants,
     fname       VARCHAR REFERENCES Food,
     PRIMARY KEY (pid, rname, fname)
