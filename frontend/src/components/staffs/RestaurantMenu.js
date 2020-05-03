@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Item, Button, Message } from "semantic-ui-react";
-import FoodItemSelector from "components/customers/FoodItemSelector";
+import FoodItemEditor from "./FoodItemEditor";
+import NewItemButton from "./NewItemButton";
 
 const data = [
   {
@@ -45,36 +46,38 @@ const rname = "Toast Box";
 
 function RestaurantMenu() {
   const [restaurantName, setRestaurantName] = useState("");
-  const [restaurantFoodItems, setRestaurantFoodItems] = useState({});
+  const [restaurantFoodItems, setRestaurantFoodItems] = useState([]);
   const [saveChanges, setSaveChanges] = useState(false);
 
   useEffect(() => {
     // retrieve the restaurant name under this staff
     setRestaurantName(rname);
     // retrieve restaurant data
-    let foodItems = {};
-    data.forEach((value) => {
-      foodItems[value.name] = value;
-    });
-    setRestaurantFoodItems(foodItems);
+    setRestaurantFoodItems(data);
   }, []);
 
-  /*
-    selectedFoodItems = {
-      <food name>: selectedFoodItem,
-      <food name>: selectedFoodItem,
-      ...
-    }
-  
-    selectedFoodItem = {
-      name: string,
-      quantity: number,
-      price: number
-    }
-    */
-  const updateFoodItems = (foodItem) => {
-    restaurantFoodItems[foodItem.name] = foodItem;
-    setRestaurantFoodItems(restaurantFoodItems);
+  const updateFoodItem = (key, value, index) => {
+    let clone = [...restaurantFoodItems];
+    let affectedItem = clone[index];
+    let itemClone = {
+      name: affectedItem.name,
+      price: affectedItem.price,
+      category: affectedItem.category,
+      limit: affectedItem.limit,
+    };
+    itemClone[key] = value;
+    clone[index] = itemClone;
+    setRestaurantFoodItems(clone);
+  };
+
+  const deleteFoodItem = (index) => {
+    let clone = [...restaurantFoodItems];
+    clone.splice(index, 1);
+    setRestaurantFoodItems(clone);
+  };
+
+  const createFoodItem = (foodItem) => {
+    setRestaurantFoodItems([foodItem].concat(restaurantFoodItems));
   };
 
   const handleSaveChanges = () => {
@@ -99,21 +102,22 @@ function RestaurantMenu() {
           <Button color="blue" onClick={handleSaveChanges}>
             Save changes
           </Button>
-          <Button color="teal" icon="plus" />
+          <NewItemButton createFoodItem={createFoodItem} />
         </span>
       </div>
 
       <Item.Group divided>
-        {Object.entries(restaurantFoodItems).map((pair, index) => {
-          let foodItem = pair[1];
+        {restaurantFoodItems.map((value, index) => {
           return (
-            <FoodItemSelector
+            <FoodItemEditor
               key={index}
-              name={foodItem.name}
-              price={foodItem.price}
-              category={foodItem.category}
-              count={foodItem.limit}
-              updateSelectedFoodItems={updateFoodItems}
+              index={index}
+              name={value.name}
+              price={value.price}
+              category={value.category}
+              limit={value.limit}
+              updateFoodItem={updateFoodItem}
+              deleteFoodItem={deleteFoodItem}
             />
           );
         })}
