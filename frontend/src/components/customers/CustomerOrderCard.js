@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Button, Label } from "semantic-ui-react";
+import { Card, Button, Label, Rating } from "semantic-ui-react";
 import { format } from "date-fns";
 
 function CustomerOrderCard(props) {
@@ -35,11 +35,13 @@ function CustomerOrderCard(props) {
       <Card.Content>
         <Card.Description>
           {format(order.odatetime * 1000, "MM/dd/yyyy hh:mm aa")}
-          {
-            <Label color={[getStatus()[1]]} style={{ marginLeft: "1rem" }}>
-              {getStatus()[0]}
-            </Label>
-          }
+          <Label color={[getStatus()[1]]} style={{ marginLeft: "1rem" }}>
+            {getStatus()[0]}
+          </Label>
+
+          {order.status === 2 && (
+            <Rating icon="star" maxRating={5} style={{ marginLeft: "1rem" }} />
+          )}
 
           <Button
             primary
