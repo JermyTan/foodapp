@@ -12,9 +12,7 @@ exports.getRestaurants = async (req, response) => {
   const rows = await db.query(getRestaurantsQuery, async (err, result) => {
     if (err) {
       console.error(err.stack);
-      response.status(404).json({
-        msg: `Failed to get restaurants and categories.`
-      });
+      response.status(404).json(`Failed to get restaurants and categories.`);
     } else {
       console.log("Get restaurants result:", result.rows);
       response.status(200).json(result.rows)
@@ -25,7 +23,7 @@ exports.getRestaurants = async (req, response) => {
 
 
 // @desc    Get single restaurant and the food items, along with the amount available today
-// @route   GET /restaurant/:fname
+// @route   GET /restaurant/:rname/:start/:end
 // @acess   Public
 exports.getRestaurant = async (req, response) => {
   //const rname = req.params.rname
@@ -50,14 +48,14 @@ exports.getRestaurant = async (req, response) => {
   const row = await db.query(getRestaurantFoodQuery, (err, result) => {
     if (err) {
       console.error("Error here:", err)
-      response.status(404).json({ success: false, msg: `Failed to get restaurant and food items.` })
+      response.status(404).json(`Failed to get restaurant and food items.`)
     } else {
       console.log("RESULT:", result)
       if (!result.rows) {
-        response.status(404).json({ success: false, msg: `Failed to get restaurant and food items.` })
+        response.status(404).json(`Failed to get restaurant and food items.`)
       } else {
         console.log(result.rows)
-        response.status(200).json({ success: true, msg: result.rows })
+        response.status(200).json(result.rows)
       }
     }
   })
@@ -74,24 +72,24 @@ exports.createRestaurant = async (req, response) => {
   const rows = await db.query(checkRestaurantExistsQuery, (err, result) => {
     if (err) {
       console.log(err.stack)
-      response.status(500).json({ success: false, msg: 'Some error occurred' })
+      response.status(500).json('Some error occurred')
     } else {
       if (result.rows.length !== 0) {
         //Restaurant already registered
-        response.status(400).json({ success: false, msg: 'This restaurant is already registered.' })
+        response.status(400).json('This restaurant is already registered.')
       } else {
         db.query(createRestaurantQuery, async (err2, result2) => {
           if (err2) {
             console.log("Error creating restaurant", err2.stack)
-            response.status(500).json({ success: false, msg: 'Failed to create restaurant account.' })
+            response.status(500).json('Failed to create restaurant account.')
           } else {
             console.log("Result", result2[2].rows, result2[3].rows)
             if (result.rows) {
               console.log('Successfully created restaurant')
-              response.status(200).json({ success: true, msg: "Created restaurant" })
+              response.status(200).json(`Created restaurant`)
             }
             else {
-              response.status(404).json({ success: false, msg: result.rows })
+              response.status(404).json(result.rows)
             }
           }
         })
@@ -125,18 +123,18 @@ exports.addFoodToSells = async (req, response) => {
     if (err) {
       console.log("ERROR:", err)
       if (err.constraint === 'sells_pkey') {
-        response.status(400).json({ success: false, msg: 'Record already exists.' })
+        response.status(400).json('Record already exists.')
       } else {
-        response.status(500).json({ success: false, msg: 'Unable to add food. Please try again.' })
+        response.status(500).json('Unable to add food. Please try again.')
       }
     } else {
       console.log("RESULT", result)
       if (result[3].rows) {
         console.log(result[3].rows)
-        response.status(404).json({ success: true, msg: result[3].rows })
+        response.status(404).json(result[3].rows)
       } else {
         console.log('Failed to add new record in sells')
-        response.status(400).json({ success: false, msg: `Failed to add new record in sells` })
+        response.status(400).json(`Failed to add new record in sells`)
       }
     }
   });
@@ -162,7 +160,7 @@ exports.viewNewOrders = async (req, response) => {
   db.query(viewNewOrdersQuery, (err, result) => {
     if (err) {
       console.log(err.stack)
-      response.status(500).json({ success: false, msg: 'Unable to view orders.' })
+      response.status(500).json('Unable to view orders.')
     } else {
       console.log(result.rows)
       const groupByOid = groupBy("oid")

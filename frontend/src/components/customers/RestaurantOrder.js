@@ -55,8 +55,8 @@ function RestaurantOrder(props) {
   useEffect(() => {
     Axios.get(url)
       .then(response => {
-        console.log("response", response.data.msg)
-        setRestaurantData(response.data.msg)
+        console.log("response", response.data)
+        setRestaurantData(response.data)
       })
       .catch(error => {
         console.log(rname)
