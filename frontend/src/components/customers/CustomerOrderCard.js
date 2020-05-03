@@ -1,25 +1,28 @@
 import React, { useState } from "react";
 import { Card, Button, Label } from "semantic-ui-react";
-import { format } from 'date-fns'
+import { format } from "date-fns";
 
 function CustomerOrderCard(props) {
   const [isExpanded, setExpanded] = useState(false);
-  const order = props.order
-  function getStatus() {
+  const order = props.order;
+
+  const getStatus = () => {
     switch (order.status) {
+      case 0:
+        return ["Processing", "yellow"];
       case 1:
-        return "Delivering"
+        return ["Delivering", "blue"];
       case 2:
-        return "Delivered"
+        return ["Delivered", "green"];
       case 3:
-        return "Cancelled"
+        return ["Cancelled", "grey"];
       default:
-        return "Processing"
+        console.log("Unknown status");
     }
-  }
+  };
 
   return (
-    <Card fluid raised color={order.status === 2 ? 'green' : 'yellow'}>
+    <Card fluid raised color={getStatus()[1]}>
       <Card.Content>
         <Card.Header
           style={{ display: "flex", justifyContent: "space-between" }}
@@ -30,12 +33,13 @@ function CustomerOrderCard(props) {
       </Card.Content>
       <Card.Content>
         <Card.Description>
-          {format(order.odatetime, 'MM/dd/yyyy hh:mm aa')}
-          {<Label
-            color={order.status === 2 ? 'green' : order.status === 3 ? "grey" : 'yellow'}
-            style={{ marginLeft: "30px" }}>
-            {getStatus()}
-          </Label>}
+          {format(order.odatetime * 1000, "MM/dd/yyyy hh:mm aa")}
+          {
+            <Label color={[getStatus()[1]]} style={{ marginLeft: "1rem" }}>
+              {getStatus()[0]}
+            </Label>
+          }
+
           <Button
             primary
             floated="right"
@@ -43,55 +47,60 @@ function CustomerOrderCard(props) {
           >
             {isExpanded ? "View less" : "View more"}
           </Button>
+
+          {order.status < 2 && (
+            <Button secondary floated="right" content="Cancel" />
+          )}
         </Card.Description>
         {isExpanded && (
           <Card.Description>
-            Order id: {order.oid}
+            Order number: {order.oid}
             <br />
             Delivery address: {props.order.location}
           </Card.Description>
         )}
       </Card.Content>
-      {
-        isExpanded && (
-          <>
-            <Card.Content>
-              <Card.Description>
-                {order.items.map((value, index) => {
-                  return <div
+      {isExpanded && (
+        <>
+          <Card.Content>
+            <Card.Description>
+              {order.items.map((value, index) => {
+                return (
+                  <div
                     key={index}
-                    style={{ display: "flex", justifyContent: "space-between" }}>
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
                     {`${value.qty}x ${value.fname}`}
                     <span>${value.qty * value.price}</span>
                   </div>
-                })}
-              </Card.Description>
-            </Card.Content>
-            <Card.Content>
-              <Card.Description>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  Subtotal
+                );
+              })}
+            </Card.Description>
+          </Card.Content>
+          <Card.Content>
+            <Card.Description>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                Subtotal
                 <span>${order.fprice}</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  Delivery fee
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                Delivery fee
                 <span>${order.dfee}</span>
-                </div>
-                <br />
-                <strong>
-                  <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    Total
+              </div>
+              <br />
+              <strong>
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  Total
                   <span>${order.fprice + order.dfee}</span>
-                  </div>
-                </strong>
-              </Card.Description>
-            </Card.Content>
-          </>
-        )
-      }
-    </Card >
+                </div>
+              </strong>
+            </Card.Description>
+          </Card.Content>
+        </>
+      )}
+    </Card>
   );
 }
 

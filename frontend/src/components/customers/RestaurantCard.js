@@ -10,7 +10,7 @@ import "styles/reactive.scss";
 // };
 
 function RestaurantCard(props) {
-  const data = props.restaurant
+  const data = props.restaurant;
 
   return (
     <Card
@@ -19,11 +19,7 @@ function RestaurantCard(props) {
       className="reactive-card"
       onClick={() => props.setSelectedRestaurant(data.rname)}
     >
-      <Image
-        src={data.imgurl}
-        ui="false"
-        style={{ maxHeight: "25vh" }}
-      />
+      <Image src={data.imgurl} ui="false" style={{ maxHeight: "25vh" }} />
       <Card.Content>
         <Card.Header
           style={{ display: "flex", justifyContent: "space-between" }}
@@ -38,15 +34,15 @@ function RestaurantCard(props) {
 
         <br />
         <Card.Description>
-          $2.99 delivery fee
-          {/* {data.promotions.map(value => {
-          return (
-            <>
-              <br />
-              <strong style={{ color: "#0d97ff" }}>{value}</strong>
-            </>
-          );
-        })} */}
+          $3.99 delivery fee
+          {data.promotions.map((value) => {
+            return (
+              <>
+                <br />
+                <strong style={{ color: "#0d97ff" }}>{value}</strong>
+              </>
+            );
+          })}
         </Card.Description>
       </Card.Content>
     </Card>
