@@ -49,6 +49,7 @@ CREATE TABLE Customers (
     DEFERRABLE INITIALLY IMMEDIATE,
     rpoints     INTEGER NOT NULL DEFAULT 0,
     cardnum     INTEGER,
+    joindate    INTEGER NOT NULL,
     CHECK (rpoints >= 0),
     CHECK (cardnum >= 0)
 );
@@ -58,6 +59,7 @@ CREATE TABLE Customers (
 CREATE TABLE Restaurants (
     rname       VARCHAR PRIMARY KEY,
     minamt      FLOAT NOT NULL,
+    imgurl      VARCHAR DEFAULT 'https://zabas.com/wp-content/uploads/2017/01/food-placeholder.png',
     CHECK (rname <> ''),
     CHECK (minamt >= 0)
 );
@@ -74,8 +76,8 @@ CREATE TABLE Managers (
 
 CREATE TABLE Promotions (
     pid         SERIAL PRIMARY KEY,
-    sdatetime   BIGINT NOT NULL,
-    edatetime   BIGINT NOT NULL,
+    sdatetime   INTEGER NOT NULL,
+    edatetime   INTEGER NOT NULL,
     discount    DECIMAL(5, 2) NOT NULL,
     CHECK (pid > 0),
     CHECK (0 <= sdatetime AND sdatetime < edatetime),
@@ -175,9 +177,9 @@ CREATE TABLE Reviews (
 CREATE TABLE Sells (
     fname       VARCHAR REFERENCES Food,
     rname       VARCHAR REFERENCES Restaurants,
-    avail       BOOLEAN NOT NULL,
     flimit      INTEGER NOT NULL,
     price       NUMERIC(12, 2) NOT NULL,
+    imgurl      VARCHAR DEFAULT 'https://platerate.com/images/tempfoodnotext.png',
     PRIMARY KEY (fname, rname),
     CHECK (flimit >= 0),
     CHECK (price >= 0)
@@ -191,7 +193,7 @@ CREATE TABLE Consists (
 );
 
 CREATE TABLE Offers (
-    pid         INTEGER REFERENCES Promotions,
+    pid         INTEGER REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE,
     rname       VARCHAR REFERENCES Restaurants,
     fname       VARCHAR REFERENCES Food,
     PRIMARY KEY (pid, rname, fname)

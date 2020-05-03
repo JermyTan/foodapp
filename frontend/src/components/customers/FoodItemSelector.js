@@ -8,7 +8,7 @@ function FoodItemSelector(props) {
 
   return (
     <Item>
-      <Item.Image src={require("images/curry-chicken.jpg")} />
+      <Item.Image src={props.imgurl} />
 
       <Item.Content>
         <Item.Header
