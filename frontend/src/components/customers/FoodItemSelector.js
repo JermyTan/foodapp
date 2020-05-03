@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Item, Label } from "semantic-ui-react";
 import NumberInput from "semantic-ui-react-numberinput";
-import "styles/FoodItemSelector.scss";
+import "styles/FoodItem.scss";
 
 function FoodItemSelector(props) {
-  const [count, setCount] = useState(props.count.toString());
+  const [count, setCount] = useState("0");
 
   return (
     <Item>

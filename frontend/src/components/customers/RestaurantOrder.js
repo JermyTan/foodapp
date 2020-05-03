@@ -148,7 +148,6 @@ function RestaurantOrder(props) {
               price={value.price}
               category={value.categories}
               limit={value.limit}
-              count={0}
               updateSelectedFoodItems={updateSelectedFoodItems}
             />
           );
