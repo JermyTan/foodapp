@@ -6,24 +6,25 @@ import Axios from "axios";
 
 function AllRestaurants(props) {
   const [restaurantsData, setRestaurantData] = useState([]);
-  const url = `http://localhost:5000/api/restaurants`
+  const url = `http://localhost:5000/api/restaurants`;
   useEffect(() => {
     Axios.get(url)
-      .then(response => {
-        console.log("response", response.data)
-        setRestaurantData(response.data)
+      .then((response) => {
+        console.log("response", response.data);
+        setRestaurantData(response.data);
       })
-      .catch(error => {
+      .catch((error) => {
         console.log("Error retrieving past orders:", error);
-      })
-  }, [])
+      });
+  }, []);
+
   return (
     <>
       <div
         style={{
           display: "flex",
           flexWrap: "wrap",
-          justifyContent: "space-between"
+          justifyContent: "space-between",
         }}
       >
         <h1>Restaurants</h1>
@@ -47,11 +48,13 @@ function AllRestaurants(props) {
       {/* {props.location && ( */}
       <Card.Group>
         {restaurantsData.map((value, index) => {
-          return <RestaurantCard
-            key={index}
-            restaurant={value}
-            setSelectedRestaurant={props.setSelectedRestaurant}
-          />
+          return (
+            <RestaurantCard
+              key={index}
+              restaurant={value}
+              setSelectedRestaurant={props.setSelectedRestaurant}
+            />
+          );
         })}
 
         {/* <RestaurantCard setSelectedRestaurant={props.setSelectedRestaurant} />
