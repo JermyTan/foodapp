@@ -55,9 +55,15 @@ function RestaurantOrder(props) {
   useEffect(() => {
     const url = `http://localhost:5000/api/restaurants/'${rname}'/${start}/${end}`;
     Axios.get(url)
+<<<<<<< HEAD
       .then((response) => {
         console.log("response", response.data.msg);
         setRestaurantData(response.data.msg);
+=======
+      .then(response => {
+        console.log("response", response.data)
+        setRestaurantData(response.data)
+>>>>>>> 457e6a6571f8cfe58fe7f3e815c44668c030c6b1
       })
       .catch((error) => {
         console.log(rname);
