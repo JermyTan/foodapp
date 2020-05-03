@@ -23,15 +23,6 @@ INSERT INTO Sells
 VALUES('Hawaiian Pizza', 'Pizza Hut', 10, 18.90, 'https://i.ytimg.com/vi/ncdJny9PsrM/hqdefault.jpg');
 COMMIT;
 
-BEGIN;
-SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO Food
-SELECT * FROM (SELECT 'Pepperoni Pizza', 'Pizza') AS tmp 
-WHERE NOT EXISTS (SELECT fname FROM Food WHERE fname = 'Hawaiian Pizza') LIMIT 1;
-
-INSERT INTO Sells
-VALUES('Hawaiian Pizza', 'Pizza Hut', 10, 18.90);
-COMMIT;
 
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
@@ -40,7 +31,7 @@ SELECT * FROM (SELECT 'Mala Pizza', 'Pizza') AS tmp
 WHERE NOT EXISTS (SELECT fname FROM Food WHERE fname = 'Mala Pizza') LIMIT 1;
 
 INSERT INTO Sells
-VALUES('Mala Pizza', 'Pizza Hut', 5, 25.90);
+VALUES('Mala Pizza', 'Pizza Hut', 5, 25.90, 'https://sethlui.com/wp-content/uploads/2020/03/Pizza-Hut-Mala-Pizza-Online-7-2.jpg');
 COMMIT;
 
 BEGIN;
@@ -50,7 +41,7 @@ SELECT * FROM (SELECT 'Mushroom Pizza', 'Pizza') AS tmp
 WHERE NOT EXISTS (SELECT fname FROM Food WHERE fname = 'Mushroom Pizza') LIMIT 1;
 
 INSERT INTO Sells
-VALUES('Mushroom Pizza', 'Pizza Hut', 5, 15.90);
+VALUES('Mushroom Pizza', 'Pizza Hut', 5, 15.90, '');
 COMMIT;
 
 BEGIN;
