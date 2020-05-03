@@ -38,15 +38,15 @@ COMMIT;
 
 UPDATE Staffs
 SET rname = 'McDonalds'
-WHERE id = 3;
+WHERE id = (SELECT currval('users_id_seq');
 
 UPDATE Users
 SET name = 'Jane'
-WHERE id = 3;
+WHERE id = (SELECT currval('users_id_seq');
 
 UPDATE Users
 SET email = 'lee99@gmail.com'
-WHERE id = 3;
+WHERE id = (SELECT currval('users_id_seq');
 
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;

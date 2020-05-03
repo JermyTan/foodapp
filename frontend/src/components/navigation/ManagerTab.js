@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, Accordion } from "semantic-ui-react";
-import { MANAGER_SUMMARY_PATH } from "../../utils/Constants";
+import { MANAGER_SUMMARY_PATH, MANAGER_PROMOTION_PATH } from "../../utils/Constants";
 
 function ManagerTab(props) {
   const [isExpanded, setExpanded] = useState(false);
@@ -21,6 +21,14 @@ function ManagerTab(props) {
           name={MANAGER_SUMMARY_PATH}
           active={window.location.pathname === MANAGER_SUMMARY_PATH}
           content="Summary"
+          onClick={props.onTabClick}
+        />
+        <Menu.Item
+          as={Link}
+          to={MANAGER_PROMOTION_PATH}
+          name={MANAGER_PROMOTION_PATH}
+          active={window.location.pathname === MANAGER_PROMOTION_PATH}
+          content="Promotions"
           onClick={props.onTabClick}
         />
       </Accordion.Content>

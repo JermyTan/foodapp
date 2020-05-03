@@ -16,6 +16,9 @@ DROP TABLE IF EXISTS Orders CASCADE;
 DROP TABLE IF EXISTS Sells CASCADE;
 DROP TABLE IF EXISTS Consists CASCADE;
 DROP TABLE IF EXISTS Offers CASCADE;
+DROP TABLE IF EXISTS FDSOffers CASCADE;
+DROP TABLE IF EXISTS Reviews CASCADE;
+DROP TABLE IF EXISTS Ratings CASCADE;
 
 CREATE TABLE Users (
     id          SERIAL PRIMARY KEY,
@@ -46,6 +49,7 @@ CREATE TABLE Customers (
     DEFERRABLE INITIALLY IMMEDIATE,
     rpoints     INTEGER NOT NULL,
     cardnum     INTEGER,
+    joindate    INTEGER,
     CHECK (rpoints >= 0),
     CHECK (cardnum >= 0)
 );
@@ -55,6 +59,7 @@ CREATE TABLE Customers (
 CREATE TABLE Restaurants (
     rname       VARCHAR PRIMARY KEY,
     minamt      FLOAT NOT NULL,
+    imgurl      VARCHAR DEFAULT 'https://platerate.com/images/tempfoodnotext.png',
     CHECK (rname <> ''),
     CHECK (minamt >= 0)
 );
@@ -70,21 +75,21 @@ CREATE TABLE Managers (
 );
 
 CREATE TABLE Promotions (
-    pid         INTEGER PRIMARY KEY,
-    sdatetime   INTEGER NOT NULL,
-    edatetime   INTEGER NOT NULL,
-    description VARCHAR NOT NULL,
+    pid         SERIAL PRIMARY KEY,
+    sdatetime   BIGINT NOT NULL,
+    edatetime   BIGINT NOT NULL,
+    discount    DECIMAL(5, 2) NOT NULL,
     CHECK (pid > 0),
     CHECK (0 <= sdatetime AND sdatetime < edatetime),
-    CHECK (description <> '')
+    CHECK(discount > 0 AND discount <= 1)
 );
 
 CREATE TABLE FDSPromotions (
-    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE
+    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
 );
 
 CREATE TABLE RPromotions (
-    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE
+    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
 );
 
 CREATE TABLE Food (
@@ -96,25 +101,19 @@ CREATE TABLE Food (
 
 CREATE TABLE MWS (
     id          INTEGER REFERENCES FTRiders ON DELETE CASCADE,
-    month       SMALLINT,
-    dayofweek   SMALLINT,
+    stdom       DATE,
     stime       INTEGER,
     etime       INTEGER,
-    PRIMARY KEY (id, month, dayofweek, stime, etime),
-    CHECK (1 <= month AND month <= 12),
-    CHECK (1 <= dayofweek AND dayofweek <= 7),
+    PRIMARY KEY (id, stdom, stime, etime),
     CHECK (10 <= stime AND stime < etime AND etime <= 22)
 );
 
 CREATE TABLE WWS (
     id          INTEGER REFERENCES PTRiders ON DELETE CASCADE,
-    week        SMALLINT,
-    dayofweek   SMALLINT,
+    dmy         DATE,
     stime       INTEGER,
     etime       INTEGER,
-    PRIMARY KEY (id, week, dayofweek, stime, etime),
-    CHECK (1 <= week AND week <= 52),
-    CHECK (1 <= dayofweek AND dayofweek <= 7),
+    PRIMARY KEY (id, dmy, stime, etime),
     CHECK (10 <= stime AND stime < etime AND etime <= 22 AND etime - stime <= 4)
 );
 
@@ -145,26 +144,39 @@ CREATE TABLE Orders (
     rname       VARCHAR NOT NULL REFERENCES Restaurants,
 
     rid         INTEGER REFERENCES Riders,
-    rating      SMALLINT
-                CHECK (0 <= rating AND rating <= 5),
+    -- rating      SMALLINT
+    --             CHECK (0 <= rating AND rating <= 5),
     
     departdatetime1 INTEGER CHECK (odatetime <= departdatetime1),
     arrivedatetime  INTEGER CHECK (departdatetime1 <= arrivedatetime),
     departdatetime2 INTEGER CHECK (arrivedatetime <= departdatetime2),
-    deliverdatetime INTEGER CHECK (departdatetime2 <= deliverdatetime),
+    deliverdatetime INTEGER CHECK (departdatetime2 <= deliverdatetime)
 
-    reviewdatetime  INTEGER CHECK (deliverdatetime <= reviewdatetime),
-    review          VARCHAR CHECK (review <> ''),
-    CHECK (
-        (reviewdatetime IS NULL AND review IS NULL) 
-        OR (reviewdatetime IS NOT NULL AND review IS NOT NULL)
-    )
+    -- reviewdatetime  INTEGER CHECK (deliverdatetime <= reviewdatetime),
+    -- review          VARCHAR CHECK (review <> ''),
+    -- CHECK (
+    --     (reviewdatetime IS NULL AND review IS NULL) 
+    --     OR (reviewdatetime IS NOT NULL AND review IS NOT NULL)
+    -- )
 );
+
+CREATE TABLE Ratings (
+    oid         INTEGER PRIMARY KEY REFERENCES Orders,
+    rating      SMALLINT
+                CHECK (0 <= rating AND rating <= 5)
+);
+
+CREATE TABLE Reviews (
+    oid         INTEGER PRIMARY KEY REFERENCES Orders,
+    review      VARCHAR NOT NULL
+                CHECK (review <> ''),
+    reviewdatetime INTEGER NOT NULL
+);
+
 
 CREATE TABLE Sells (
     fname       VARCHAR REFERENCES Food,
     rname       VARCHAR REFERENCES Restaurants,
-    avail       BOOLEAN NOT NULL,
     flimit      INTEGER NOT NULL,
     price       NUMERIC(12, 2) NOT NULL,
     PRIMARY KEY (fname, rname),
@@ -180,9 +192,14 @@ CREATE TABLE Consists (
 );
 
 CREATE TABLE Offers (
+    pid         INTEGER REFERENCES Promotions,
     rname       VARCHAR REFERENCES Restaurants,
+    fname       VARCHAR REFERENCES Food,
+    PRIMARY KEY (pid, rname, fname)
+);
+
+CREATE TABLE FDSOffers (
     pid         INTEGER REFERENCES Promotions,
     oid         INTEGER REFERENCES Orders,
-    fname       VARCHAR REFERENCES Food,
-    PRIMARY KEY (rname, pid, oid, fname)
+    PRIMARY KEY (pid, oid)
 );

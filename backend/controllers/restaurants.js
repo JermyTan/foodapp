@@ -1,53 +1,62 @@
 const db = require('../db')
 
-// @desc    Get all restaurants
+// @desc    Get all restaurants with info rname, category
 // @route   GET /restaurants
 // @acess   Public
 exports.getRestaurants = async (req, response) => {
-  const rows = await db.query('SELECT * FROM restaurants', (err, result) => {
+  const getRestaurantsQuery =
+    `SELECT rname, 
+    ARRAY_AGG (DISTINCT cat) as categories
+    FROM Sells NATURAL JOIN Food
+    GROUP BY rname`
+  const rows = await db.query(getRestaurantsQuery, async (err, result) => {
     if (err) {
       console.error(err.stack);
-      throw err
+      response.status(404).json({
+        msg: `Failed to get restaurants and categories.`
+      });
     } else {
-      if (!result.rows[0]) {
-        response.status(404).json({ success: false, msg: `Failed to get all restaurants. There could be no restaurants yet.` })
-      } else {
-        console.log('Successfully get all restaurants')
-        response.status(200).json({ success: true, msg: result.rows })
-      }
+      console.log("Get restaurants result:", result.rows);
+      response.status(200).json(result.rows)
     }
   })
 }
+
 
 
 // @desc    Get single restaurant and the food items, along with the amount available today
 // @route   GET /restaurant/:fname
 // @acess   Public
 exports.getRestaurant = async (req, response) => {
-  const { rname, starttimetoday, endtimetoday } = req.body
+  //const rname = req.params.rname
+  //start and end refer to 10am and 10pm on the day the request is made
+  const { rname, start, end } = req.params
+  console.log("PARAMS", req.params)
+
+  const getFoodCategoriesQuery = `SELECT ARRAY_AGG(DISTINCT cat) FROM Food F WHERE F.fname = S.fname`
   const getRestaurantFoodQuery =
     `SELECT *, flimit - COALESCE(
       (SELECT SUM(C.quantity) AS qtysoldtoday
         FROM (
           SELECT * FROM Orders O
-          WHERE (O.odatetime >= ${starttimetoday} AND O.odatetime <= ${endtimetoday}) 
+          WHERE (O.odatetime >= ${start} AND O.odatetime <= ${end}) 
           AND (O.status = 1 OR O.status = 2)) AS O
         JOIN Consists C ON O.oid = C.oid
         GROUP BY C.fname, O.rname
         HAVING S.fname = C.fname
-        AND S.rname = O.rname), 0) as qtylefttoday
+        AND S.rname = O.rname), 0) as qtylefttoday, (${getFoodCategoriesQuery}) as categories
     FROM Sells S
-    WHERE S.rname = ${rname}
-    ;`
+    WHERE S.rname = ${rname};`
   const row = await db.query(getRestaurantFoodQuery, (err, result) => {
     if (err) {
-      console.error(err.stack)
+      console.error("Error here:", err)
       response.status(404).json({ success: false, msg: `Failed to get restaurant and food items.` })
     } else {
       console.log("RESULT:", result)
       if (!result.rows) {
         response.status(404).json({ success: false, msg: `Failed to get restaurant and food items.` })
       } else {
+        console.log(result.rows)
         response.status(200).json({ success: true, msg: result.rows })
       }
     }
@@ -58,9 +67,9 @@ exports.getRestaurant = async (req, response) => {
 // @route   POST /restaurant
 // @acess   Private
 exports.createRestaurant = async (req, response) => {
-  const { rname, minamt } = req.body
+  const { rname, minamt, imgurl } = req.body
   const checkRestaurantExistsQuery = `SELECT * FROM Restaurants WHERE rname = ${rname}`
-  const createRestaurantQuery = `INSERT INTO Restaurants (${rname}, ${minamt}) VALUES ($1, $2) returning *`
+  const createRestaurantQuery = `INSERT INTO Restaurants (rname, minamt, imgurl) VALUES (${rname}, ${minamt}, ${imgurl}) returning *`
 
   const rows = await db.query(checkRestaurantExistsQuery, (err, result) => {
     if (err) {
@@ -109,7 +118,7 @@ exports.addFoodToSells = async (req, response) => {
     returning *;
 
     INSERT INTO Sells (fname, rname, avail, flimit, price)
-    VALUES(${fname}, ${rname}, TRUE, ${flimit}, ${price})
+    VALUES(${fname}, ${rname}, ${flimit}, ${price})
     returning *;
     COMMIT;`
   const rows = await db.query(addFoodToSellsQuery, (err, result) => {
@@ -133,5 +142,32 @@ exports.addFoodToSells = async (req, response) => {
   });
 }
 
+const groupBy = key => array =>
+  array.reduce((objectsByKeyValue, obj) => {
+    const value = obj[key];
+    objectsByKeyValue[value] = (objectsByKeyValue[value] || []).concat(obj);
+    return objectsByKeyValue;
+  }, {});
 
 
+// @desc    View all orders made to restaurant
+// @route   GET /restaurants/orders/rname
+// @acess   Private
+exports.viewNewOrders = async (req, response) => {
+  const { rname } = req.body
+  const viewNewOrdersQuery = `SELECT O.oid, O.status, C.fname, C.quantity
+  FROM Orders O NATURAL JOIN Consists C
+  WHERE O.rname = ${rname};`
+
+  db.query(viewNewOrdersQuery, (err, result) => {
+    if (err) {
+      console.log(err.stack)
+      response.status(500).json({ success: false, msg: 'Unable to view orders.' })
+    } else {
+      console.log(result.rows)
+      const groupByOid = groupBy("oid")
+      const data = groupByOid(result.rows)
+      response.status(200).json(data)
+    }
+  })
+}

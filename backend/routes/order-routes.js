@@ -6,23 +6,23 @@ const Router = require('express-promise-router');
 const router = new Router();
 
 // import controllers here
-const { 
+const {
     getOrders,
     getOrder,
     createOrder,
     updateOrder,
     deleteOrder
- } = require('../controllers/orders');
+} = require('../controllers/orders');
 
 // map routes to controller
 router
-.route('/')
-.get(getOrders)
-.post(createOrder);
+    .route('/')
+    .get(getOrders)
+    .post(createOrder);
 
 router.route('/:id')
-.get(getOrder)
-.put(updateOrder)
-.delete(deleteOrder);
+    .get(getOrder)
+    .put(updateOrder)
+    .delete(deleteOrder);
 
 module.exports = router;
