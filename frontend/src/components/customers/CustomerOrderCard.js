@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Card, Button, Label, Rating } from "semantic-ui-react";
 import { format } from "date-fns";
+import NewReviewButton from "./NewReviewButton";
 
 function CustomerOrderCard(props) {
   const [isExpanded, setExpanded] = useState(false);
@@ -40,7 +41,14 @@ function CustomerOrderCard(props) {
           </Label>
 
           {order.status === 2 && (
-            <Rating icon="star" maxRating={5} style={{ marginLeft: "1rem" }} />
+            <>
+              <NewReviewButton
+                style={{ marginLeft: "1rem", marginRight: "1rem" }}
+                oid={order.oid}
+                rname={order.rname}
+              />
+              <Rating icon="star" maxRating={5} />
+            </>
           )}
 
           <Button
