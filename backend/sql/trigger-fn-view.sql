@@ -1,7 +1,7 @@
 DROP VIEW IF EXISTS rider_info CASCADE;
 DROP VIEW IF EXISTS ftr_mth_sal CASCADE;
 DROP VIEW IF EXISTS ptr_wk_sal CASCADE;
-DROP VIEW IF EXISTS CombinedTable CASCADE;
+DROP VIEW IF EXISTS CombinedScheduleTable CASCADE;
 DROP VIEW IF EXISTS st_hr_gen CASCADE;
 DROP VIEW IF EXISTS day_gen CASCADE;
 DROP VIEW IF EXISTS count_daily_hourly_rider CASCADE;
@@ -42,7 +42,7 @@ FROM PTRiderPastSalary
 GROUP BY id, (SELECT date_trunc('week', dldatetime));
 
 -- Combined mws and wws table
-CREATE OR REPLACE VIEW CombinedTable AS
+CREATE OR REPLACE VIEW CombinedScheduleTable AS
 SELECT
 	COALESCE(w.id, m.id) as id,
 	COALESCE((SELECT
@@ -65,8 +65,12 @@ SELECT
 		THEN int4range(w.stime, w.etime, '[)') 
 		ELSE int4range(m.stime, m.etime, '[)')
 	END AS timerange,
-	w.dmy,
-	m.stdom
+	COALESCE(m.stdom, w.dmy) AS sc_date,
+	CASE 
+		WHEN m.stdom IS NULL 
+		THEN 0
+		ELSE 1
+	END AS isFT
 FROM
 	wws w FULL OUTER JOIN 
 	mws m ON (w.id = m.id)
