@@ -65,6 +65,7 @@ function RestaurantMenu() {
             let minamt = response.data.minamt
             let menu = response.data.menu
             setRestaurantFoodItems(menu)
+            setMinAmt(minamt)
           })
           .catch((error) => {
             console.log("Error", error)
@@ -87,6 +88,7 @@ function RestaurantMenu() {
       price: affectedItem.price,
       category: affectedItem.category,
       limit: affectedItem.limit,
+      imgurl: affectedItem.imgurl
     };
     itemClone[key] = value;
     clone[index] = itemClone;
@@ -103,11 +105,42 @@ function RestaurantMenu() {
     setRestaurantFoodItems([foodItem].concat(restaurantFoodItems));
   };
 
+  //parses data in menu
+  const getChanges = () => {
+    let updatedItems = [];
+    restaurantFoodItems.forEach(item => {
+      let updatedItem = {}
+      updatedItem.fname = `'${item.name}'`
+      updatedItem.cat = `'${item.category}'`
+      updatedItem.imgurl = `'${item.imgurl}'`
+      updatedItem.flimit = `${item.limit}`
+      updatedItem.price = `${item.price}`
+      updatedItems.push(updatedItem)
+    })
+    return updatedItems;
+  }
+
   const handleSaveChanges = () => {
     // API call to patch new changes
+    let updatedData = {
+      foodLimitPrice: getChanges(),
+      minamt: minAmt
+    }
+
+    const url = `http://localhost:5000/api/restaurants/'${restaurantName}'/menu`
+    Axios.put(url, updatedData)
+      .then((response) => {
+        console.log(response.data)
+      })
+      .catch((error) => {
+        console.log("Error updating menu:", error)
+      })
+
     // if success
     setSaveChanges(true);
   };
+
+
 
   return (
     <>

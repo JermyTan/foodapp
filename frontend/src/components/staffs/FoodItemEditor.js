@@ -6,7 +6,8 @@ import "styles/FoodItem.scss";
 function FoodItemEditor(props) {
   return (
     <Item>
-      <Item.Image src={require("images/curry-chicken.jpg")} />
+      {/* <Item.Image src={require("images/curry-chicken.jpg")} /> */}
+      <Item.Image src={props.imgurl} />
 
       <Item.Content>
         <Item.Header
@@ -48,6 +49,20 @@ function FoodItemEditor(props) {
             }}
           />
         </Item.Extra>
+
+        <Item.Extra>
+          <Input
+            label={<Label basic>Image url</Label>}
+            labelPosition="left"
+            value={props.imgurl}
+            size="mini"
+            onChange={(event, data) => {
+              let newImgurl = data.value;
+              props.updateFoodItem("imgurl", newImgurl, props.index);
+            }}
+          />
+        </Item.Extra>
+
         <Item.Extra>
           <NumberInput
             minValue={0}
