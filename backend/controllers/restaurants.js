@@ -101,7 +101,7 @@ exports.createRestaurant = async (req, response) => {
 
 
 // @desc    Add new food to sells table
-// @route   POST /restaurant
+// @route   POST /restaurant/:rname
 // @acess   Private
 exports.addFoodToSells = async (req, response) => {
   const { fname, price, cat, flimit, imgurl } = req.body
@@ -154,7 +154,7 @@ const groupBy = key => array =>
 // @acess   Private
 exports.viewNewOrders = async (req, response) => {
   const { rname } = req.body
-  const viewNewOrdersQuery = `SELECT O.oid, O.status, C.fname, C.quantity
+  const viewNewOrdersQuery = `SELECT O.oid, O.status, C.fname, C.quantity, C.itemprice
   FROM Orders O NATURAL JOIN Consists C
   WHERE O.rname = ${rname};`
 
@@ -169,4 +169,58 @@ exports.viewNewOrders = async (req, response) => {
       response.status(200).json(data)
     }
   })
+}
+
+// @desc    Update food daily limit/food price for a restuarant's menu
+// @route   PATCH /restaurant/rname
+// @acess   Private
+exports.updateMenu = async (req, response) => {
+  let rname = req.params.rname
+  let foodLimitPrice = req.body.foodLimitPrice
+  let restMinAmt = req.body.minamt
+  console.log("food limit and price: ", foodLimitPrice)
+  //const updateMenuItemQuery = `UPDATE Sells SET flimit = $1, price = $2, imgurl = $3 WHERE rname = $4 AND fname = $5 returning *`
+  const updateMinAmtQuery = `UPDATE Restaurants SET minamt = ${restMinAmt} WHERE fname = ${rname}`
+
+  let errorFlag = false;
+  let errorList = [];
+  for (var i = 0; i < foodLimitPrice.length; i += 1) {
+    var fooditem = foodLimitPrice[i]
+    await db.query(`UPDATE Sells SET flimit = ${fooditem.flimit}, price = ${fooditem.price}, imgurl = ${fooditem.imgurl}
+    WHERE rname = ${rname} AND fname = ${fooditem.fname} returning *`, (err, result) => {
+      if (err) {
+        errorFlag = true;
+        console.log("Some error occured for editing details for", fooditem.fname)
+        errorList.push(fooditem.fname)
+      } else {
+        console.log("Updated item details. New datails are:")
+        console.log(result.rows)
+      }
+    })
+  }
+
+  if (errorFlag) {
+    response.status(400).json({ msg: `Unable to update details for the following:`, errors: errorList })
+  }
+  response.status(200).json({ msg: "Successfully saved changes for items" })
+
+}
+
+// @desc    Deletes an item from the menu
+// @route   PATCH /restaurant/rname
+// @acess   Private
+exports.deleteMenuItem = async (req, response) => {
+  let rname = req.params.rname
+  let fname = req.body.fname
+  const deleteMenuItemQuery = `DELETE FROM Sells WHERE rname = ${rname} AND fname = ${fname}`
+
+  db.query(deleteMenuItemQuery, (err, result) => {
+    if (err) {
+      console.log("Error:", err.stack)
+      response.status(400).json({ msg: `Failed to delete ${fname} from menu of ${rname}` })
+    } else {
+      response.status(200).json({ msg: `Successfully deleted ${fname} from menu of ${rname}` })
+    }
+  })
+
 }
