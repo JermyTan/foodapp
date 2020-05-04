@@ -11,7 +11,8 @@ const {
   getRider,
   createRider,
   getRiderOrders,
-  getRiderSalary
+  getRiderSalary,
+  getRiderSchedule
   // updateRiders,
   // deleteRiders
 } = require('../controllers/riders');
@@ -32,5 +33,8 @@ router.route('/:id/orders')
 
 router.route('/:id/salary')
   .get(getRiderSalary);
+
+router.route('/:id/schedule')
+  .get(getRiderSchedule);
 
 module.exports = router;

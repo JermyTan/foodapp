@@ -42,7 +42,6 @@ exports.getRider = async (req, response) => {
 // @desc    Get a rider's past monthly or weekly salary (depending on ft or pt resp)
 // @route   GET /riders/:id/salary
 // @access   Private
-// TODO: WIP
 exports.getRiderSalary = async (req, response) => {
   const id = req.params.id
   const getRiderSalaryQuery = 
@@ -58,12 +57,37 @@ exports.getRiderSalary = async (req, response) => {
   const rows = await db.query(getRiderSalaryQuery, (err, result) => {
     if (err) {
       console.error(err.stack);
-      response.status(404).json(`Failed to get rider.`)
+      response.status(404).json(`Failed to get rider salary.`)
     } else {
       if (!result.rows[0]) {
-        response.status(404).json(`Failed to get rider.`)
+        response.status(404).json(`Failed to get rider salary.`)
       } else {
-        console.log('Successfully get rider')
+        console.log('Successfully get rider salary')
+        response.status(200).json(result.rows)
+      }
+    }
+  })
+}
+
+// @desc    Get a rider's schedule
+// @route   GET /riders/:id/schedule
+// @access   Private
+exports.getRiderSchedule = async (req, response) => {
+  const id = req.params.id
+  const getRiderSalaryQuery = 
+  `SELECT sc_date, lower(timerange) AS st_time, upper(timerange) AS e_time
+    FROM CombinedScheduleTable
+    WHERE id = ${id}
+    ORDER BY sc_date;`
+  const rows = await db.query(getRiderSalaryQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json(`Failed to get rider schedule.`)
+    } else {
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to get rider schedule.`)
+      } else {
+        console.log('Successfully get rider schedule')
         response.status(200).json(result.rows)
       }
     }
