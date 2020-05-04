@@ -23,7 +23,7 @@ exports.getCustomers = async (req, response) => {
 // @route   POST /customers
 // @acess   Private
 exports.createCustomer = async (req, response) => {
-  const { email, name, cardnum } = req.body
+  const { email, name, cardnum, joindate } = req.body
   const checkCustomerEmailQuery = `SELECT * FROM Users WHERE email = ${email}`
   const createCustomerQuery =
     `BEGIN;
@@ -32,8 +32,8 @@ exports.createCustomer = async (req, response) => {
     INSERT INTO Users (email, name)
     VALUES(${email}, ${name}) RETURNING id;
 
-    INSERT INTO Customers (id, rpoints, cardNum)
-    VALUES((SELECT currval('users_id_seq')), 0, (SELECT NULLIF(${cardnum}, 0))) RETURNING *;
+    INSERT INTO Customers (id, rpoints, cardNum, joindate)
+    VALUES((SELECT currval('users_id_seq')), 0, (SELECT NULLIF(${cardnum}, 0)), ${joindate}) RETURNING *;
 
     COMMIT;`
 
@@ -107,7 +107,7 @@ exports.getCustomerOrders = async (req, response) => {
     AS order
     FROM Orders O
     WHERE O.cid = ${cid}
-    ORDER BY O.odatetime
+    ORDER BY O.odatetime DESC
     ;`
 
   const rows = await db.query(getCustomerOrdersQuery, async (err, result) => {
@@ -115,7 +115,12 @@ exports.getCustomerOrders = async (req, response) => {
       console.error(err.stack);
       response.status(404).json(`Failed to get customer's orders.`)
     } else {
-      response.status(200).json(result.rows)
+      console.log(result.rows)
+      let allCustomerOrders = []
+      result.rows.forEach(item => {
+        allCustomerOrders.push(item.order)
+      })
+      response.status(200).json(allCustomerOrders)
       // console.log("Result.rows for order id:", result.rows);
       // const orderItemsPromises = await result.rows.map(async orderJson => {
       //   //console.log("order json", orderJson);
