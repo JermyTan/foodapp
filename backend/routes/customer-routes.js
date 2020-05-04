@@ -10,7 +10,10 @@ const {
   getCustomers,
   getCustomer,
   createCustomer,
-  getCustomerOrders
+  getCustomerOrders,
+  addOrderReview,
+  addOrderRating,
+  updateCustomerCard
   // updateCustomer,
   // deleteCustomer
 } = require('../controllers/customers');
@@ -23,10 +26,16 @@ router
 
 router.route('/:id')
   .get(getCustomer)
-// .put(updateCustomer)
+  .put(updateCustomerCard)
 //   .delete(deleteCustomer);
 
 router.route('/:id/orders')
   .get(getCustomerOrders)
+
+router.route('/review')
+  .post(addOrderReview)
+
+router.route('/rating')
+  .post(addOrderRating)
 
 module.exports = router;

@@ -98,7 +98,7 @@ exports.createOrder = async (req, response) => {
                                                 }
                                             })
                                         }
-                                        response.status(200).json({ msg: `Successfully created order with oid ${oid}` })
+                                        response.status(200).json({ msg: `Successfully created order with ${oid}` })
                                     }
                                 }
                             });

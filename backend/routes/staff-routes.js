@@ -10,6 +10,7 @@ const {
   // getStaffs,
   // getStaff,
   createStaff,
+  getStaffRestaurant
   // updateCustomer,
   // deleteCustomer
 } = require('../controllers/staffs');
@@ -21,6 +22,7 @@ router
   .post(createStaff);
 
 router.route('/:id')
+  .get(getStaffRestaurant)
 // .get(getStaff)
 // .put(updateCustomer)
 //   .delete(deleteCustomer);
