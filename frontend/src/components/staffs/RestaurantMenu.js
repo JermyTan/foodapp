@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Item, Button, Message } from "semantic-ui-react";
+import { Item, Button, Message, Container, Form, Input, Label } from "semantic-ui-react";
 import FoodItemEditor from "./FoodItemEditor";
 import NewItemButton from "./NewItemButton";
+import Axios from "axios";
 
 const data = [
   {
@@ -48,12 +49,34 @@ function RestaurantMenu() {
   const [restaurantName, setRestaurantName] = useState("");
   const [restaurantFoodItems, setRestaurantFoodItems] = useState([]);
   const [saveChanges, setSaveChanges] = useState(false);
+  const [minAmt, setMinAmt] = useState(0);
+  let staffid = 19
 
   useEffect(() => {
-    // retrieve the restaurant name under this staff
-    setRestaurantName(rname);
-    // retrieve restaurant data
-    setRestaurantFoodItems(data);
+    const url = `http://localhost:5000/api/staffs/${staffid}`
+
+    Axios.get(url)
+      .then((response) => {
+        let rname = response.data.rname
+        setRestaurantName(rname);
+        const url2 = `http://localhost:5000/api/restaurants/'${rname}'/menu`
+        Axios.get(url2)
+          .then((response) => {
+            let minamt = response.data.minamt
+            let menu = response.data.menu
+            setRestaurantFoodItems(menu)
+          })
+          .catch((error) => {
+            console.log("Error", error)
+          })
+      })
+      .catch((error) => {
+        console.log("Error", error)
+      })
+
+    // setRestaurantName(rname);
+    // // retrieve restaurant data
+    // setRestaurantFoodItems(data);
   }, []);
 
   const updateFoodItem = (key, value, index) => {
@@ -106,6 +129,24 @@ function RestaurantMenu() {
         </span>
       </div>
 
+      <Container>
+        <Form>
+          <Form.Field inline>
+            <label>Min order amount</label>
+            <Input type="number"
+              label={<Label basic>$</Label>}
+              labelPosition="left"
+              value={minAmt}
+              size="mini"
+              onChange={(event, data) => {
+                let newMinAmt = Number(Number(data.value).toFixed(2));
+                setMinAmt(newMinAmt);
+              }} />
+          </Form.Field>
+        </Form>
+
+      </Container>
+
       <Item.Group divided>
         {restaurantFoodItems.map((value, index) => {
           return (
@@ -116,6 +157,7 @@ function RestaurantMenu() {
               price={value.price}
               category={value.category}
               limit={value.limit}
+              imgurl={value.imgurl}
               updateFoodItem={updateFoodItem}
               deleteFoodItem={deleteFoodItem}
             />

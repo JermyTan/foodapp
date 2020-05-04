@@ -8,6 +8,7 @@ function NewItemButton(props) {
   const [price, setPrice] = useState(0);
   const [category, setCategory] = useState("");
   const [limit, setLimit] = useState(0);
+  const [imgurl, setImgurl] = useState("");
 
   const updateFoodItem = (key, value) => {
     switch (key) {
@@ -23,6 +24,8 @@ function NewItemButton(props) {
       case "limit":
         setLimit(value);
         break;
+      case "imgurl":
+        setImgurl(value);
       default:
         console.log("Unknown key in creating new food item");
     }
