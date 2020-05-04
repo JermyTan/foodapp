@@ -88,7 +88,8 @@ exports.createOrder = async (req, response) => {
                                         for (var i = 0; i < foodlist.length; i += 1) {
                                             var food = foodlist[i]
                                             console.log("Food:", food)
-                                            db.query(`INSERT INTO Consists (oid, fname, quantity) VALUES (${oid}, ${food.fname}, ${food.qty}) returning *;`, (err, result2) => {
+                                            db.query(`INSERT INTO Consists (oid, fname, quantity, itemprice) VALUES (${oid}, ${food.fname}, ${food.qty}, ${food.itemprice})
+                                            returning *;`, (err, result2) => {
                                                 if (err) {
                                                     console.log("Some error occured for adding ", food.fname)
                                                     console.log(err.stack)
@@ -98,7 +99,7 @@ exports.createOrder = async (req, response) => {
                                                 }
                                             })
                                         }
-                                        response.status(200).json({ msg: `Successfully created order with ${oid}` })
+                                        response.status(200).json({ msg: `Successfully created order with oid ${oid}` })
                                     }
                                 }
                             });

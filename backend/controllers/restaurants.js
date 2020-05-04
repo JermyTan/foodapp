@@ -104,7 +104,8 @@ exports.createRestaurant = async (req, response) => {
 // @route   POST /restaurant
 // @acess   Private
 exports.addFoodToSells = async (req, response) => {
-  const { fname, rname, price, cat, flimit, imgurl } = req.body
+  const { fname, price, cat, flimit, imgurl } = req.body
+  const rname = req.params.rname
   const addFoodToSellsQuery =
     `BEGIN;
     SET CONSTRAINTS ALL DEFERRED;

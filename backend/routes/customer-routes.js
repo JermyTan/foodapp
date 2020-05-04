@@ -14,8 +14,6 @@ const {
   addOrderReview,
   addOrderRating,
   updateCustomerCard
-  // updateCustomer,
-  // deleteCustomer
 } = require('../controllers/customers');
 
 // map routes to controller
@@ -27,7 +25,6 @@ router
 router.route('/:id')
   .get(getCustomer)
   .put(updateCustomerCard)
-//   .delete(deleteCustomer);
 
 router.route('/:id/orders')
   .get(getCustomerOrders)

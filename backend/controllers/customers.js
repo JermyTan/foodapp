@@ -111,7 +111,7 @@ exports.getCustomerOrders = async (req, response) => {
   const cid = req.params.id
 
   //scalar subquery to obtain individual prices of items sold by a restaurant
-  const getItemPriceQuery = `SELECT price FROM Sells S WHERE S.rname = O.rname AND S.fname = C.fname`
+  //const getItemPriceQuery = `SELECT price FROM Sells S WHERE S.rname = O.rname AND S.fname = C.fname`
 
   const getCustomerOrdersQuery =
     `SELECT json_build_object(
@@ -122,7 +122,7 @@ exports.getCustomerOrders = async (req, response) => {
     'rname', rname,
     'odatetime', odatetime,
     'status', status,
-    'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', (${getItemPriceQuery})))
+    'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', itemprice))
               FROM Consists C
               WHERE C.oid = O.oid))
     AS order
