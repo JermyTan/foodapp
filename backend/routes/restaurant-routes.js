@@ -13,7 +13,8 @@ const {
   addFoodToSells,
   viewNewOrders,
   updateMenu,
-  deleteMenuItem
+  deleteMenuItem,
+  getStaffMenu
   // updateRestaurant,
   // deleteRestaurant
 } = require('../controllers/restaurants');
@@ -30,7 +31,8 @@ router.route('/:rname')
 router.route('/:rname/menu')
   .post(addFoodToSells)
   .put(updateMenu)
-  .delete(deleteMenuItem);
+  .delete(deleteMenuItem)
+  .get(getStaffMenu);
 
 // .put(updateRestaurant)
 // .delete(deleteRestaurant);

@@ -171,6 +171,49 @@ exports.viewNewOrders = async (req, response) => {
   })
 }
 
+// @desc    Get staff menu
+// @route   GET /restaurants/:rname/menu
+// @acess   Private
+exports.getStaffMenu = async (req, response) => {
+  let rname = req.params.rname
+  const getMenuQuery = `SELECT *
+    FROM Sells S NATURAL JOIN Food
+    WHERE S.rname = ${rname}
+    ORDER BY S.fname
+    ;`
+
+  db.query(getMenuQuery, (err, result) => {
+    if (err) {
+      console.log(err.stack)
+      response.status(404).json('Unable to view orders.')
+    } else {
+      console.log(result.rows)
+      //data processing
+      let menuData = [];
+      result.rows.forEach(item => {
+        let menuItem = {};
+        menuItem.name = item.fname
+        menuItem.price = parseFloat(item.price)
+        menuItem.limit = parseInt(item.flimit)
+        menuItem.imgurl = item.imgurl
+        menuItem.category = item.cat
+        menuData.push(menuItem)
+      })
+
+      db.query(`SELECT minamt FROM Restaurants WHERE rname = ${rname}`, (err, result2) => {
+        if (err) {
+          console.log(`Error occured retrieving min amt from ${rname}:`)
+          response.status(200).json({ msg: `Error occured retrieving min amt from ${rname}:` });
+        } else {
+          console.log("Get min order amt:", result2.rows)
+          let minamt = result2.rows[0].minamt
+          response.status(200).json({ menu: menuData, minamt: minamt });
+        }
+      })
+    }
+  })
+}
+
 // @desc    Update food daily limit/food price for a restuarant's menu
 // @route   PATCH /restaurant/rname
 // @acess   Private
@@ -178,31 +221,43 @@ exports.updateMenu = async (req, response) => {
   let rname = req.params.rname
   let foodLimitPrice = req.body.foodLimitPrice
   let restMinAmt = req.body.minamt
-  console.log("food limit and price: ", foodLimitPrice)
   //const updateMenuItemQuery = `UPDATE Sells SET flimit = $1, price = $2, imgurl = $3 WHERE rname = $4 AND fname = $5 returning *`
-  const updateMinAmtQuery = `UPDATE Restaurants SET minamt = ${restMinAmt} WHERE fname = ${rname}`
+  const updateMinAmtQuery = `UPDATE Restaurants SET minamt = ${restMinAmt} WHERE rname = ${rname} returning *`
 
   let errorFlag = false;
   let errorList = [];
-  for (var i = 0; i < foodLimitPrice.length; i += 1) {
-    var fooditem = foodLimitPrice[i]
-    await db.query(`UPDATE Sells SET flimit = ${fooditem.flimit}, price = ${fooditem.price}, imgurl = ${fooditem.imgurl}
-    WHERE rname = ${rname} AND fname = ${fooditem.fname} returning *`, (err, result) => {
-      if (err) {
-        errorFlag = true;
-        console.log("Some error occured for editing details for", fooditem.fname)
-        errorList.push(fooditem.fname)
-      } else {
-        console.log("Updated item details. New datails are:")
-        console.log(result.rows)
-      }
-    })
-  }
 
-  if (errorFlag) {
-    response.status(400).json({ msg: `Unable to update details for the following:`, errors: errorList })
-  }
-  response.status(200).json({ msg: "Successfully saved changes for items" })
+  db.query(updateMinAmtQuery, async (err, result) => {
+    if (err) {
+      console.log("Error updating min amount", err.stack)
+      response.status(400).json({ msg: `Unable to update min amt for ${rname}` })
+    } else {
+      for (var i = 0; i < foodLimitPrice.length; i += 1) {
+        var fooditem = foodLimitPrice[i]
+        console.log("food item:", fooditem)
+
+        db.query(`    
+        UPDATE Sells SET flimit = ${fooditem.flimit}, price = ${fooditem.price}, imgurl = ${fooditem.imgurl}
+         WHERE rname = ${rname} AND fname = ${fooditem.fname} returning *`, (err2, result2) => {
+          if (err2) {
+            errorFlag = true;
+            console.log("Some error occured for editing details for", fooditem.fname)
+            console.log(err2.stack)
+            errorList.push(fooditem.fname)
+          } else {
+            console.log("Updated item details. New datails are:")
+            console.log(result2.rows)
+          }
+        })
+      }
+      if (errorFlag) {
+        response.status(400).json({ msg: `Unable to update details for the following:`, errors: errorList })
+      } else {
+        response.status(200).json({ msg: "Successfully saved changes for items" })
+      }
+    }
+
+  })
 
 }
 
