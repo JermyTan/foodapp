@@ -58,8 +58,8 @@ function PromotionCard(props) {
                   checkTime() === 1
                     ? "red"
                     : checkTime() === 2
-                    ? "grey"
-                    : "green"
+                      ? "grey"
+                      : "green"
                 }
                 style={{ marginLeft: "1000px" }}
               >

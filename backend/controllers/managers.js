@@ -45,3 +45,64 @@ exports.createManager = async (req, response) => {
   })
 }
 
+// @desc    Get customer summary
+// @route   GET /manager/summary
+// @acess   Public
+exports.getCustomerSummary = async (req, response) => {
+  const getSummaryQuery =
+    `SELECT json_build_object(
+  'id', C.id,
+  'name', U.name,
+  'numOrder', COUNT(*),
+  'totalCost', SUM(O.fprice)
+  )
+  AS customersummary
+  FROM (Customers C NATURAL JOIN Users U) JOIN Orders O ON (C.id = O.cid)
+  GROUP BY C.id, U.name
+  ;`
+
+  const rows = await db.query(getSummaryQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      throw err
+    } else {
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to get customer data.`)
+      } else {
+        console.log('Successfully get customer data')
+        response.status(200).json(result.rows)
+      }
+    }
+  })
+}
+
+// @desc    Get total customer, order summary
+// @route   GET /manager/summary
+// @acess   Public
+exports.getGeneralSummary = async (req, response) => {
+  const getSummaryQuery =
+    `SELECT json_build_object(
+  'id', C.id,
+  'name', U.name,
+  'numOrder', COUNT(*),
+  'totalCost', SUM(O.fprice)
+  )
+  AS customersummary
+  FROM (Customers C NATURAL JOIN Users U) JOIN Orders O ON (C.id = O.cid)
+  GROUP BY C.id, U.name
+  ;`
+
+  const rows = await db.query(getSummaryQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      throw err
+    } else {
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to get customer data.`)
+      } else {
+        console.log('Successfully get customer data')
+        response.status(200).json(result.rows)
+      }
+    }
+  })
+}
