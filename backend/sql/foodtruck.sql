@@ -189,6 +189,7 @@ CREATE TABLE Consists (
     oid         INTEGER REFERENCES Orders ON DELETE CASCADE,
     fname       VARCHAR REFERENCES Food,
     quantity    INTEGER NOT NULL,
+    itemprice   FLOAT NOT NULL,
     CHECK (quantity > 0)
 );
 

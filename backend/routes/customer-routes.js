@@ -10,9 +10,10 @@ const {
   getCustomers,
   getCustomer,
   createCustomer,
-  getCustomerOrders
-  // updateCustomer,
-  // deleteCustomer
+  getCustomerOrders,
+  addOrderReview,
+  addOrderRating,
+  updateCustomerCard
 } = require('../controllers/customers');
 
 // map routes to controller
@@ -23,10 +24,15 @@ router
 
 router.route('/:id')
   .get(getCustomer)
-// .put(updateCustomer)
-//   .delete(deleteCustomer);
+  .put(updateCustomerCard)
 
 router.route('/:id/orders')
   .get(getCustomerOrders)
+
+router.route('/review')
+  .post(addOrderReview)
+
+router.route('/rating')
+  .post(addOrderRating)
 
 module.exports = router;

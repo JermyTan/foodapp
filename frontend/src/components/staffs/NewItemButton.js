@@ -8,6 +8,7 @@ function NewItemButton(props) {
   const [price, setPrice] = useState(0);
   const [category, setCategory] = useState("");
   const [limit, setLimit] = useState(0);
+  const [imgurl, setImgurl] = useState("");
 
   const updateFoodItem = (key, value) => {
     switch (key) {
@@ -23,6 +24,8 @@ function NewItemButton(props) {
       case "limit":
         setLimit(value);
         break;
+      case "imgurl":
+        setImgurl(value);
       default:
         console.log("Unknown key in creating new food item");
     }
@@ -38,6 +41,7 @@ function NewItemButton(props) {
         setPrice(0);
         setCategory("");
         setLimit(0);
+        setImgurl("https://platerate.com/images/tempfoodnotext.png");
       }}
       onClose={() => setModalOpened(false)}
       trigger={
@@ -53,6 +57,7 @@ function NewItemButton(props) {
             price={price}
             category={category}
             limit={limit}
+            imgurl={imgurl}
             updateFoodItem={updateFoodItem}
           />
         </Item.Group>
@@ -70,10 +75,11 @@ function NewItemButton(props) {
           disabled={!isValid}
           onClick={() => {
             props.createFoodItem({
-              name: name,
-              price: price,
-              category: category,
-              limit: limit,
+              name: `'${name}'`,
+              price: `'${price}'`,
+              category: `'${category}'`,
+              limit: `${limit}`,
+              imgurl: `'${imgurl}'`
             });
             setModalOpened(false);
           }}

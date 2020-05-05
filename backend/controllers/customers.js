@@ -83,6 +83,27 @@ exports.getCustomer = async (req, response) => {
   })
 }
 
+// @desc    Update a customer's card details
+// @route   PUT /customers/:id
+// @acess   Private
+exports.updateCustomerCard = async (req, response) => {
+  let cardnum = req.body.cardnum
+  let id = req.params.id
+  const rows = await db.query('UPDATE Customers SET cardnum = NULLIF($1, 0) WHERE id = $2 returning *', [cardnum, id], (err, result) => {
+    if (err) {
+      console.error(err.stack);
+    } else {
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to update cardnum for customer ${id}`)
+      } else {
+        console.log(`Successfully updated customer ${id} card number`)
+        response.status(200).json({ msg: `Successfully updated customer ${id} card number` })
+      }
+    }
+  })
+}
+
+
 // @desc    Get all orders and related information made by a customer
 // @route   GET /customer/:id/orders
 // @acess   Private
@@ -90,7 +111,7 @@ exports.getCustomerOrders = async (req, response) => {
   const cid = req.params.id
 
   //scalar subquery to obtain individual prices of items sold by a restaurant
-  const getItemPriceQuery = `SELECT price FROM Sells S WHERE S.rname = O.rname AND S.fname = C.fname`
+  //const getItemPriceQuery = `SELECT price FROM Sells S WHERE S.rname = O.rname AND S.fname = C.fname`
 
   const getCustomerOrdersQuery =
     `SELECT json_build_object(
@@ -101,7 +122,7 @@ exports.getCustomerOrders = async (req, response) => {
     'rname', rname,
     'odatetime', odatetime,
     'status', status,
-    'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', (${getItemPriceQuery})))
+    'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', itemprice))
               FROM Consists C
               WHERE C.oid = O.oid))
     AS order
@@ -121,29 +142,61 @@ exports.getCustomerOrders = async (req, response) => {
         allCustomerOrders.push(item.order)
       })
       response.status(200).json(allCustomerOrders)
-      // console.log("Result.rows for order id:", result.rows);
-      // const orderItemsPromises = await result.rows.map(async orderJson => {
-      //   //console.log("order json", orderJson);
-      //   const oid = orderJson.oid
-      //   await db.query(getOrderItemsQuery, [oid], async (err, result2) => {
-      //     if (err) {
-      //       console.log(err.stack)
-      //       response.status(404).json(`Failed to get order items for ` + oid)
-      //     } else {
-      //       orderJson.items = result2.rows
-      //       console.log("orderJson", orderJson)
-      //     }
-      //   })
-      // })
-      // console.log("orderitems", orderItemsPromises)
-      // const final = await Promise.all(orderItemsPromises)
-      // console.log("FINAL", final)
-      // response.status(200).json(final)
     }
-
   })
 }
 
 
+// @desc    Post a review for a completed order, or updates an existing one
+// @route   POST /customers/review
+// @acess   Private
+exports.addOrderReview = async (req, response) => {
+  let { review, oid, reviewdatetime } = req.body
 
+  //TODO: Add trigger to check if the order is completed (status 2) before adding the review/rating
+  const addReviewQuery = `INSERT INTO Reviews (review, oid, reviewdatetime) VALUES (${review}, ${oid}, ${reviewdatetime})
+  ON CONFLICT (oid) DO UPDATE 
+  SET review = ${review}
+  returning *`
+
+  const rows = await db.query(addReviewQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+    } else {
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to add review for order.`)
+      } else {
+        console.log('Successfully added a review')
+        response.status(200).json({ msg: `Successfully added/updated review for order ${oid}` })
+      }
+    }
+  })
+}
+
+
+// @desc    Add a rating for a completed order, or updates an existing one
+// @route   POST /customers/rating
+// @acess   Private
+exports.addOrderRating = async (req, response) => {
+  let { rating, oid } = req.body
+
+  //TODO: Add trigger to check if the order is completed (status 2) before adding the review/rating
+  const addRatingQuery = `INSERT INTO Ratings (rating, oid) VALUES (${rating}, ${oid})
+  ON CONFLICT (oid) DO UPDATE 
+  SET rating = ${rating}
+  returning *`
+
+  const rows = await db.query(addRatingQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+    } else {
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to add rating for order.`)
+      } else {
+        console.log('Successfully added a review')
+        response.status(200).json({ msg: `Successfully added/updated rating for order ${oid}` })
+      }
+    }
+  })
+}
 

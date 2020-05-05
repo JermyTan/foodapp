@@ -11,7 +11,10 @@ const {
   getRestaurant,
   createRestaurant,
   addFoodToSells,
-  viewNewOrders
+  viewNewOrders,
+  updateMenu,
+  deleteMenuItem,
+  getStaffMenu
   // updateRestaurant,
   // deleteRestaurant
 } = require('../controllers/restaurants');
@@ -22,19 +25,14 @@ router
   .get(getRestaurants)
   .post(createRestaurant);
 
-// router.route('/:rname?start=:start&end=:end')
-
-// router.route('/:rname', function (req, res) {
-//   var start = req.param('start');
-//   var end = req.param('end');
-//   res.send(req.params);
-// }).get(getRestaurant)
-
-
 router.route('/:rname')
-  .post(addFoodToSells)
-  .get(getRestaurant)
+  .get(getRestaurant);
 
+router.route('/:rname/menu')
+  .post(addFoodToSells)
+  .put(updateMenu)
+  .delete(deleteMenuItem)
+  .get(getStaffMenu);
 
 // .put(updateRestaurant)
 // .delete(deleteRestaurant);
