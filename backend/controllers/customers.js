@@ -69,7 +69,8 @@ exports.createCustomer = async (req, response) => {
 // @route   GET /customers
 // @acess   Private
 exports.getCustomer = async (req, response) => {
-  const rows = await db.query('SELECT * FROM customers NATURAL JOIN users WHERE id = $1', [req.params.id], (err, result) => {
+  let email = req.params.email
+  const rows = await db.query('SELECT * FROM customers NATURAL JOIN users WHERE email = $1', [email], (err, result) => {
     if (err) {
       console.error(err.stack);
     } else {
