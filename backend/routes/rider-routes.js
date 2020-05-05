@@ -8,10 +8,13 @@ const router = new Router();
 // import controllers here
 const {
   getRiders,
-  // getRider,
+  getRider,
   createRider,
-  // updateCustomer,
-  // deleteCustomer
+  getRiderOrders,
+  getRiderSalary,
+  getRiderSchedule
+  // updateRiders,
+  // deleteRiders
 } = require('../controllers/riders');
 
 // map routes to controller
@@ -20,9 +23,18 @@ router
   .get(getRiders)
   .post(createRider);
 
-// router.route('/:id')
-// .get(getCustomer)
-// .put(updateCustomer)
-//   .delete(deleteCustomer);
+router.route('/:id')
+.get(getRider);
+// .put(updateRider)
+// .delete(deleteRider);
+
+router.route('/:id/orders')
+  .get(getRiderOrders);
+
+router.route('/:id/salary')
+  .get(getRiderSalary);
+
+router.route('/:id/schedule')
+  .get(getRiderSchedule);
 
 module.exports = router;
