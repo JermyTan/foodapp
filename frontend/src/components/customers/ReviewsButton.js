@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Modal, Feed } from "semantic-ui-react";
 import { format } from "date-fns";
+import Axios from "axios";
 
 const data = [
   {
@@ -96,6 +97,24 @@ const profileImages = [
 
 function ReviewsButton(props) {
   const [isModalOpened, setModalOpened] = useState(false);
+  const [reviews, setReviews] = useState([]);
+
+  useEffect(() => {
+    getReviews()
+  }, [])
+
+  const getReviews = () => {
+    const url = `http://localhost:5000/api/restaurants/'${props.rname}'/reviews`
+    Axios.get(url)
+      .then((response) => {
+        console.log(`Get reviews for ${props.rname}`, response.data)
+        setReviews(response.data)
+      })
+      .catch((error) => {
+        console.log(`Error retrieving reviews for ${props.rname}, error`);
+      })
+  }
+
 
   return (
     <Modal
@@ -115,7 +134,7 @@ function ReviewsButton(props) {
 
       <Modal.Content>
         <Feed>
-          {data.map((value, index) => {
+          {reviews.map((value, index) => {
             let image =
               profileImages[Math.floor(Math.random() * profileImages.length)];
             return (
@@ -130,7 +149,7 @@ function ReviewsButton(props) {
                     <Feed.User>{value.name}</Feed.User> reviewed on
                     <Feed.Date>
                       {format(
-                        value.reviewDatetime * 1000,
+                        value.reviewdatetime * 1000,
                         "MM/dd/yyyy hh:mm aa"
                       )}
                     </Feed.Date>

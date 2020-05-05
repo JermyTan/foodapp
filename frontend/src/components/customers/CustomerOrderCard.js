@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { Card, Button, Label, Rating } from "semantic-ui-react";
 import { format } from "date-fns";
 import NewReviewButton from "./NewReviewButton";
+import Axios from "axios";
 
 function CustomerOrderCard(props) {
   const [isExpanded, setExpanded] = useState(false);
   const order = props.order;
+  const [rating, setRating] = useState(order.rating)
 
   const getStatus = () => {
     switch (order.status) {
@@ -22,6 +24,21 @@ function CustomerOrderCard(props) {
         return ["Unknown", "black"];
     }
   };
+
+  const handleRate = (e, { rating, MaxRating }) => {
+    console.log("Rate clicked:", rating)
+    const url = `http://localhost:5000/api/customers/rating`
+    Axios.post(url, {
+      rating: `${rating}`,
+      oid: `${order.oid}`
+    })
+      .then((response) => {
+        console.log("Successfully updated rating for order", response)
+      })
+      .catch((error) => {
+        console.log("Error updating rating for order", error)
+      })
+  }
 
   return (
     <Card fluid raised color={getStatus()[1]}>
@@ -46,8 +63,11 @@ function CustomerOrderCard(props) {
                 style={{ marginLeft: "1rem", marginRight: "1rem" }}
                 oid={order.oid}
                 rname={order.rname}
+                review={order.review}
               />
-              <Rating icon="star" maxRating={5} />
+              <Rating icon="star" maxRating={5} defaultRating={rating}
+                onRate={handleRate}
+              />
             </>
           )}
 

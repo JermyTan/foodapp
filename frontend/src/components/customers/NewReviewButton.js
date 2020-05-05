@@ -1,9 +1,23 @@
 import React, { useState } from "react";
 import { Button, Label, Modal, Form } from "semantic-ui-react";
+import { getUnixTime } from 'date-fns';
+import Axios from "axios";
 
 function NewReviewButton(props) {
   const [isModalOpened, setModalOpened] = useState(false);
-  const [review, setReview] = useState("");
+  const [review, setReview] = useState(props.review);
+
+  const postOrEditReview = (reviewInfo) => {
+    const url = `http://localhost:5000/api/customers/review`
+    console.log(reviewInfo);
+    Axios.post(url, reviewInfo)
+      .then((response) => {
+        console.log("Successfully added review", response)
+      })
+      .catch((error) => {
+        console.log("Error adding review", error)
+      })
+  }
 
   return (
     <Modal
@@ -44,6 +58,11 @@ function NewReviewButton(props) {
           content="Submit"
           disabled={!review}
           onClick={() => {
+            postOrEditReview({
+              review: `'${review}'`,
+              oid: props.oid,
+              reviewdatetime: getUnixTime(new Date())
+            });
             setModalOpened(false);
           }}
         />
