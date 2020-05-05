@@ -38,7 +38,7 @@ function ManagerPromotionPage() {
             .catch(error => {
                 console.log("Error retrieving promotions:", error);
             })
-    }, [])
+    }, [url])
 
     return (
         <main className="manager-promotion-page">
