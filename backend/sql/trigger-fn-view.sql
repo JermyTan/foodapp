@@ -96,7 +96,7 @@ CREATE OR REPLACE VIEW count_daily_hourly_rider AS
 			count(*) AS cnt
 		FROM
 			st_hr_gen AS dsh
-		LEFT OUTER JOIN CombinedTable t ON sthour <@ t.timerange
+		LEFT OUTER JOIN CombinedScheduleTable t ON sthour <@ t.timerange
 	GROUP BY
 		t.yr,
 		t.wknum,

@@ -108,6 +108,8 @@ CREATE TABLE MWS (
     etime       INTEGER,
     PRIMARY KEY (id, dmy, stime, etime),
     CHECK (10 <= stime AND stime < etime AND etime <= 22),
+    CHECK ((stime = 10 AND etime = 14) OR (stime = 11 AND etime = 15) OR (stime = 12 AND etime = 16) OR (stime = 13 AND etime = 17)
+    OR (stime = 15 AND etime = 19) OR (stime = 16 AND etime = 20) OR (stime = 17 AND etime = 21) OR (stime = 18 AND etime = 22)),
     EXCLUDE USING gist (id WITH =, dmy WITH =, int4range(stime, etime) WITH &&)
 );
 
