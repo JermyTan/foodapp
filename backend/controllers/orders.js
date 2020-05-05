@@ -48,70 +48,63 @@ exports.createOrder = async (req, response) => {
     //TODO: Check that customer can only pay by card if customer has a card
 
     const { location, dfee, odatetime, paymethod, cid, rname, foodlist, fprice } = req.body;
-    const createOrderQuery = `INSERT INTO orders(location, dfee, status, fprice, odatetime, paymethod, cid, rname) 
-            VALUES(${location}, ${dfee}, 0, ${fprice}, ${odatetime}, ${paymethod}, ${cid}, ${rname}) returning *`
+    const createOrderQuery = `INSERT INTO Orders (location, dfee, status, fprice, odatetime, paymethod, cid, rname) 
+    VALUES(${location}, ${dfee}, 0, ${fprice}, ${odatetime}, ${paymethod}, ${cid}, ${rname}) RETURNING *`
 
-    const checkMinAmt = `SELECT minamt FROM Restaurants WHERE rname = ${rname}`
-    const checkCard = `SELECT cardnum FROM Customers WHERE id = ${cid}`
-
-    await db.query(checkMinAmt, (err, result) => {
+    // await db.query(checkMinAmt, (err, result) => {
+    //     if (err) {
+    //         console.error("Error:", err.stack)
+    //         response.status(404).json({ msg: `Unable to check min amt` })
+    //     } else {
+    //         console.log("Min amount: ", result.rows[0].minamt)
+    //         let minamt = result.rows.minamt
+    //         if (minamt > fprice) {
+    //             response.status(400).json({ msg: 'Min amount not met, order cannot be made' })
+    //         } else {
+    //             db.query(checkCard, (err, result2) => {
+    //                 if (err) {
+    //                     console.error(err.stack)
+    //                     response.status(404).json({ msg: `Unable to check customer card` })
+    //                 } else {
+    //                     console.log("Cardnum", result2.rows.cardnum)
+    // if (result2.rows[0].cardnum === null && paymethod == 1) {
+    //     console.log("Error: card payment selected but no card available")
+    //     response.status(400).json({ msg: `No card available for payment` })
+    // } else {
+    //passed both checks
+    await db.query(createOrderQuery, (err, result) => {
         if (err) {
             console.error(err.stack)
-            response.status(404).json({ msg: `Unable to check min amt` })
+            response.status(404).json(`Failed to create new order: Min amount not met`)
         } else {
-            let minamt = result.rows.minamt
-            if (minamt > fprice) {
-                response.status(400).json({ msg: 'Min amount not met, order cannot be made' })
+            if (!result.rows) {
+                response.status(404).json(`Failed to create new order.`)
             } else {
-                db.query(checkCard, (err, result2) => {
-                    if (err) {
-                        console.error(err.stack)
-                        response.status(404).json({ msg: `Unable to check customer card` })
-                    } else {
-                        console.log(result2.rows[0].cardnum)
-                        if (result2.rows[0].cardnum === null && paymethod == 1) {
-                            console.log("Error: card payment selected but no card available")
-                            response.status(400).json({ msg: `No card available for payment` })
+                console.log('Successfully created order')
+                console.log(result)
+                oid = result.rows[0].oid
+                console.log('Order id = ', oid)
+                for (var i = 0; i < foodlist.length; i += 1) {
+                    var food = foodlist[i]
+                    console.log("Food:", food)
+                    db.query(`INSERT INTO Consists (oid, fname, quantity, itemprice) VALUES (${oid}, ${food.fname}, ${food.qty}, ${food.itemprice})
+                        returning *;`, (err, result2) => {
+                        if (err) {
+                            console.log("Some error occured for adding ", food.fname)
+                            console.log(err.stack)
                         } else {
-                            //passed both checks
-                            db.query(createOrderQuery, (err, result) => {
-                                if (err) {
-                                    console.error(err.stack)
-                                    response.status(404).json(`Failed to create new order.`)
-                                } else {
-                                    if (!result.rows) {
-                                        response.status(404).json(`Failed to create new order.`)
-                                    } else {
-                                        console.log('Successfully created order')
-                                        oid = result.rows[0].oid
-                                        console.log('Order id = ', oid)
-                                        for (var i = 0; i < foodlist.length; i += 1) {
-                                            var food = foodlist[i]
-                                            console.log("Food:", food)
-                                            db.query(`INSERT INTO Consists (oid, fname, quantity, itemprice) VALUES (${oid}, ${food.fname}, ${food.qty}, ${food.itemprice})
-                                            returning *;`, (err, result2) => {
-                                                if (err) {
-                                                    console.log("Some error occured for adding ", food.fname)
-                                                    console.log(err.stack)
-                                                } else {
-                                                    console.log("Added item:")
-                                                    console.log(result2.rows)
-                                                }
-                                            })
-                                        }
-                                        response.status(200).json({ msg: `Successfully created order with oid ${oid}` })
-                                    }
-                                }
-                            });
+                            console.log("Added item:")
+                            console.log(result2.rows)
                         }
-                    }
-                })
-
+                    })
+                }
+                response.status(200).json({ msg: `Successfully created order with oid ${oid}` })
             }
         }
-
-    })
+    });
+    //}
 }
+
 
 // @desc    Update existing order's location
 // @route   PUT /orders/:oid
