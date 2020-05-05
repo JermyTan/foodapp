@@ -41,6 +41,7 @@ function NewItemButton(props) {
         setPrice(0);
         setCategory("");
         setLimit(0);
+        setImgurl("https://platerate.com/images/tempfoodnotext.png");
       }}
       onClose={() => setModalOpened(false)}
       trigger={
@@ -56,6 +57,7 @@ function NewItemButton(props) {
             price={price}
             category={category}
             limit={limit}
+            imgurl={imgurl}
             updateFoodItem={updateFoodItem}
           />
         </Item.Group>
@@ -73,10 +75,11 @@ function NewItemButton(props) {
           disabled={!isValid}
           onClick={() => {
             props.createFoodItem({
-              name: name,
-              price: price,
-              category: category,
-              limit: limit,
+              name: `'${name}'`,
+              price: `'${price}'`,
+              category: `'${category}'`,
+              limit: `${limit}`,
+              imgurl: `'${imgurl}'`
             });
             setModalOpened(false);
           }}

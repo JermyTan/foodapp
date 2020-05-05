@@ -104,20 +104,20 @@ exports.createRestaurant = async (req, response) => {
 // @route   POST /restaurant/:rname
 // @acess   Private
 exports.addFoodToSells = async (req, response) => {
-  const { fname, price, cat, flimit, imgurl } = req.body
+  const { name, price, category, limit, imgurl } = req.body
   const rname = req.params.rname
   const addFoodToSellsQuery =
     `BEGIN;
     SET CONSTRAINTS ALL DEFERRED;
     INSERT INTO Food
     SELECT * FROM 
-    (SELECT ${fname}, ${cat}) AS tmp 
-    WHERE NOT EXISTS (SELECT fname FROM Food WHERE fname = ${fname})
+    (SELECT ${name}, ${category}) AS tmp 
+    WHERE NOT EXISTS (SELECT fname FROM Food WHERE fname = ${name})
     LIMIT 1
     returning *;
 
     INSERT INTO Sells (fname, rname, flimit, price, imgurl)
-    VALUES(${fname}, ${rname}, ${flimit}, ${price}, ${imgurl})
+    VALUES(${name}, ${rname}, ${limit}, ${price}, ${imgurl})
     returning *;
     COMMIT;`
   const rows = await db.query(addFoodToSellsQuery, (err, result) => {
@@ -126,13 +126,13 @@ exports.addFoodToSells = async (req, response) => {
       if (err.constraint === 'sells_pkey') {
         response.status(400).json('Record already exists.')
       } else {
-        response.status(500).json('Unable to add food. Please try again.')
+        response.status(400).json('Unable to add food. Please try again.')
       }
     } else {
       console.log("RESULT", result)
       if (result[3].rows) {
         console.log(result[3].rows)
-        response.status(404).json(result[3].rows)
+        response.status(200).json(result[3].rows)
       } else {
         console.log('Failed to add new record in sells')
         response.status(400).json(`Failed to add new record in sells`)
@@ -262,11 +262,12 @@ exports.updateMenu = async (req, response) => {
 }
 
 // @desc    Deletes an item from the menu
-// @route   PATCH /restaurant/rname
+// @route   DELETE /restaurant/rname
 // @acess   Private
 exports.deleteMenuItem = async (req, response) => {
   let rname = req.params.rname
   let fname = req.body.fname
+  console.log("fname", fname)
   const deleteMenuItemQuery = `DELETE FROM Sells WHERE rname = ${rname} AND fname = ${fname}`
 
   db.query(deleteMenuItemQuery, (err, result) => {
@@ -274,6 +275,7 @@ exports.deleteMenuItem = async (req, response) => {
       console.log("Error:", err.stack)
       response.status(400).json({ msg: `Failed to delete ${fname} from menu of ${rname}` })
     } else {
+      console.log(result)
       response.status(200).json({ msg: `Successfully deleted ${fname} from menu of ${rname}` })
     }
   })

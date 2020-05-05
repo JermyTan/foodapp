@@ -53,27 +53,27 @@ function RestaurantMenu() {
   let staffid = 19
 
   useEffect(() => {
-    const url = `http://localhost:5000/api/staffs/${staffid}`
-
-    Axios.get(url)
-      .then((response) => {
-        let rname = response.data.rname
-        setRestaurantName(rname);
-        const url2 = `http://localhost:5000/api/restaurants/'${rname}'/menu`
-        Axios.get(url2)
-          .then((response) => {
-            let minamt = response.data.minamt
-            let menu = response.data.menu
-            setRestaurantFoodItems(menu)
-            setMinAmt(minamt)
-          })
-          .catch((error) => {
-            console.log("Error", error)
-          })
-      })
-      .catch((error) => {
-        console.log("Error", error)
-      })
+    // const url = `http://localhost:5000/api/staffs/${staffid}`
+    fetchData();
+    // Axios.get(url)
+    //   .then((response) => {
+    //     let rname = response.data.rname
+    //     setRestaurantName(rname);
+    //     const url2 = `http://localhost:5000/api/restaurants/'${rname}'/menu`
+    //     Axios.get(url2)
+    //       .then((response) => {
+    //         let minamt = response.data.minamt
+    //         let menu = response.data.menu
+    //         setRestaurantFoodItems(menu)
+    //         setMinAmt(minamt)
+    //       })
+    //       .catch((error) => {
+    //         console.log("Error", error)
+    //       })
+    //   })
+    //   .catch((error) => {
+    //     console.log("Error", error)
+    //   })
 
     // setRestaurantName(rname);
     // // retrieve restaurant data
@@ -95,14 +95,61 @@ function RestaurantMenu() {
     setRestaurantFoodItems(clone);
   };
 
-  const deleteFoodItem = (index) => {
-    let clone = [...restaurantFoodItems];
-    clone.splice(index, 1);
-    setRestaurantFoodItems(clone);
+  const fetchData = () => {
+    const url = `http://localhost:5000/api/staffs/${staffid}`
+    Axios.get(url)
+      .then((response) => {
+        let rname = response.data.rname
+        setRestaurantName(rname);
+        const url2 = `http://localhost:5000/api/restaurants/'${rname}'/menu`
+        Axios.get(url2)
+          .then((response) => {
+            let minamt = response.data.minamt
+            let menu = response.data.menu
+            setRestaurantFoodItems(menu)
+            setMinAmt(minamt)
+          })
+          .catch((error) => {
+            console.log("Error", error)
+          })
+      })
+      .catch((error) => {
+        console.log("Error", error)
+      })
+  }
+
+  // const deleteFoodItem = (index) => {
+  const deleteFoodItem = (name) => {
+    console.log("Delete this item:", name)
+    const url = `http://localhost:5000/api/restaurants/'${restaurantName}'/menu`
+    Axios.delete(url,
+      { data: { fname: `'${name}'` } })
+      .then((response) => {
+        console.log("Deleted item from menu:", response.data);
+        fetchData();
+      })
+      .catch((error) => {
+        console.log("Error occurred deleting item from menu", error);
+      })
+    //let clone = [...restaurantFoodItems];
+    //clone.splice(index, 1);
+    //setRestaurantFoodItems(clone);
   };
 
   const createFoodItem = (foodItem) => {
-    setRestaurantFoodItems([foodItem].concat(restaurantFoodItems));
+    const url = `http://localhost:5000/api/restaurants/'${restaurantName}'/menu`
+    console.log(foodItem)
+    Axios.post(url, foodItem)
+      .then((response) => {
+        console.log(response)
+        console.log("Item successfully added to the menu")
+        fetchData()
+      })
+      .catch((error) => {
+        console.log("An error occured while adding new item to the menu")
+        console.log(error.data)
+      })
+    //setRestaurantFoodItems([foodItem].concat(restaurantFoodItems));
   };
 
   //parses data in menu
@@ -144,6 +191,16 @@ function RestaurantMenu() {
 
   return (
     <>
+      {/* <Modal
+        open={deleteFoodItem}
+        onClose={() => deleteFoodItem(false)}
+        trigger={
+          <Button color="teal" onClick={() => deleteFoodItem(true)} icon="plus" />
+        }
+      >
+        <Modal.Header>Confirm delete menu item</Modal.Header>
+      </Modal> */}
+
       {saveChanges && (
         <Message
           success

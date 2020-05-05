@@ -1,9 +1,11 @@
-import React from "react";
-import { Item, Label, Input, Button } from "semantic-ui-react";
+import React, { useState } from "react";
+import { Item, Label, Input, Button, Modal } from "semantic-ui-react";
 import NumberInput from "semantic-ui-react-numberinput";
 import "styles/FoodItem.scss";
 
 function FoodItemEditor(props) {
+  const [isModalOpened, setModalOpened] = useState(false);
+
   return (
     <Item>
       {/* <Item.Image src={require("images/curry-chicken.jpg")} /> */}
@@ -74,14 +76,48 @@ function FoodItemEditor(props) {
             className="number-input"
           />
           {props.deleteFoodItem && (
-            <Button
-              floated="right"
-              icon="close"
-              color="red"
-              onClick={() => {
-                props.deleteFoodItem(props.index);
-              }}
-            />
+            <Modal
+              open={isModalOpened}
+              onClose={() => setModalOpened(false)}
+              trigger={
+                <Button color="red"
+                  floated="right"
+                  color="red"
+                  icon="close"
+                  onClick={() => setModalOpened(true)} />
+              }
+            >
+              <Modal.Header>Confirm delete menu item?</Modal.Header>
+              <Modal.Content>
+                Confirm delete {props.name} from the menu?
+                This cannot be undone.
+                </Modal.Content>
+              <Modal.Actions>
+                <Button
+                  color="red"
+                  content="Cancel"
+                  onClick={() => setModalOpened(false)}
+                />
+                <Button
+                  color="green"
+                  content="Confirm"
+                  onClick={() => {
+                    props.deleteFoodItem(props.name);
+                    setModalOpened(false);
+                  }}
+                />
+              </Modal.Actions>
+
+
+            </Modal>
+            // <Button
+            //   floated="right"
+            //   icon="close"
+            //   color="red"
+            //   onClick={() => {
+            //     props.deleteFoodItem(props.name);
+            //   }}
+            // />
           )}
         </Item.Extra>
       </Item.Content>
