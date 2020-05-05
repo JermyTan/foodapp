@@ -1,3 +1,5 @@
+CREATE EXTENSION btree_gist;
+
 DROP TABLE IF EXISTS Users CASCADE;
 DROP TABLE IF EXISTS Riders CASCADE;
 DROP TABLE IF EXISTS PTRiders CASCADE;
@@ -106,7 +108,7 @@ CREATE TABLE MWS (
     etime       INTEGER,
     PRIMARY KEY (id, dmy, stime, etime),
     CHECK (10 <= stime AND stime < etime AND etime <= 22),
-    EXCLUDE USING gist (int4range(stime, etime) WITH &&)
+    EXCLUDE USING gist (id WITH =, dmy WITH =, int4range(stime, etime) WITH &&)
 );
 
 CREATE TABLE WWS (
@@ -116,7 +118,7 @@ CREATE TABLE WWS (
     etime       INTEGER,
     PRIMARY KEY (id, dmy, stime, etime),
     CHECK (10 <= stime AND stime < etime AND etime <= 22 AND etime - stime <= 4),
-    EXCLUDE USING gist (int4range(stime, etime) WITH &&)
+    EXCLUDE USING gist (id WITH =, dmy WITH =, int4range(stime, etime) WITH &&)
 );
 
 CREATE TABLE Orders (
