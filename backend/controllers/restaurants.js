@@ -44,7 +44,8 @@ exports.getRestaurant = async (req, response) => {
         HAVING S.fname = C.fname
         AND S.rname = O.rname), 0) as qtylefttoday, (${getFoodCategoriesQuery}) as categories
     FROM Sells S
-    WHERE S.rname = ${rname};`
+    WHERE S.rname = ${rname}
+    ORDER BY S.fname;`
   const row = await db.query(getRestaurantFoodQuery, (err, result) => {
     if (err) {
       console.error("Error here:", err)

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Icon, Modal, Header, Radio } from "semantic-ui-react";
 import Axios from "axios";
-import { getUnixTime } from 'date-fns'
+import { getUnixTime, parse } from 'date-fns'
 import { Redirect } from 'react-router-dom';
 
 function CheckoutButton(props) {
@@ -10,11 +10,29 @@ function CheckoutButton(props) {
   //TODO: replace these with real details of customer
   //If customer has no card, then the default cardnum is 0
   const cid = 6;
-  const cardnum = 0;
+  const cardnum = 123;
+
+  const handleTogglePayMethod = () => {
+    setPayByCard(!isPayByCard);
+  }
 
   const makeOrder = () => {
-    console.log(props.selectedFoodItems);
-    console.log(props.deliveryInfo);
+    console.log("selected food items", props.selectedFoodItems);
+    // console.log(props.deliveryInfo);
+
+    let parsedItems = [];
+    let chosenItems = props.selectedFoodItems
+    for (var key in chosenItems) {
+      if (chosenItems.hasOwnProperty(key)) {
+        let item = chosenItems[key];
+        let parsedItem = {}
+        parsedItem.fname = `'${item.name}'`
+        parsedItem.qty = `${item.quantity}`
+        parsedItem.itemprice = `${item.price}`
+        parsedItems.push(parsedItem)
+      }
+    }
+    console.log(parsedItems)
     const url = `http://localhost:5000/api/orders`
     let payMethod = isPayByCard ? 1 : 0;
     Axios.post(url, {
@@ -25,14 +43,12 @@ function CheckoutButton(props) {
       paymethod: `${payMethod}`,
       rname: `'${props.restaurant}'`,
       fprice: `${props.subtotal}`,
-      foodlist: props.selectedFoodItems
+      foodlist: parsedItems
     })
       .then((response) => {
         console.log("'Successfully created order", response)
         //setModalOpened(false);
-
-
-        //Redirect to orders page
+        //TODO: Redirect to orders page
       })
       .catch((error) => {
         console.log("Error occured while making an order")
@@ -113,7 +129,7 @@ function CheckoutButton(props) {
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           {cardnum == 0 ? `No registered card (pay by cash)` : `Pay by card`}
           <span>
-            <Radio toggle disabled={cardnum == 0}>
+            <Radio toggle disabled={cardnum == 0} onClick={handleTogglePayMethod}>
             </Radio>
           </span>
         </div>

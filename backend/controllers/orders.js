@@ -51,27 +51,6 @@ exports.createOrder = async (req, response) => {
     const createOrderQuery = `INSERT INTO Orders (location, dfee, status, fprice, odatetime, paymethod, cid, rname) 
     VALUES(${location}, ${dfee}, 0, ${fprice}, ${odatetime}, ${paymethod}, ${cid}, ${rname}) RETURNING *`
 
-    // await db.query(checkMinAmt, (err, result) => {
-    //     if (err) {
-    //         console.error("Error:", err.stack)
-    //         response.status(404).json({ msg: `Unable to check min amt` })
-    //     } else {
-    //         console.log("Min amount: ", result.rows[0].minamt)
-    //         let minamt = result.rows.minamt
-    //         if (minamt > fprice) {
-    //             response.status(400).json({ msg: 'Min amount not met, order cannot be made' })
-    //         } else {
-    //             db.query(checkCard, (err, result2) => {
-    //                 if (err) {
-    //                     console.error(err.stack)
-    //                     response.status(404).json({ msg: `Unable to check customer card` })
-    //                 } else {
-    //                     console.log("Cardnum", result2.rows.cardnum)
-    // if (result2.rows[0].cardnum === null && paymethod == 1) {
-    //     console.log("Error: card payment selected but no card available")
-    //     response.status(400).json({ msg: `No card available for payment` })
-    // } else {
-    //passed both checks
     await db.query(createOrderQuery, (err, result) => {
         if (err) {
             console.error(err.stack)
@@ -93,7 +72,7 @@ exports.createOrder = async (req, response) => {
                             console.log("Some error occured for adding ", food.fname)
                             console.log(err.stack)
                         } else {
-                            console.log("Added item:")
+                            console.log("Added item to Consists:")
                             console.log(result2.rows)
                         }
                     })
@@ -102,8 +81,9 @@ exports.createOrder = async (req, response) => {
             }
         }
     });
-    //}
+
 }
+
 
 
 // @desc    Update existing order's location
