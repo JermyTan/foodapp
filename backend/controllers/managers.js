@@ -84,12 +84,14 @@ exports.getGeneralSummary = async (req, response) => {
     `SELECT json_build_object(
   'id', C.id,
   'name', U.name,
+  'email', U.email,
+  'joindate', C.joindate,
   'numOrder', COUNT(*),
   'totalCost', SUM(O.fprice)
   )
-  AS customersummary
+  AS customerorder
   FROM (Customers C NATURAL JOIN Users U) JOIN Orders O ON (C.id = O.cid)
-  GROUP BY C.id, U.name
+  GROUP BY C.id, U.name, U.email
   ;`
 
   const rows = await db.query(getSummaryQuery, (err, result) => {

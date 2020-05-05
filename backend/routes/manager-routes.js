@@ -10,7 +10,7 @@ const {
   // getStaffs,
   // getStaff,
   createManager,
-  getCustomerSummary
+  getGeneralSummary
   // deleteCustomer
 } = require('../controllers/managers');
 
@@ -21,7 +21,7 @@ router
   .post(createManager);
 
 router.route('/summary')
-  .get(getCustomerSummary)
+  .get(getGeneralSummary)
 // .put(updateCustomer)
 //   .delete(deleteCustomer);
 
