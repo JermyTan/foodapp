@@ -101,11 +101,12 @@ CREATE TABLE Food (
 
 CREATE TABLE MWS (
     id          INTEGER REFERENCES FTRiders ON DELETE CASCADE,
-    stdom       DATE,
+    dmy         DATE,
     stime       INTEGER,
     etime       INTEGER,
-    PRIMARY KEY (id, stdom, stime, etime),
-    CHECK (10 <= stime AND stime < etime AND etime <= 22)
+    PRIMARY KEY (id, dmy, stime, etime),
+    CHECK (10 <= stime AND stime < etime AND etime <= 22),
+    EXCLUDE USING gist (int4range(stime, etime) WITH &&)
 );
 
 CREATE TABLE WWS (
@@ -114,7 +115,8 @@ CREATE TABLE WWS (
     stime       INTEGER,
     etime       INTEGER,
     PRIMARY KEY (id, dmy, stime, etime),
-    CHECK (10 <= stime AND stime < etime AND etime <= 22 AND etime - stime <= 4)
+    CHECK (10 <= stime AND stime < etime AND etime <= 22 AND etime - stime <= 4),
+    EXCLUDE USING gist (int4range(stime, etime) WITH &&)
 );
 
 CREATE TABLE Orders (
