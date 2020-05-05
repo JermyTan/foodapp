@@ -121,6 +121,8 @@ exports.getCustomerOrders = async (req, response) => {
     'dfee', dfee,
     'rname', rname,
     'odatetime', odatetime,
+    'review', COALESCE((SELECT review FROM Reviews R WHERE R.oid = O.oid), ''),
+    'rating', COALESCE((SELECT rating FROM Ratings R WHERE R.oid = O.oid), 0),
     'status', status,
     'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', itemprice))
               FROM Consists C
@@ -199,4 +201,30 @@ exports.addOrderRating = async (req, response) => {
     }
   })
 }
+
+// @desc    Gets the 5 most recent order locations of the user
+// @route   GET /customers/:id/locations
+// @acess   Private
+// exports.getRecentOrderLocations = async (req, response) => {
+//   let { rating, oid } = req.body
+
+//   //TODO: Add trigger to check if the order is completed (status 2) before adding the review/rating
+//   const addRatingQuery = `INSERT INTO Ratings (rating, oid) VALUES (${rating}, ${oid})
+//   ON CONFLICT (oid) DO UPDATE 
+//   SET rating = ${rating}
+//   returning *`
+
+//   const rows = await db.query(addRatingQuery, (err, result) => {
+//     if (err) {
+//       console.error(err.stack);
+//     } else {
+//       if (!result.rows[0]) {
+//         response.status(404).json(`Failed to add rating for order.`)
+//       } else {
+//         console.log('Successfully added a review')
+//         response.status(200).json({ msg: `Successfully added/updated rating for order ${oid}` })
+//       }
+//     }
+//   })
+// }
 
