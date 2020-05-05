@@ -48,26 +48,26 @@ SELECT
 	COALESCE((SELECT
 		EXTRACT(WEEK FROM w.dmy)), 
 		(SELECT
-		EXTRACT(WEEK FROM m.stdom))) AS wknum,
+		EXTRACT(WEEK FROM m.dmy))) AS wknum,
 	COALESCE((SELECT
 		EXTRACT(ISODOW FROM w.dmy)), (SELECT
-		EXTRACT(ISODOW FROM m.stdom))) AS dow,
+		EXTRACT(ISODOW FROM m.dmy))) AS dow,
 	COALESCE((SELECT
 		EXTRACT(MONTH FROM w.dmy)), 
 		(SELECT
-		EXTRACT(MONTH FROM m.stdom))) AS mth,
+		EXTRACT(MONTH FROM m.dmy))) AS mth,
 		COALESCE((SELECT
 		EXTRACT(YEAR FROM w.dmy)), 
 		(SELECT
-		EXTRACT(YEAR FROM m.stdom))) AS yr,
+		EXTRACT(YEAR FROM m.dmy))) AS yr,
 	CASE 
-		WHEN m.stdom IS NULL 
+		WHEN m.dmy IS NULL 
 		THEN int4range(w.stime, w.etime, '[)') 
 		ELSE int4range(m.stime, m.etime, '[)')
 	END AS timerange,
-	COALESCE(m.stdom, w.dmy) AS sc_date,
+	COALESCE(m.dmy, w.dmy) AS sc_date,
 	CASE 
-		WHEN m.stdom IS NULL 
+		WHEN m.dmy IS NULL 
 		THEN 0
 		ELSE 1
 	END AS isFT
@@ -96,7 +96,7 @@ CREATE OR REPLACE VIEW count_daily_hourly_rider AS
 			count(*) AS cnt
 		FROM
 			st_hr_gen AS dsh
-		LEFT OUTER JOIN CombinedTable t ON sthour <@ t.timerange
+		LEFT OUTER JOIN CombinedScheduleTable t ON sthour <@ t.timerange
 	GROUP BY
 		t.yr,
 		t.wknum,
@@ -140,6 +140,43 @@ CREATE OR REPLACE VIEW count_daily_hourly_rider AS
 		RiderDailyHourlyCount
 	ORDER BY yr, wknum, dow, sthour;
 
+-- Check at least 1 hour break between a part time rider's entries for the day CRUD was done on
+-- CREATE OR REPLACE FUNCTION check_wws_break()
+-- RETURNS TRIGGER
+-- AS $$
+-- DECLARE
+-- r1 record;
+-- check_id INTEGER;
+-- check_date DATE;
+-- BEGIN
+-- 	IF (TG_OP = 'UPDATE') THEN
+-- 		check_id := OLD.id;
+-- 		check_date := OLD.dmy;
+-- 	ELSE
+-- 		check_id := NEW.id;
+-- 		check_date := NEW.dmy;
+-- 	END IF;
+
+-- 	SELECT * INTO r1
+-- 	FROM wws
+-- 	WHERE wws.id = check_id
+-- 	AND wws.dmy = check_date;
+
+-- 	IF r1 IS NOT NULL THEN
+-- 		RAISE exception 'Less than 5 riders for table on table name: % for date: % for input values %', TG_TABLE_NAME, check_date, r1;
+-- 	END IF;
+-- 	RETURN NULL;
+-- END;
+-- $$ LANGUAGE plpgsql;
+
+-- Create corresponding trigger that activates on CRUD of wws
+-- CREATE CONSTRAINT TRIGGER wws_break_trigger
+-- 	AFTER INSERT OR UPDATE
+-- 	ON wws
+-- 	DEFERRABLE INITIALLY DEFERRED
+-- 	FOR EACH ROW 
+-- 	EXECUTE PROCEDURE check_wws_break();
+
 -- Checks 5 riders are assigned hourly, daily for the day
 CREATE OR REPLACE FUNCTION check_min_daily_hourly_rider_for_day()
 RETURNS TRIGGER
@@ -150,13 +187,13 @@ check_date date;
 BEGIN
 	IF (TG_OP = 'DELETE') or (TG_OP = 'UPDATE') THEN
 		IF (TG_TABLE_NAME = 'mws') THEN
-			check_date := OLD.stdom;
+			check_date := OLD.dmy;
 		ELSE
 			check_date := OLD.dmy;
 		END IF;
 	ELSE
 		IF (TG_TABLE_NAME = 'mws') THEN
-			check_date := NEW.stdom;
+			check_date := NEW.dmy;
 		ELSE
 			check_date := NEW.dmy;
 		END IF;
