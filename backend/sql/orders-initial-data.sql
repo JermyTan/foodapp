@@ -1,3 +1,5 @@
+-- NOTE: cid is hard-coded value. Look up customer table to hard code new value for cid
+
 INSERT INTO orders(location, dfee, status, fprice, odatetime, paymethod, cid, rname) 
 VALUES('Woodlands', 3.99, 2, 104.50, 1588486582, 1, 3, 'Pizza Hut');
 INSERT INTO Consists (oid, fname, quantity, itemprice) VALUES (1, 'Pepperoni Pizza', 5, 20.9);

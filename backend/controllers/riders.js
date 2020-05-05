@@ -186,6 +186,56 @@ exports.getRiderOrders = async (req, response) => {
   })
 }
 
+// @desc    Get all processing orders (ie. status = 0) that fall in rider's work schedule
+// @route   GET /riders/:id/eligible-p-orders
+// @access   Private
+exports.getProcessingOrders = async (req, response) => {
+  const rid = req.params.id
+
+  //scalar subquery to obtain individual prices of items sold by a restaurant
+  const getItemPriceQuery = `SELECT price FROM Sells S WHERE S.rname = O.rname AND S.fname = C.fname`
+
+  // Query to get all processing orders that fall in rider's work schedule
+  const getProcessingOrdersQuery =
+    `SELECT json_build_object(
+    'oid', oid,
+    'fprice', fprice,
+    'location', location,
+    'dfee', dfee,
+    'rname', rname,
+    'odatetime', odatetime,
+    'status', status,
+    'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', (${getItemPriceQuery})))
+              FROM Consists C
+              WHERE C.oid = O.oid))
+    AS order
+    FROM Orders O
+    WHERE EXISTS (
+      SELECT 1
+        FROM CombinedScheduleTable cst
+        WHERE cst.id = ${rid}
+        AND cst.timerange @> EXTRACT(HOUR from to_timestamp(O.odatetime))::int4
+        AND cst.sc_date = date_trunc('day', to_timestamp(O.odatetime))::date  
+    )
+    AND
+    o.status = 0
+    ORDER BY O.odatetime DESC;`
+
+  const rows = await db.query(getProcessingOrdersQuery, async (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json(`Failed to get eligible processing orders.`)
+    } else {
+      console.log(result.rows)
+      let allEligibleProcessingOrders = []
+      result.rows.forEach(item => {
+        allEligibleProcessingOrders.push(item.order)
+      })
+      response.status(200).json(allEligibleProcessingOrders)
+    }
+  })
+}
+
 exports.acceptOrder = async (req, response) => {
   const { rid, oid, datetime } = req.body
 }
