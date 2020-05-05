@@ -281,3 +281,25 @@ exports.deleteMenuItem = async (req, response) => {
   })
 
 }
+
+
+// @desc    Gets the reviews of a restaurant
+// @route   GET /restaurant/rname/reviews
+// @acess   Private
+exports.getRestaurantReviews = async (req, response) => {
+  let rname = req.params.rname
+  const getReviewsQuery = `SELECT review, reviewdatetime, name
+  FROM Reviews NATURAL JOIN Orders O JOIN Users U ON (O.cid = U.id)
+  WHERE O.rname = ${rname}`
+
+  db.query(getReviewsQuery, (err, result) => {
+    if (err) {
+      console.log("Error:", err.stack)
+      response.status(400).json({ msg: `Failed to retrieve reviews for ${rname}` })
+    } else {
+      console.log(result.rows)
+      response.status(200).json(result.rows)
+    }
+  })
+
+}
