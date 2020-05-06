@@ -45,52 +45,69 @@ exports.createManager = async (req, response) => {
   })
 }
 
-// @desc    Get customer summary
-// @route   GET /manager/summary
-// @acess   Public
-exports.getCustomerSummary = async (req, response) => {
-  const getSummaryQuery =
-    `SELECT json_build_object(
-  'id', C.id,
-  'name', U.name,
-  'numOrder', COUNT(*),
-  'totalCost', SUM(O.fprice)
-  )
-  AS customersummary
-  FROM (Customers C NATURAL JOIN Users U) JOIN Orders O ON (C.id = O.cid)
-  GROUP BY C.id, U.name
-  ;`
+// // @desc    Get total no. of order and total cost of these orders with filter dates
+// // @route   GET /manager/summary/orders/filtered?start=:start&end=:end
+// // @acess   Public
+// exports.getGeneralOrderSummaryFiltered = async (req, response) => {
+//   let { start, end } = req.query
+//   const rows = await db.query(
+//     `SELECT COUNT(*), SUM(fprice + dfee)
+//     FROM Orders 
+//     WHERE odatetime >= ${start} 
+//     AND odatetime <= ${end}`,
+//     (err, result) => {
+//       if (err) {
+//         console.error("Error here:", err)
+//         response.status(404).json(`Failed to get general filtered order summary.`)
+//       } else {
+//         if (!result.rows[0]) {
+//           response.status(404).json(`Failed to get filtered order data. There could be no order yet.`)
+//         } else {
+//           console.log('Successfully get filtered order data')
+//           response.status(200).json(result.rows)
+//         }
+//       }
+//     })
+// }
 
-  const rows = await db.query(getSummaryQuery, (err, result) => {
-    if (err) {
-      console.error(err.stack);
-      throw err
-    } else {
-      if (!result.rows[0]) {
-        response.status(404).json(`Failed to get customer data.`)
+// @desc    Get total no. of order and total cost of these orders
+// @route   GET /manager/summary/orders
+// @acess   Public
+exports.getGeneralOrderSummary = async (req, response) => {
+  let { start, end } = req.query
+  const rows = await db.query(
+    `SELECT COUNT(*), SUM(fprice + dfee)
+    FROM Orders`,
+    (err, result) => {
+      if (err) {
+        console.error("Error here:", err)
+        response.status(404).json(`Failed to get general order summary.`)
       } else {
-        console.log('Successfully get customer data')
-        response.status(200).json(result.rows)
+        if (!result.rows[0]) {
+          response.status(404).json(`Failed to get order data. There could be no order yet.`)
+        } else {
+          console.log('Successfully get order data')
+          response.status(200).json(result.rows)
+        }
       }
-    }
-  })
+    })
 }
 
-// @desc    Get total customer, order summary
-// @route   GET /manager/summary
+// @desc    Get customer info, no. of orders made by them and the cost
+// @route   GET /manager/summary/customers
 // @acess   Public
-exports.getGeneralSummary = async (req, response) => {
+exports.getGeneralCustomerSummary = async (req, response) => {
   const getSummaryQuery =
     `SELECT json_build_object(
   'id', C.id,
   'name', U.name,
   'email', U.email,
   'joindate', C.joindate,
-  'numOrder', COUNT(*),
-  'totalCost', SUM(O.fprice)
+  'numOrder', COUNT(O.oid),
+  'totalCost', SUM(COALESCE(O.fprice, 0))
   )
   AS customerorder
-  FROM (Customers C NATURAL JOIN Users U) JOIN Orders O ON (C.id = O.cid)
+  FROM (Customers C NATURAL JOIN Users U) LEFT JOIN Orders O ON (C.id = O.cid)
   GROUP BY C.id, U.name, U.email
   ;`
 

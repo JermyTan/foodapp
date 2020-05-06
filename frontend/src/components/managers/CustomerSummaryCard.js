@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Card, Button, Label, Rating } from "semantic-ui-react";
+import { Card, Button, Image, Icon } from "semantic-ui-react";
 import { format } from "date-fns";
 
-function CustomerCard(props) {
+function CustomerSummaryCard(props) {
     const [isExpanded, setExpanded] = useState(false);
+
     return (
         <Card fluid raised color={"teal"}>
             <Card.Content>
@@ -15,6 +16,12 @@ function CustomerCard(props) {
             </Card.Content>
             <Card.Content>
                 <Card.Header>
+                    {/* <Icon name="user" /> */}
+                    <Image
+                        floated='left'
+                        size='mini'
+                        src={`https://react.semantic-ui.com/images/avatar/large/${props.image}`}
+                    />
                     Name: {props.name}
                     <Button
                         primary
@@ -26,16 +33,22 @@ function CustomerCard(props) {
                 </Card.Header>
                 {isExpanded && (
                     <Card.Description>
-                        Email: {props.email}
+                        <Icon name="mail" />
+                        <a href>{props.email}</a>
                         <br />
-                        Total number of orders: {props.numOrder}
+                        <Icon name="calendar alternate outline" />
+                        <strong>Join Date: {format(props.joindate * 1000, "dd/MM/yyyy")}</strong>
                         <br />
-                        Total cost of orders: {props.totalCost}
+                        <Icon name="file alternate" />
+                        <strong>Total number of orders: {props.numOrder}</strong>
+                        <br />
+                        <Icon name="dollar" />
+                        <strong>Total cost of orders: {props.totalCost}</strong>
                     </Card.Description>
                 )}
             </Card.Content>
-        </Card>
+        </Card >
     );
 }
 
-export default CustomerCard;
+export default CustomerSummaryCard;

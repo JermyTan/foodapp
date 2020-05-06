@@ -10,7 +10,9 @@ const {
   // getStaffs,
   // getStaff,
   createManager,
-  getGeneralSummary
+  getGeneralCustomerSummary,
+  // getGeneralOrderSummaryFiltered,
+  getGeneralOrderSummary
   // deleteCustomer
 } = require('../controllers/managers');
 
@@ -20,9 +22,15 @@ router
   // .get(getStaffs)
   .post(createManager);
 
-router.route('/summary')
-  .get(getGeneralSummary)
+router.route('/summary/customers')
+  .get(getGeneralCustomerSummary);
 // .put(updateCustomer)
 //   .delete(deleteCustomer);
+
+// router.route('/summary/orders/filtered')
+//   .get(getGeneralOrderSummaryFiltered);
+
+router.route('/summary/orders')
+  .get(getGeneralOrderSummary);
 
 module.exports = router;
