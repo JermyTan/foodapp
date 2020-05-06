@@ -154,8 +154,6 @@ function RestaurantOrder(props) {
         </span>
       </div>
 
-      <h3>Minimum order amount required: </h3>
-
       <Item.Group divided>
         {restaurantFoodItems.map((foodItem, index) => {
           return (

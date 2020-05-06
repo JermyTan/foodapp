@@ -99,14 +99,14 @@ exports.getRiderSchedule = async (req, response) => {
 // @access   Public
 exports.createRider = async (req, response) => {
   const { email, name, isFT } = req.body
-  const checkRiderEmailQuery = `SELECT * FROM Users WHERE email = ${email}`
+  const checkRiderEmailQuery = `SELECT * FROM Users WHERE email = '${email}'`
   var riderType = Boolean(parseInt(isFT)) ? 'FTRiders' : 'PTRiders'
 
   const createRiderQuery =
     `BEGIN;
     SET CONSTRAINTS ALL DEFERRED;
     INSERT INTO Users (email, name, role)
-    VALUES(${email},${name}, 2);
+    VALUES('${email}','${name}', 2);
     
     INSERT INTO Riders (id, bsalary)
     VALUES((SELECT currval('users_id_seq')), 1000);
