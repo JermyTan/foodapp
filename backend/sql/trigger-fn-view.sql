@@ -51,23 +51,9 @@ GROUP BY id, (SELECT date_trunc('week', dldatetime));
 
 -- Combined mws and wws table
 CREATE OR REPLACE VIEW CombinedScheduleTable AS
+With UnorderedTable AS (
 SELECT
 	COALESCE(w.id, m.id) as id,
-	COALESCE((SELECT
-		EXTRACT(WEEK FROM w.dmy)), 
-		(SELECT
-		EXTRACT(WEEK FROM m.dmy))) AS wknum,
-	COALESCE((SELECT
-		EXTRACT(ISODOW FROM w.dmy)), (SELECT
-		EXTRACT(ISODOW FROM m.dmy))) AS dow,
-	COALESCE((SELECT
-		EXTRACT(MONTH FROM w.dmy)), 
-		(SELECT
-		EXTRACT(MONTH FROM m.dmy))) AS mth,
-		COALESCE((SELECT
-		EXTRACT(YEAR FROM w.dmy)), 
-		(SELECT
-		EXTRACT(YEAR FROM m.dmy))) AS yr,
 	CASE 
 		WHEN m.dmy IS NULL 
 		THEN int4range(w.stime, w.etime, '[)') 
@@ -80,8 +66,12 @@ SELECT
 		ELSE 1
 	END AS isFT
 FROM
-	wws w FULL OUTER JOIN 
+	wws w FULL OUTER JOIN
 	effective_mws m ON (w.id = m.id)
+) 
+SELECT *
+FROM UnorderedTable
+ORDER BY sc_date , lower(timerange), upper(timerange);
 ;
 
 CREATE OR REPLACE VIEW st_hr_gen AS
@@ -89,31 +79,27 @@ CREATE OR REPLACE VIEW st_hr_gen AS
 	FROM generate_series(10, 22, 1) as sthour;
 
 CREATE OR REPLACE VIEW day_gen AS
-	SELECT *
-	FROM generate_series(1, 7, 1) as dayofweek, generate_series(10, 21, 1) as starthour, generate_series(0, 53, 1) as weeknum, 
-	generate_series(1970, 2050, 1) as year;
+	SELECT t.day::date AS date, starthour
+	FROM   generate_series(timestamp '2010-01-01'
+                     , timestamp '2038-12-31'
+                     , interval  '1 day') AS t(day)
+			, generate_series(10, 21, 1) AS starthour;
 
 -- Checks the combined daily hourly count of riders for all existing entries in wws and mws 
 CREATE OR REPLACE VIEW count_daily_hourly_rider AS 
 	WITH RiderCount AS (
 		SELECT
-			t.yr AS yr,
-			t.wknum AS wknum,
-			t.dow AS dow,
-			sthour AS sthour,
+			sc_date,
+			sthour,
 			count(*) AS cnt
 		FROM
 			st_hr_gen AS dsh
 		LEFT OUTER JOIN CombinedScheduleTable t ON sthour <@ t.timerange
 	GROUP BY
-		t.yr,
-		t.wknum,
-		t.dow,
+		sc_date,
 		sthour
 	ORDER BY
-		t.yr,
-		t.wknum,
-		t.dow,
+		sc_date,
 		sthour
 	), RiderDailyHourlyCount AS (
 		SELECT
@@ -122,31 +108,27 @@ CREATE OR REPLACE VIEW count_daily_hourly_rider AS
 			RiderCount rc
 		UNION
 		SELECT
-			dg.year,
-			dg.weeknum,
-			dg.dayofweek,
+			dg.date,
 			dg.starthour,
 			0 AS cnt
 		FROM
 			day_gen dg
 		WHERE
-			(dg.year, dg.weeknum, dg.dayofweek) IN (
+			dg.date IN (
 				SELECT
-					yr, wknum, dow FROM RiderCount rc)
+					sc_date FROM RiderCount rc)
 			AND dg.starthour NOT IN(
 				SELECT
 					rc2.sthour FROM RiderCount rc2
 				WHERE
-					rc2.yr = dg.year
-					AND rc2.wknum = dg.weeknum
-					AND rc2.dow = dg.dayofweek
+					rc2.sc_date = dg.date
 			)
 	)
 	SELECT
 		*
 	FROM
 		RiderDailyHourlyCount
-	ORDER BY yr, wknum, dow, sthour;
+	ORDER BY sc_date, sthour;
 
 -- Checks 5 riders are assigned hourly, daily for the day
 CREATE OR REPLACE FUNCTION check_min_daily_hourly_rider_for_day()
@@ -172,9 +154,7 @@ BEGIN
 	SELECT * INTO r1
 	FROM count_daily_hourly_rider cd
 	WHERE cnt < 5
-	AND (SELECT EXTRACT(YEAR FROM check_date)) = cd.yr
-	AND (SELECT EXTRACT(WEEK FROM check_date)) = cd.wknum
-	AND (SELECT EXTRACT(ISODOW FROM check_date)) = cd.dow;
+	AND check_date = cd.sc_date;
 
 	IF r1 IS NOT NULL THEN
 		RAISE exception 'Less than 5 riders for table on table name: % for date: % for input values %', TG_TABLE_NAME, check_date, r1;

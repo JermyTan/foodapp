@@ -21,12 +21,6 @@ INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currv
 INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-04-2020', '13', '15');
 INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '19', '21');
 INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '20', '22');
--- INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-10-2020', '10', '12');
--- INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-10-2020', '13', '15');
--- INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-10-2020', '16', '18');
--- INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-11-2020', '10', '12');
--- INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '03-11-2020', '13', '15');
-
 
 INSERT INTO "public"."users" ("email", "name") VALUES ('ptride1@gmail.com', 'PtRide1');
 INSERT INTO "public"."riders" ("id", "bsalary") VALUES ((SELECT currval('users_id_seq')), '900');
@@ -158,58 +152,38 @@ INSERT INTO "public"."wws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currv
 INSERT INTO Users (email, name) VALUES('riderfoo@gmail.com', 'Rider FooTime');
 INSERT INTO Riders VALUES((SELECT currval('users_id_seq')), '1100');
 INSERT INTO Ftriders VALUES((SELECT currval('users_id_seq')));
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-02', '10', '14');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-02', '15', '19');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-03', '12', '16');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-03', '17', '21');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '10', '14');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '15', '19');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-05', '11', '15');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-05', '16', '20');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '10', '14');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '15', '19');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-02', '1');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-03', '3');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '1');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-05', '2');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '1');
 
 INSERT INTO "public"."users" ("email", "name") VALUES ('ftride1@gmail.com', 'FtRide1');
 INSERT INTO "public"."riders" ("id", "bsalary") VALUES ((SELECT currval('users_id_seq')), '1200');
 INSERT INTO "public"."ftriders" ("id") VALUES ((SELECT currval('users_id_seq')));
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-02', '12', '16');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-02', '17', '21');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-03', '13', '17');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-03', '18', '22');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '10', '14');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '15', '19');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-05', '10', '14');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-05', '15', '19');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '10', '14');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '15', '19');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-02', '3');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-03', '4');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '1');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-05', '1');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '1');
 
 INSERT INTO "public"."users" ("email", "name") VALUES ('ftride2@gmail.com', 'FtRide2');
 INSERT INTO "public"."riders" ("id", "bsalary") VALUES ((SELECT currval('users_id_seq')), '1300');
 INSERT INTO "public"."ftriders" ("id") VALUES ((SELECT currval('users_id_seq')));
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-02', '13', '17');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-02', '18', '22');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-03', '13', '17');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-03', '18', '22');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '13', '17');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '18', '22');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-05', '13', '17');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-05', '18', '22');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '12', '16');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '17', '21');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-02', '4');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-03', '4');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '4');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-05', '4');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '3');
 
 INSERT INTO "public"."users" ("email", "name") VALUES ('ftride3@gmail.com', 'FtRide3');
 INSERT INTO "public"."riders" ("id", "bsalary") VALUES ((SELECT currval('users_id_seq')), '1400');
 INSERT INTO "public"."ftriders" ("id") VALUES ((SELECT currval('users_id_seq')));
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-02', '13', '17');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-02', '18', '22');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-03', '13', '17');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-03', '18', '22');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '13', '17');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '18', '22');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-05', '13', '17');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-05', '18', '22');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '13', '17');
-INSERT INTO "public"."mws" ("id", "dmy", "stime", "etime") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '18', '22');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-02', '4');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-03', '4');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-04', '4');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-05', '4');
+INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-03-06', '4');
 
 COMMIT;
 
