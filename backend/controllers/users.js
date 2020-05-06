@@ -25,7 +25,7 @@ exports.getUsers = async (req, response) => {
 // @acess   Public
 exports.getUser = async (req, response) => {
     const email = req.query.email
-    db.query(`SELECT * FROM Users WHERE email = ${email}`, (err, result) => {
+    db.query(`SELECT * FROM Users WHERE email = '${email}'`, (err, result) => {
         if (err) {
             console.error(err.stack)
             response.status(404).json(`Failed to get user. User does not exist.`)

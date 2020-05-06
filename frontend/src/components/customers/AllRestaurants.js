@@ -22,7 +22,7 @@ function AllRestaurants(props) {
         getDeliveryLocations();
       })
       .catch((error) => {
-        console.log("Error retrieving past orders:", error);
+        console.log("Error retrieving restaurants:", error);
       });
   }, []);
 

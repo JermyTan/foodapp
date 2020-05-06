@@ -5,11 +5,10 @@ const db = require('../db')
 // @acess   Public
 exports.getRestaurants = async (req, response) => {
   const getRestaurantsQuery =
-    `SELECT R.rname, R.imgurl, R.minamt
-    ARRAY_AGG (DISTINCT cat) as categories
+    `SELECT R.rname, R.imgurl, R.minamt, ARRAY_AGG(DISTINCT cat) as categories
     FROM Restaurants R JOIN Sells S ON (R.rname = S.rname) NATURAL JOIN Food
     GROUP BY R.rname`
-  const rows = await db.query(getRestaurantsQuery, async (err, result) => {
+  db.query(getRestaurantsQuery, async (err, result) => {
     if (err) {
       console.error(err.stack);
       response.status(404).json(`Failed to get restaurants and categories.`);
