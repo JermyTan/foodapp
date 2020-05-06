@@ -78,14 +78,7 @@ ORDER BY sc_date , lower(timerange), upper(timerange);
 
 CREATE OR REPLACE VIEW st_hr_gen AS
 	SELECT *
-	FROM generate_series(10, 22, 1) as sthour;
-
-CREATE OR REPLACE VIEW day_gen AS
-	SELECT t.day::date AS date, starthour
-	FROM   generate_series(timestamp '2010-01-01'
-                     , timestamp '2038-12-31'
-                     , interval  '1 day') AS t(day)
-			, generate_series(10, 21, 1) AS starthour;
+	FROM generate_series(10, 21, 1) as sthour;
 
 -- Checks the combined daily hourly count of riders for all existing entries in wws and mws 
 CREATE OR REPLACE VIEW count_daily_hourly_rider AS 
@@ -100,36 +93,24 @@ CREATE OR REPLACE VIEW count_daily_hourly_rider AS
 	GROUP BY
 		sc_date,
 		sthour
-	ORDER BY
-		sc_date,
-		sthour
-	), RiderDailyHourlyCount AS (
-		SELECT
-			*
-		FROM
-			RiderCount rc
 		UNION
 		SELECT
-			dg.date,
-			dg.starthour,
+			t.sc_date,
+			dsh.sthour,
 			0 AS cnt
 		FROM
-			day_gen dg
-		WHERE
-			dg.date IN (
-				SELECT
-					sc_date FROM RiderCount rc)
-			AND dg.starthour NOT IN(
-				SELECT
-					rc2.sthour FROM RiderCount rc2
-				WHERE
-					rc2.sc_date = dg.date
+			CombinedScheduleTable t, st_hr_gen dsh
+		WHERE NOT EXISTS (
+				SELECT 1
+				FROM CombinedScheduleTable t2
+				WHERE t2.sc_date = t.sc_date
+				AND t2.timerange @> dsh.sthour
 			)
 	)
 	SELECT
 		*
 	FROM
-		RiderDailyHourlyCount
+		RiderCount
 	ORDER BY sc_date, sthour;
 
 -- Checks 5 riders are assigned hourly, daily for the day
