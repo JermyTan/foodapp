@@ -10,7 +10,7 @@ function HomeTab(props) {
       to={HOME_PATH}
       name={HOME_PATH}
       active={window.location.pathname === HOME_PATH}
-      content="Home"
+      content="Food"
       onClick={props.onTabClick}
     />
   );

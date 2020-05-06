@@ -24,6 +24,7 @@ import {
   STAFF,
   MANAGER,
 } from "./utils/Constants";
+import WelcomePage from "./components/pages/WelcomePage";
 import Homepage from "./components/pages/Homepage";
 import HistoryPage from "./components/pages/HistoryPage";
 import ProfilePage from "./components/pages/ProfilePage";
@@ -39,21 +40,27 @@ import LoginPage from "components/pages/LoginPage";
 function App() {
   const [uid, setUid] = useState();
   const [role, setRole] = useState();
+  const [name, setName] = useState();
+  const [email, setEmail] = useState();
 
   const signOut = () => {
     localStorage.clear();
     loadFromLocalStorage();
   };
 
-  const login = (uid, role) => {
+  const login = (uid, role, name, email) => {
     localStorage.setItem("uid", uid);
     localStorage.setItem("role", role);
+    localStorage.setItem("name", name);
+    localStorage.setItem("email", email);
     loadFromLocalStorage();
   };
 
   const loadFromLocalStorage = () => {
     setUid(parseInt(localStorage.getItem("uid")));
     setRole(parseInt(localStorage.getItem("role")));
+    setName(localStorage.getItem("name"));
+    setEmail(localStorage.getItem("email"));
   };
 
   useEffect(loadFromLocalStorage, []);
@@ -61,52 +68,64 @@ function App() {
   return (
     <div className="App">
       <Router>
-        {uid && role ? (
+        {uid && role >= 0 && name && email ? (
           <UserContext.Provider
             value={{
               uid: uid,
               role: role,
+              name: name,
+              email: email,
             }}
           >
             <NavigationContainer signOut={signOut}>
               <Switch>
+                <Route path={ROOT_PATH} exact component={WelcomePage} />
                 {role === CUSTOMER && (
-                  <Route path={HOME_PATH} component={Homepage} />
+                  <Route path={HOME_PATH} exact component={Homepage} />
                 )}
                 {role === CUSTOMER && (
-                  <Route path={HISTORY_PATH} component={HistoryPage} />
+                  <Route path={HISTORY_PATH} exact component={HistoryPage} />
                 )}
-                <Route path={PROFILE_PATH} component={ProfilePage} />
+                <Route path={PROFILE_PATH} exact component={ProfilePage} />
                 {role === RIDER && (
                   <Route
                     path={RIDER_ACTIVITY_PATH}
+                    exact
                     component={RiderActivityPage}
                   />
                 )}
                 {role === RIDER && (
                   <Route
                     path={RIDER_SUMMARY_PATH}
+                    exact
                     component={RiderSummaryPage}
                   />
                 )}
                 {role === STAFF && (
                   <Route
                     path={STAFF_SUMMARY_PATH}
+                    exact
                     component={StaffSummaryPage}
                   />
                 )}
                 {role === STAFF && (
-                  <Route path={STAFF_MENU_PATH} component={StaffMenuPage} />
+                  <Route
+                    path={STAFF_MENU_PATH}
+                    exact
+                    component={StaffMenuPage}
+                  />
                 )}
                 {role === MANAGER && (
                   <Route
                     path={MANAGER_SUMMARY_PATH}
+                    exact
                     component={ManagerSummaryPage}
                   />
                 )}
                 {role === MANAGER && (
                   <Route
                     path={MANAGER_PROMOTION_PATH}
+                    exact
                     component={ManagerPromotionPage}
                   />
                 )}

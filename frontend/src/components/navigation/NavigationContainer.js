@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
 import { Sidebar, Menu, Header, Icon } from "semantic-ui-react";
+import WelcomeTab from "./WelcomeTab";
 import HomeTab from "./HomeTab";
 import HistoryTab from "./HistoryTab";
 import ProfileTab from "./ProfileTab";
@@ -36,6 +37,7 @@ function NavigationContainer({ signOut, children }) {
           <Icon name="truck" />
           Food Truck
         </Header>
+        <WelcomeTab onTabClick={onTabClick} />
         {role === CUSTOMER && <HomeTab onTabClick={onTabClick} />}
         {role === CUSTOMER && <HistoryTab onTabClick={onTabClick} />}
         <ProfileTab onTabClick={onTabClick} />

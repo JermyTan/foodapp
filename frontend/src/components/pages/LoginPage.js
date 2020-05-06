@@ -19,28 +19,34 @@ function LoginPage(props) {
   const [newRole, setNewRole] = useState(CUSTOMER);
   const [riderType, setRiderType] = useState(0);
   const [restaurant, setRestaurant] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const onLogin = () => {
     console.log("logging in");
+    setLoading(true);
     axios
       .get(`http://localhost:5000/api/users/login?email=${email}`)
       .then((response) => {
+        console.log(response);
         if (response.status === 200) {
-          let { id, role } = response.data;
-          props.login(id, role);
+          let { id, role, name, email } = response.data;
+          props.login(id, role, name, email);
+          setLoading(false);
         }
       })
       .catch((error) => {
         console.log(error);
+        setLoading(false);
       });
   };
 
   const onSignUp = () => {
     var postRequest;
     console.log("signing up");
+    setLoading(true);
     switch (newRole) {
       case CUSTOMER:
-        axios.post("http://localhost:5000/api/customers", {
+        postRequest = axios.post("http://localhost:5000/api/customers", {
           name: name,
           email: newEmail,
         });
@@ -56,7 +62,7 @@ function LoginPage(props) {
         postRequest = axios.post("http://localhost:5000/api/riders", {
           name: name,
           email: newEmail,
-          isFT: riderType.toString(),
+          isFT: riderType,
         });
         break;
       case MANAGER:
@@ -74,10 +80,12 @@ function LoginPage(props) {
       .then((response) => {
         if (response.status === 200) {
           toggleRegister();
+          setLoading(false);
         }
       })
       .catch((error) => {
         console.log(error);
+        setLoading(false);
       });
   };
 
@@ -200,6 +208,7 @@ function LoginPage(props) {
                       primary
                       fluid
                       disabled={isInvalid()}
+                      loading={loading}
                       onClick={signingUp ? onSignUp : onLogin}
                     />
                     <Form.Button
