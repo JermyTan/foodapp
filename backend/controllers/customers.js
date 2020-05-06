@@ -206,26 +206,29 @@ exports.addOrderRating = async (req, response) => {
 // @desc    Gets the 5 most recent order locations of the user
 // @route   GET /customers/:id/locations
 // @acess   Private
-// exports.getRecentOrderLocations = async (req, response) => {
-//   let { rating, oid } = req.body
+exports.getRecentOrderLocations = async (req, response) => {
+  let id = req.params.id
 
-//   //TODO: Add trigger to check if the order is completed (status 2) before adding the review/rating
-//   const addRatingQuery = `INSERT INTO Ratings (rating, oid) VALUES (${rating}, ${oid})
-//   ON CONFLICT (oid) DO UPDATE 
-//   SET rating = ${rating}
-//   returning *`
+  //TODO: Add trigger to check if the order is completed (status 2) before adding the review/rating
+  const getRecentLocationsQuery = `SELECT DISTINCT location, COUNT(*) as num
+  FROM Orders O WHERE O.cid = ${id}
+  GROUP BY location
+  ORDER BY num DESC
+  LIMIT 5;`
 
-//   const rows = await db.query(addRatingQuery, (err, result) => {
-//     if (err) {
-//       console.error(err.stack);
-//     } else {
-//       if (!result.rows[0]) {
-//         response.status(404).json(`Failed to add rating for order.`)
-//       } else {
-//         console.log('Successfully added a review')
-//         response.status(200).json({ msg: `Successfully added/updated rating for order ${oid}` })
-//       }
-//     }
-//   })
-// }
+  db.query(getRecentLocationsQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+    } else {
+      console.log(result)
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to retrieve recent delivery locations`)
+      } else {
+        console.log('Successfully retrieved locations')
+        console.log(result.rows)
+        response.status(200).json(result.rows)
+      }
+    }
+  })
+}
 
