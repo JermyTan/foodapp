@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Card, Search, Input, Segment, Dropdown } from "semantic-ui-react";
+import { Card, Search, Input, Segment } from "semantic-ui-react";
 import RestaurantCard from "./RestaurantCard";
 import "styles/AllRestaurants.scss";
 import Axios from "axios";
-import { set } from "date-fns";
 
 function AllRestaurants(props) {
   const [restaurantsData, setRestaurantData] = useState([]);
@@ -27,16 +26,16 @@ function AllRestaurants(props) {
   }, []);
 
   const getDeliveryLocations = () => {
-    const url = `http://localhost:5000/api/customers/${id}/locations`
+    const url = `http://localhost:5000/api/customers/${id}/locations`;
     Axios.get(url)
       .then((response) => {
         console.log("Fetch recent delivery locations", response.data);
-        setDeliveryLocations(response.data)
+        setDeliveryLocations(response.data);
       })
       .catch((error) => {
         console.log("Unable to fetch recent delivery locations", error);
-      })
-  }
+      });
+  };
 
   return (
     <>
@@ -55,14 +54,14 @@ function AllRestaurants(props) {
             iconPosition="left"
             icon="location arrow"
             value={props.location}
-            list='orderLocations'
+            list="orderLocations"
             onChange={(event, data) => {
               props.setLocation(data.value);
             }}
           />
-          <datalist id='orderLocations'>
-            {deliveryLocations.map(value => {
-              return <option value={value.location} />
+          <datalist id="orderLocations">
+            {deliveryLocations.map((value) => {
+              return <option value={value.location} />;
             })}
           </datalist>
         </span>
@@ -81,18 +80,18 @@ function AllRestaurants(props) {
             textAlign="center"
           />
         ) : (
-            <Card.Group>
-              {restaurantsData.map((value, index) => {
-                return (
-                  <RestaurantCard
-                    key={index}
-                    restaurant={value}
-                    setSelectedRestaurant={props.setSelectedRestaurant}
-                  />
-                );
-              })}
-            </Card.Group>
-          ))}
+          <Card.Group>
+            {restaurantsData.map((value, index) => {
+              return (
+                <RestaurantCard
+                  key={index}
+                  restaurant={value}
+                  setSelectedRestaurant={props.setSelectedRestaurant}
+                />
+              );
+            })}
+          </Card.Group>
+        ))}
     </>
   );
 }

@@ -21,6 +21,7 @@ function LoginPage(props) {
   const [restaurant, setRestaurant] = useState("");
 
   const onLogin = () => {
+    console.log("logging in");
     axios
       .get(`http://localhost:5000/api/users/login?email=${email}`)
       .then((response) => {
@@ -36,10 +37,10 @@ function LoginPage(props) {
 
   const onSignUp = () => {
     var postRequest;
-
+    console.log("signing up");
     switch (newRole) {
       case CUSTOMER:
-        postRequest = axios.post("http://localhost:5000/api/customers", {
+        axios.post("http://localhost:5000/api/customers", {
           name: name,
           email: newEmail,
         });

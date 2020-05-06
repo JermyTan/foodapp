@@ -19,6 +19,10 @@ import {
   MANAGER_SUMMARY_PATH,
   MANAGER_PROMOTION_PATH,
   ROOT_PATH,
+  CUSTOMER,
+  RIDER,
+  STAFF,
+  MANAGER,
 } from "./utils/Constants";
 import Homepage from "./components/pages/Homepage";
 import HistoryPage from "./components/pages/HistoryPage";
@@ -66,37 +70,48 @@ function App() {
           >
             <NavigationContainer signOut={signOut}>
               <Switch>
-                <Route path={HOME_PATH} exact component={Homepage} />
-                <Route path={HISTORY_PATH} exact component={HistoryPage} />
-                <Route path={PROFILE_PATH} exact component={ProfilePage} />
-                <Route
-                  path={RIDER_ACTIVITY_PATH}
-                  exact
-                  component={RiderActivityPage}
-                />
-                <Route
-                  path={RIDER_SUMMARY_PATH}
-                  exact
-                  component={RiderSummaryPage}
-                />
-                <Route
-                  path={STAFF_SUMMARY_PATH}
-                  exact
-                  component={StaffSummaryPage}
-                />
-                <Route path={STAFF_MENU_PATH} exact component={StaffMenuPage} />
-                <Route
-                  path={MANAGER_SUMMARY_PATH}
-                  exact
-                  component={ManagerSummaryPage}
-                />
-                <Route
-                  path={MANAGER_PROMOTION_PATH}
-                  exact
-                  component={ManagerPromotionPage}
-                />
+                {role === CUSTOMER && (
+                  <Route path={HOME_PATH} component={Homepage} />
+                )}
+                {role === CUSTOMER && (
+                  <Route path={HISTORY_PATH} component={HistoryPage} />
+                )}
+                <Route path={PROFILE_PATH} component={ProfilePage} />
+                {role === RIDER && (
+                  <Route
+                    path={RIDER_ACTIVITY_PATH}
+                    component={RiderActivityPage}
+                  />
+                )}
+                {role === RIDER && (
+                  <Route
+                    path={RIDER_SUMMARY_PATH}
+                    component={RiderSummaryPage}
+                  />
+                )}
+                {role === STAFF && (
+                  <Route
+                    path={STAFF_SUMMARY_PATH}
+                    component={StaffSummaryPage}
+                  />
+                )}
+                {role === STAFF && (
+                  <Route path={STAFF_MENU_PATH} component={StaffMenuPage} />
+                )}
+                {role === MANAGER && (
+                  <Route
+                    path={MANAGER_SUMMARY_PATH}
+                    component={ManagerSummaryPage}
+                  />
+                )}
+                {role === MANAGER && (
+                  <Route
+                    path={MANAGER_PROMOTION_PATH}
+                    component={ManagerPromotionPage}
+                  />
+                )}
                 <Route>
-                  <Redirect to={HOME_PATH} />
+                  <Redirect to={ROOT_PATH} />
                 </Route>
               </Switch>
             </NavigationContainer>

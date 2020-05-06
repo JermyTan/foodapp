@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
 import { Sidebar, Menu, Header, Icon } from "semantic-ui-react";
 import HomeTab from "./HomeTab";
@@ -7,9 +7,12 @@ import ProfileTab from "./ProfileTab";
 import RiderTab from "./RiderTab";
 import StaffTab from "./StaffTab";
 import ManagerTab from "./ManagerTab";
+import UserContext from "utils/UserContext";
+import { CUSTOMER, STAFF, RIDER, MANAGER } from "utils/Constants";
 
 function NavigationContainer({ signOut, children }) {
   const [sidebarOpened, setSidebarOpened] = useState(false);
+  const { role } = useContext(UserContext);
 
   const onTabClick = () => {
     setSidebarOpened(false);
@@ -33,12 +36,12 @@ function NavigationContainer({ signOut, children }) {
           <Icon name="truck" />
           Food Truck
         </Header>
-        <HomeTab onTabClick={onTabClick} />
-        <HistoryTab onTabClick={onTabClick} />
+        {role === CUSTOMER && <HomeTab onTabClick={onTabClick} />}
+        {role === CUSTOMER && <HistoryTab onTabClick={onTabClick} />}
         <ProfileTab onTabClick={onTabClick} />
-        <RiderTab onTabClick={onTabClick} />
-        <StaffTab onTabClick={onTabClick} />
-        <ManagerTab onTabClick={onTabClick} />
+        {role === RIDER && <RiderTab onTabClick={onTabClick} />}
+        {role === STAFF && <StaffTab onTabClick={onTabClick} />}
+        {role === MANAGER && <ManagerTab onTabClick={onTabClick} />}
         <Menu.Item content="Sign Out" link onClick={signOut} />
       </Sidebar>
 
