@@ -3,7 +3,6 @@ import { Card, Search, Input, Segment, Dropdown } from "semantic-ui-react";
 import RestaurantCard from "./RestaurantCard";
 import "styles/AllRestaurants.scss";
 import Axios from "axios";
-import { set } from "date-fns";
 
 function AllRestaurants(props) {
   const [restaurantsData, setRestaurantData] = useState([]);
