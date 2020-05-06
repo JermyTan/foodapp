@@ -103,7 +103,7 @@ exports.createUser = async (req, response) => {
 exports.updateUser = async (req, response) => {
     const id = req.params.id
     const { email, name } = req.body
-    const checkUserEmailQuery = `SELECT * FROM Users WHERE email = ${email}`
+    const checkUserEmailQuery = `SELECT * FROM Users WHERE email = '${email}'`
 
     const updateUserQuery =
         `UPDATE users
