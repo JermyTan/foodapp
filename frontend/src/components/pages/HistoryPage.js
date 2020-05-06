@@ -116,7 +116,7 @@ function HistoryPage() {
 
   useEffect(() => {
     //need props for user id
-    let id = 5;
+    let id = 6;
     let url = `http://localhost:5000/api/customers/${id}/orders`;
     Axios.get(url)
       .then((response) => {

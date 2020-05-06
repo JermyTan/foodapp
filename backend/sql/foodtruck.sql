@@ -23,30 +23,36 @@ DROP TABLE IF EXISTS FDSOffers CASCADE;
 DROP TABLE IF EXISTS Reviews CASCADE;
 DROP TABLE IF EXISTS Ratings CASCADE;
 
+--BCNF--
 CREATE TABLE Users (
     id          SERIAL PRIMARY KEY,
     email       VARCHAR UNIQUE NOT NULL,
     name        VARCHAR NOT NULL,
+    role        SMALLINT NOT NULL,
     CHECK (email LIKE '%@%'),
-    CHECK (name <> '')
+    CHECK (name <> ''),
+    --Role: 0 -> Customer, 1 -> Restaurant Staff, 2 -> Rider, 3 -> FDS manager
+    CHECK (role IN (0,1,2,3))
 );
 
--- INSERT INTO Users VALUES (1, 'tan_kai_qun97@yahoo.com.sg', 'Jermy Tan');
-
+--BCNF--
 CREATE TABLE Riders (
     id          INTEGER PRIMARY KEY REFERENCES Users ON DELETE CASCADE,
     bsalary     INTEGER NOT NULL,
     CHECK (bsalary >= 0)
 );
 
+--BCNF--
 CREATE TABLE PTRiders (
     id          INTEGER PRIMARY KEY REFERENCES Riders ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
 );
 
+--BCNF--
 CREATE TABLE FTRiders (
     id          INTEGER PRIMARY KEY REFERENCES Riders ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
 );
 
+--BCNF--
 CREATE TABLE Customers (
     id          INTEGER PRIMARY KEY REFERENCES Users ON DELETE CASCADE
     DEFERRABLE INITIALLY IMMEDIATE,
@@ -59,6 +65,7 @@ CREATE TABLE Customers (
 
 -- INSERT INTO Customers VALUES (1, 0);
 
+--BCNF--
 CREATE TABLE Restaurants (
     rname       VARCHAR PRIMARY KEY,
     minamt      FLOAT NOT NULL,
@@ -67,16 +74,19 @@ CREATE TABLE Restaurants (
     CHECK (minamt >= 0)
 );
 
+--BCNF--
 CREATE TABLE Staffs (
     id          INTEGER PRIMARY KEY REFERENCES Users ON DELETE CASCADE
     DEFERRABLE INITIALLY IMMEDIATE,
     rname       VARCHAR UNIQUE NOT NULL REFERENCES Restaurants
 );
 
+--BCNF--
 CREATE TABLE Managers (
     id          INTEGER PRIMARY KEY REFERENCES Users ON DELETE CASCADE
 );
 
+--BCNF--
 CREATE TABLE Promotions (
     pid         SERIAL PRIMARY KEY,
     sdatetime   INTEGER NOT NULL,
@@ -87,14 +97,17 @@ CREATE TABLE Promotions (
     CHECK(discount > 0 AND discount <= 1)
 );
 
+--BCNF--
 CREATE TABLE FDSPromotions (
     pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
 );
 
+--BCNF--
 CREATE TABLE RPromotions (
     pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
 );
 
+--BCNF--
 CREATE TABLE Food (
     fname       VARCHAR PRIMARY KEY,
     cat         VARCHAR NOT NULL,
@@ -120,6 +133,7 @@ CREATE TABLE MWS (
     PRIMARY KEY (id, dmy)
 );
 
+--BCNF--
 CREATE TABLE WWS (
     id          INTEGER REFERENCES PTRiders ON DELETE CASCADE,
     dmy         DATE,
@@ -130,6 +144,7 @@ CREATE TABLE WWS (
     EXCLUDE USING gist (id WITH =, dmy WITH =, int4range(stime, etime, '[]') WITH &&)
 );
 
+--BCNF--
 CREATE TABLE Orders (
     oid         SERIAL PRIMARY KEY,
 
@@ -157,36 +172,30 @@ CREATE TABLE Orders (
     rname       VARCHAR NOT NULL REFERENCES Restaurants,
 
     rid         INTEGER REFERENCES Riders,
-    -- rating      SMALLINT
-    --             CHECK (0 <= rating AND rating <= 5),
     
     departdatetime1 INTEGER CHECK (odatetime <= departdatetime1),
     arrivedatetime  INTEGER CHECK (departdatetime1 <= arrivedatetime),
     departdatetime2 INTEGER CHECK (arrivedatetime <= departdatetime2),
     deliverdatetime INTEGER CHECK (departdatetime2 <= deliverdatetime)
 
-    -- reviewdatetime  INTEGER CHECK (deliverdatetime <= reviewdatetime),
-    -- review          VARCHAR CHECK (review <> ''),
-    -- CHECK (
-    --     (reviewdatetime IS NULL AND review IS NULL) 
-    --     OR (reviewdatetime IS NOT NULL AND review IS NOT NULL)
-    -- )
 );
 
+--BCNF--
 CREATE TABLE Ratings (
-    oid         INTEGER PRIMARY KEY REFERENCES Orders,
+    oid         INTEGER PRIMARY KEY REFERENCES Orders ON DELETE CASCADE,
     rating      SMALLINT
                 CHECK (0 <= rating AND rating <= 5)
 );
 
+--BCNF--
 CREATE TABLE Reviews (
-    oid         INTEGER PRIMARY KEY REFERENCES Orders,
+    oid         INTEGER PRIMARY KEY REFERENCES Orders ON DELETE CASCADE,
     review      VARCHAR NOT NULL
                 CHECK (review <> ''),
     reviewdatetime INTEGER NOT NULL
 );
 
-
+--BCNF--
 CREATE TABLE Sells (
     fname       VARCHAR REFERENCES Food,
     rname       VARCHAR REFERENCES Restaurants,
@@ -198,6 +207,7 @@ CREATE TABLE Sells (
     CHECK (price >= 0)
 );
 
+--Not in BCNF or 3NF--
 CREATE TABLE Consists (
     oid         INTEGER REFERENCES Orders ON DELETE CASCADE,
     fname       VARCHAR REFERENCES Food,
