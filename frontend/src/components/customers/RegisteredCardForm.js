@@ -40,7 +40,6 @@ function RegisteredCardForm() {
       })
       .catch((error) => {
         console.log(error);
-        setInputLoading(false);
       });
   }, []);
 
