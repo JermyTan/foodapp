@@ -25,13 +25,13 @@ exports.getCustomers = async (req, response) => {
 exports.createCustomer = async (req, response) => {
   const { email, name } = req.body
   let joindate = new Date().getTime() / 1000;
-  const checkCustomerEmailQuery = `SELECT * FROM Users WHERE email = ${email}`
+  const checkCustomerEmailQuery = `SELECT * FROM Users WHERE email = '${email}'`
   const createCustomerQuery =
     `BEGIN;
 
     SET CONSTRAINTS ALL DEFERRED;
     INSERT INTO Users (email, name, role)
-    VALUES(${email}, ${name}, 0) RETURNING id;
+    VALUES('${email}', '${name}', 0) RETURNING id;
 
     INSERT INTO Customers (id, rpoints, joindate)
     VALUES((SELECT currval('users_id_seq')), 0, ${joindate}) RETURNING *;
