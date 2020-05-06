@@ -14,7 +14,7 @@ function RestaurantCard(props) {
   const restaurant = props.restaurant;
 
   return (
-    <Card fluid raised className="reactive-card" onClick={() => {}}>
+    <Card fluid raised className="reactive-card" onClick={() => { }}>
       <Image
         src={restaurant.imgurl}
         ui="false"
@@ -31,6 +31,8 @@ function RestaurantCard(props) {
             {data.rating} <Rating icon="star" disabled defaultRating="1" />
           </span>
         </Card.Header>
+
+        <Card.Description>Minimum order amount: ${restaurant.minamt}</Card.Description>
 
         <Card.Meta style={{ display: "flex", justifyContent: "space-between" }}>
           {restaurant.categories.join(", ")}

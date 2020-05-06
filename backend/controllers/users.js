@@ -25,7 +25,7 @@ exports.getUsers = async (req, response) => {
 // @acess   Public
 exports.getUser = async (req, response) => {
     const email = req.query.email
-    db.query(`SELECT * FROM Users WHERE email = ${email}`, (err, result) => {
+    db.query(`SELECT * FROM Users WHERE email = '${email}'`, (err, result) => {
         if (err) {
             console.error(err.stack)
             response.status(404).json(`Failed to get user. User does not exist.`)
@@ -46,8 +46,7 @@ exports.getUser = async (req, response) => {
 // @acess   Private
 exports.createUser = async (req, response) => {
     const { name, email } = req.body
-    const createUserQuery = `INSERT INTO USERS (email, name) VALUES ($1, $2) returning *`
-    const values = [email, name]
+    const createUserQuery = `INSERT INTO USERS (email, name) VALUES ('${email}', '${name}') returning *`
     try {
         const rows = await db.query(createUserQuery, values, (err, result) => {
             if (err) {
@@ -108,8 +107,8 @@ exports.updateUser = async (req, response) => {
 
     const updateUserQuery =
         `UPDATE users
-    SET email = ${email},
-    name = ${name}
+    SET email = '${email}',
+    name = '${name}'
     WHERE id = ${id}
     RETURNING *;`
 

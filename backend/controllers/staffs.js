@@ -6,16 +6,16 @@ const db = require('../db')
 // @acess   Private
 exports.createStaff = async (req, response) => {
   const { email, name, rname } = req.body
-  const checkCustomerEmailQuery = `SELECT * FROM Users WHERE email = ${email}`
+  const checkCustomerEmailQuery = `SELECT * FROM Users WHERE email = '${email}'`
   const createStaffQuery =
     `BEGIN;
 
     SET CONSTRAINTS ALL DEFERRED;
     INSERT INTO Users (email, name)
-    VALUES(${email}, ${name}) RETURNING id;
+    VALUES('${email}', '${name}') RETURNING id;
 
     INSERT INTO Staffs (id, rname)
-    VALUES((SELECT currval('users_id_seq')), ${rname}) RETURNING *;
+    VALUES((SELECT currval('users_id_seq')), '${rname}') RETURNING *;
 
     COMMIT;`
   const rows = await db.query(checkCustomerEmailQuery, async (err, result) => {
@@ -35,7 +35,7 @@ exports.createStaff = async (req, response) => {
           } else {
             console.log("Result", result2[2].rows, result2[3].rows)
             if (result2[2].rows.id == result2[3].rows.id)
-              response.status(200).json(`Created user/staff with id ${result2[2].rows.id}`)
+              response.status(200).json({ msg: `Created user/staff`, data: result2[3].rows })
             else {
               response.status(404).json(`Failed to create staff.`)
             }

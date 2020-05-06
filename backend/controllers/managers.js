@@ -5,13 +5,13 @@ const db = require('../db');
 // @acess   Private
 exports.createManager = async (req, response) => {
   const { email, name } = req.body;
-  const checkManagerEmailQuery = `SELECT * FROM Users WHERE email = ${email}`
+  const checkManagerEmailQuery = `SELECT * FROM Users WHERE email = '${email}'`
   const createManagerQuery =
     `BEGIN;
 
     SET CONSTRAINTS ALL DEFERRED;
     INSERT INTO Users (email, name, role)
-    VALUES(${email}, ${name}, 3) RETURNING id;
+    VALUES('${email}', '${name}', 3) RETURNING id;
 
     INSERT INTO Managers (id)
     VALUES((SELECT currval('users_id_seq'))) RETURNING *;

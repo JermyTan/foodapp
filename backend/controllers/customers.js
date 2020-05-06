@@ -25,13 +25,13 @@ exports.getCustomers = async (req, response) => {
 exports.createCustomer = async (req, response) => {
   const { email, name } = req.body
   let joindate = new Date().getTime() / 1000;
-  const checkCustomerEmailQuery = `SELECT * FROM Users WHERE email = ${email}`
+  const checkCustomerEmailQuery = `SELECT * FROM Users WHERE email = '${email}'`
   const createCustomerQuery =
     `BEGIN;
 
     SET CONSTRAINTS ALL DEFERRED;
     INSERT INTO Users (email, name, role)
-    VALUES(${email}, ${name}, 0) RETURNING id;
+    VALUES('${email}', '${name}', 0) RETURNING id;
 
     INSERT INTO Customers (id, rpoints, joindate)
     VALUES((SELECT currval('users_id_seq')), 0, ${joindate}) RETURNING *;
@@ -67,11 +67,11 @@ exports.createCustomer = async (req, response) => {
 }
 
 // @desc    Get a customer
-// @route   GET /customers
+// @route   GET /customers/id
 // @acess   Private
 exports.getCustomer = async (req, response) => {
-  let email = req.params.email
-  const rows = await db.query('SELECT * FROM customers NATURAL JOIN users WHERE email = $1', [email], (err, result) => {
+  let id = req.params.id
+  db.query('SELECT * FROM customers NATURAL JOIN users WHERE id = $1', [id], (err, result) => {
     if (err) {
       console.error(err.stack);
     } else {
