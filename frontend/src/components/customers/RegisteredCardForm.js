@@ -1,22 +1,64 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Form, Header, Button, Message } from "semantic-ui-react";
-
-const data = {
-  cardNum: "343241234241223"
-};
+import UserContext from "utils/UserContext";
+import axios from "axios";
 
 function RegisteredCardForm() {
+  const { uid } = useContext(UserContext);
   const [isEditing, setEditing] = useState(false);
   const [cardNum, setCardNum] = useState("");
+  const [newCardNum, setNewCardNum] = useState("");
   const [didUpdateSuccessfully, setUpdateSuccessfully] = useState(false);
+  const [inputLoading, setInputLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const resetState = () => {
-    setCardNum(data.cardNum);
+    setNewCardNum(cardNum);
   };
 
   useEffect(() => {
-    resetState();
+    axios
+      .get(`http://localhost:5000/api/customers/${uid}`)
+      .then((response) => {
+        console.log(response);
+        if (response.status === 200) {
+          let { cardnum } = response.data;
+          setCardNum(cardnum ?? "");
+          setNewCardNum(cardnum ?? "");
+        }
+        setInputLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setInputLoading(false);
+      });
   }, []);
+
+  const onConfirm = () => {
+    let cardnum = newCardNum === "" ? 0 : parseInt(newCardNum);
+    if (!(cardnum >= 0)) {
+      return;
+    }
+
+    setLoading(true);
+
+    axios
+      .put(`http://localhost:5000/api/customers/${uid}`, {
+        cardnum: cardnum,
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          setCardNum(newCardNum);
+          setEditing(false);
+          setUpdateSuccessfully(true);
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setLoading(false);
+      });
+  };
 
   return (
     <>
@@ -26,9 +68,10 @@ function RegisteredCardForm() {
           label="Card Number"
           icon="credit card"
           iconPosition="left"
-          value={cardNum}
-          onChange={(event, data) => setCardNum(data.value)}
+          value={newCardNum}
+          onChange={(event, data) => setNewCardNum(data.value)}
           disabled={!isEditing}
+          loading={inputLoading}
         />
         <Button.Group widths="2">
           <Button
@@ -44,10 +87,8 @@ function RegisteredCardForm() {
             content="Confirm"
             primary
             disabled={!isEditing}
-            onClick={() => {
-              setEditing(false);
-              setUpdateSuccessfully(true);
-            }}
+            loading={loading}
+            onClick={onConfirm}
           />
         </Button.Group>
       </Form>
