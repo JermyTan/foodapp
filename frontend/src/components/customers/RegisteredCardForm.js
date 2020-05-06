@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Form, Header, Button, Message } from "semantic-ui-react";
+import {
+  Form,
+  Header,
+  Button,
+  Message,
+  Statistic,
+  Icon,
+  Loader,
+} from "semantic-ui-react";
 import UserContext from "utils/UserContext";
 import axios from "axios";
 
@@ -11,6 +19,7 @@ function RegisteredCardForm() {
   const [didUpdateSuccessfully, setUpdateSuccessfully] = useState(false);
   const [inputLoading, setInputLoading] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [rewardPoints, setRewardPoints] = useState("");
 
   const resetState = () => {
     setNewCardNum(cardNum);
@@ -22,9 +31,10 @@ function RegisteredCardForm() {
       .then((response) => {
         console.log(response);
         if (response.status === 200) {
-          let { cardnum } = response.data;
+          let { cardnum, rpoints } = response.data;
           setCardNum(cardnum ?? "");
           setNewCardNum(cardnum ?? "");
+          setRewardPoints(rpoints);
         }
         setInputLoading(false);
       })
@@ -63,6 +73,13 @@ function RegisteredCardForm() {
   return (
     <>
       <Form>
+        <Header>Reward Points</Header>
+        <Statistic size="small">
+          <Statistic.Value>
+            {inputLoading ? <Loader active inline /> : rewardPoints}{" "}
+            <Icon name="star" />
+          </Statistic.Value>
+        </Statistic>
         <Header>Registered Card</Header>
         <Form.Input
           label="Card Number"
