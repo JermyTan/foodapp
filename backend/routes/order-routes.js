@@ -12,7 +12,7 @@ const {
     createOrder,
     updateOrder,
     deleteOrder,
-    getEligibleRiders
+    // getEligibleRiders
 } = require('../controllers/orders');
 
 // map routes to controller
@@ -26,7 +26,7 @@ router.route('/:id')
     .put(updateOrder)
     .delete(deleteOrder);
 
-router.route('/:id/eligible-riders')
-    .get(getEligibleRiders);
+// router.route('/:id/eligible-riders')
+//     .get(getEligibleRiders);
 
 module.exports = router;

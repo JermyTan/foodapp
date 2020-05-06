@@ -167,13 +167,13 @@ CREATE TABLE Orders (
 );
 
 CREATE TABLE Ratings (
-    oid         INTEGER PRIMARY KEY REFERENCES Orders,
+    oid         INTEGER PRIMARY KEY REFERENCES Orders ON DELETE CASCADE,
     rating      SMALLINT
                 CHECK (0 <= rating AND rating <= 5)
 );
 
 CREATE TABLE Reviews (
-    oid         INTEGER PRIMARY KEY REFERENCES Orders,
+    oid         INTEGER PRIMARY KEY REFERENCES Orders ON DELETE CASCADE,
     review      VARCHAR NOT NULL
                 CHECK (review <> ''),
     reviewdatetime INTEGER NOT NULL

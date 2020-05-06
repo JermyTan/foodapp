@@ -47,9 +47,9 @@ exports.createOrder = async (req, response) => {
     //TODO: Check that order reaches minimum amount
     //TODO: Check that customer can only pay by card if customer has a card
 
-    const { location, dfee, odatetime, paymethod, cid, rname, foodlist, fprice } = req.body;
-    const createOrderQuery = `INSERT INTO Orders (location, dfee, status, fprice, odatetime, paymethod, cid, rname) 
-    VALUES(${location}, ${dfee}, 0, ${fprice}, ${odatetime}, ${paymethod}, ${cid}, ${rname}) RETURNING *`
+    const { location, dfee, odatetime, paymethod, cid, rname, foodlist, fprice, rid } = req.body;
+    const createOrderQuery = `INSERT INTO Orders (location, dfee, status, fprice, odatetime, paymethod, cid, rname, rid)
+    VALUES(${location}, ${dfee}, 0, ${fprice}, ${odatetime}, ${paymethod}, ${cid}, ${rname}, ${rid}) RETURNING *`
 
     await db.query(createOrderQuery, (err, result) => {
         if (err) {
@@ -127,36 +127,62 @@ exports.deleteOrder = async (req, response) => {
     })
 }
 
-// @desc    Get all eligible riders for the order (ie. order falls in rider's work schedule)
-// @route   GET /orders/:oid/eligible-riders
-// @access   Private
-exports.getEligibleRiders = async (req, response) => {
-    const oid = req.params.id
-  
-    // Query to get all processing orders that fall in rider's work schedule
-    const getEligibleRidersQuery =
-      `SELECT cst.id
-      FROM CombinedScheduleTable cst
-      WHERE EXISTS (
-        SELECT 1
-          FROM Orders o
-          WHERE o.oid = ${oid}
-          AND cst.timerange @> EXTRACT(HOUR from to_timestamp(O.odatetime))::int4
-          AND cst.sc_date = date_trunc('day', to_timestamp(O.odatetime))::date  
-      )
-      ORDER BY cst.id ASC;`
-  
-    const rows = await db.query(getEligibleRidersQuery, async (err, result) => {
-      if (err) {
-        console.error(err.stack);
-        response.status(404).json(`Failed to get eligible riders.`)
-      } else {
-        console.log(result.rows)
-        let allEligibleRiders = []
-        result.rows.forEach(item => {
-          allEligibleRiders.push(item.id)
-        })
-        response.status(200).json({'rid': allEligibleRiders})
-      }
-    })
-  }
+// // @desc    Get all eligible riders for the order (ie. order falls in rider's work schedule)
+// // @route   GET /riders?time=:time
+// // @access   Private
+// exports.getEligibleRiders = async (req, response) => {
+//     const odatetime = req.query.time
+
+//     // Query to get all processing orders that fall in rider's work schedule
+//     const getEligibleRidersQuery =
+//         `SELECT cst.id
+//             FROM CombinedScheduleTable cst
+//             WHERE cst.timerange @> EXTRACT(HOUR from to_timestamp(${odatetime}))::int4
+//             AND cst.sc_date = date_trunc('day', to_timestamp(${odatetime}))::date
+//             ORDER BY cst.id ASC;`
+
+//     const rows = await db.query(getEligibleRidersQuery, async (err, result) => {
+//         if (err) {
+//             console.error(err.stack);
+//             response.status(404).json(`Failed to get eligible riders.`)
+//         } else {
+//             console.log(result.rows)
+//             let allEligibleRiders = []
+//             result.rows.forEach(item => {
+//                 allEligibleRiders.push(item.id)
+//             })
+//             response.status(200).json({ 'rid': allEligibleRiders })
+//         }
+//     })
+// }
+
+// exports.getEligibleRiders = async (req, response) => {
+//     const oid = req.params.id
+
+//     // Query to get all processing orders that fall in rider's work schedule
+//     const getEligibleRidersQuery =
+//         `SELECT cst.id
+//       FROM CombinedScheduleTable cst
+//       WHERE EXISTS (
+//         SELECT 1
+//           FROM Orders o
+//           WHERE o.oid = ${oid}
+//           AND cst.timerange @> EXTRACT(HOUR from to_timestamp(O.odatetime))::int4
+//           AND cst.sc_date = date_trunc('day', to_timestamp(O.odatetime))::date  
+//       )
+//       ORDER BY cst.id ASC;`
+
+//     const rows = await db.query(getEligibleRidersQuery, async (err, result) => {
+//         if (err) {
+//             console.error(err.stack);
+//             response.status(404).json(`Failed to get eligible riders.`)
+//         } else {
+//             console.log(result.rows)
+//             let allEligibleRiders = []
+//             result.rows.forEach(item => {
+//                 allEligibleRiders.push(item.id)
+//             })
+//             response.status(200).json({ 'rid': allEligibleRiders })
+//         }
+//     })
+// }
