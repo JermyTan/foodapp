@@ -163,6 +163,10 @@ exports.getRiderOrders = async (req, response) => {
     'rname', rname,
     'odatetime', odatetime,
     'status', status,
+    'departdatetime1', departdatetime1,
+    'departdatetime2', departdatetime2,
+    'arrivedatetime', arrivedatetime,
+    'deliverdatetime', deliverdatetime,
     'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', itemprice))
               FROM Consists C
               WHERE C.oid = O.oid))
@@ -206,6 +210,10 @@ exports.getProcessingOrders = async (req, response) => {
     'rname', rname,
     'odatetime', odatetime,
     'status', status,
+    'departdatetime1', departdatetime1,
+    'departdatetime2', departdatetime2,
+    'arrivedatetime', arrivedatetime,
+    'deliverdatetime', deliverdatetime,
     'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', (${getItemPriceQuery})))
               FROM Consists C
               WHERE C.oid = O.oid))
@@ -264,8 +272,4 @@ exports.getEligibleRiders = async (req, response) => {
       response.status(200).json({ 'rid': allEligibleRiders })
     }
   })
-}
-
-exports.acceptOrder = async (req, response) => {
-  const { rid, oid, datetime } = req.body
 }

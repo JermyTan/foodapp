@@ -84,26 +84,70 @@ exports.createOrder = async (req, response) => {
 
 }
 
+const getFieldAndStatus = (type) => {
+    switch (type) {
+        case '1':
+            return {
+                field: 'departdatetime1',
+                status: 1
+            }
+            break;
+        case '2':
+            return {
+                field: 'arrivedatetime',
+                status: 1
+            }
+            break;
+        case '3':
+            return {
+                field: 'departdatetime2',
+                status: 1
+            }
+            break;
+        case '4':
+            return {
+                field: 'deliverdatetime',
+                status: 2
+            }
+            break;
+        default:
+            return {
+                field: '',
+                status: 0
+            }
+    }
+}
 
-
-// @desc    Update existing order's location
+// @desc    Update the timings for the orders
 // @route   PUT /orders/:oid
 // @acess   Private
-exports.updateOrder = async (req, response) => {
-    const oid = req.params.oid
-    const { location } = req.body
+exports.updateOrderTime = async (req, response) => {
+    const id = req.params.id
+    /*
+    Timing types: 1-> Depart for restaurant, 2-> Arrive at restaurant. 3-> Depart from restaurant, 4-> Arrive at delivery location
+    */
+    let timestamp = req.body.timestamp
+    let type = req.body.type
+
+    console.log(getFieldAndStatus(type))
+
+    let field = getFieldAndStatus(type).field
+    let status = getFieldAndStatus(type).status
+
+    console.log("field:", field)
+    console.log("status:", status)
 
     // TODO: handle update of variable number of fields
-    const row = await db.query('UPDATE orders SET location = $1 WHERE oid = $2 returning *', [location, oid], (err, result) => {
+    const row = await db.query(`UPDATE orders SET ${field} = ${timestamp}, status = ${status} WHERE oid = ${id} returning *`, (err, result) => {
         if (err) {
             console.error(err.stack)
-            throw err
+            response.status(404).json(`Failed to update order ${id}. Order does not exist.`)
         } else {
             if (!result.rows[0]) {
                 response.status(404).json(`Failed to update order ${id}. Order does not exist.`)
             } else {
-                console.log(`Successfully updated order with oid ${oid}`)
-                response.status(200).json(result.rows[0])
+                console.log(`Successfully updated order with oid ${id}`)
+                response.status(200).json({ msg: `Successfully updated order ${id} timestamp and status`, order: result.rows[0] })
             }
         }
     })

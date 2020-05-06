@@ -33,31 +33,12 @@ const order3 = {
 
 //const totalOrders = [order1, order2, order3];
 
-const getRiderOrders = () => {
-  //TODO: get rider
-  let id = 51
-  const url = `http://localhost:5000/api/riders/${id}/orders`
-  Axios.get(url)
-    .then((response) => {
-      console.log(`Fetch all orders for rider ${id}`, response.data)
-      // let parsedOrder = {}
-      // response.data.forEach(item => {
-      //   parsedOrder[item.oid] = item
-      // })
-      // console.log("PARSED ORDER", parsedOrder)
-      // return parsedOrder;
-    })
-    .catch((error) => {
-      console.log("Error fetching orders for rider", error)
-    })
-}
-
 function RiderActivityPage() {
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState({});
 
-  useEffect(() => {
-    let id = 51
+  const refreshOrders = () => {
+    let id = 107
     const url = `http://localhost:5000/api/riders/${id}/orders`
     Axios.get(url)
       .then((response) => {
@@ -73,7 +54,10 @@ function RiderActivityPage() {
       .catch((error) => {
         console.log("Error fetching orders for rider", error)
       })
+  }
 
+  useEffect(() => {
+    refreshOrders()
   }, []);
 
   return (
@@ -85,7 +69,9 @@ function RiderActivityPage() {
           <Card.Group>
             {Object.entries(orders).map(pair => {
               let order = pair[1];
-              return <RiderOrderCard order={order} />;
+              return <RiderOrderCard
+                refreshOrders={refreshOrders}
+                order={order} />;
             })}
           </Card.Group>
         ) : (

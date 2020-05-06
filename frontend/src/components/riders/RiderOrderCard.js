@@ -1,19 +1,24 @@
 import React, { useState } from "react";
 import { Card, Step, Button } from "semantic-ui-react";
 import { getUnixTime, format, fromUnixTime } from "date-fns";
+import Axios from "axios";
 
 function RiderOrderCard(props) {
   const [startDatetimeToRestaurant, setStartDatetimeToRestaurant] = useState(
-    props.order.startDatetimeToRestaurant
+    //props.order.startDatetimeToRestaurant
+    props.order.departdatetime1
   );
   const [endDatetimeToRestaurant, setEndDatetimeToRestaurant] = useState(
-    props.order.endDatetimeToRestaurant
+    // props.order.endDatetimeToRestaurant
+    props.order.arrivedatetime
   );
   const [startDatetimeToCustomer, setStartDatetimeToCustomer] = useState(
-    props.order.startDatetimeToCustomer
+    // props.order.startDatetimeToCustomer
+    props.order.departdatetime2
   );
   const [endDatetimeToCustomer, setEndDatetimeToCustomer] = useState(
-    props.order.endDatetimeToCustomer
+    // props.order.endDatetimeToCustomer
+    props.order.deliverdatetime
   );
 
   const [isExpanded, setExpanded] = useState(false);
@@ -22,6 +27,23 @@ function RiderOrderCard(props) {
   const goToRestaurantCompleted = endDatetimeToRestaurant != null;
   const receivedFoodCompleted = startDatetimeToCustomer != null;
   const deliverToCustomerCompleted = endDatetimeToCustomer != null;
+
+  const updateOrderTimestamp = (type) => {
+    const url = `http://localhost:5000/api/orders/${props.order.oid}`
+    let timestamp = getUnixTime(new Date());
+    Axios.put(url, {
+      timestamp: `${timestamp}`,
+      type: `${type}`
+    })
+      .then((response) => {
+        console.log("Successfully updated status of order", response.data)
+        props.refreshOrders();
+      })
+      .catch((error) => {
+        console.log("Error occured updating order status", error)
+      })
+  }
+
 
   console.log(props.order);
   return (
@@ -86,8 +108,7 @@ function RiderOrderCard(props) {
         <Step.Group ordered widths="4">
           <Step completed={receiveOrderCompleted}>
             <Step.Content style={{ display: "flex", flexDirection: "column" }}>
-              <Step.Title>Receive order</Step.Title>
-
+              <Step.Title>Depart for Restaurant</Step.Title>
               <Button
                 style={{ marginTop: "0.5em", marginRight: "0" }}
                 compact
@@ -95,6 +116,7 @@ function RiderOrderCard(props) {
                 color="green"
                 onClick={() => {
                   let currentDatetime = new Date();
+                  updateOrderTimestamp(1);
                   setStartDatetimeToRestaurant(getUnixTime(currentDatetime));
                 }}
                 disabled={receiveOrderCompleted}
@@ -115,7 +137,7 @@ function RiderOrderCard(props) {
 
           <Step completed={goToRestaurantCompleted}>
             <Step.Content style={{ display: "flex", flexDirection: "column" }}>
-              <Step.Title>Go to restaurant</Step.Title>
+              <Step.Title>Arrived at restaurant</Step.Title>
               <Step.Description>
                 Collect customer's food from restaurant
             </Step.Description>
@@ -128,6 +150,7 @@ function RiderOrderCard(props) {
                   color="green"
                   onClick={() => {
                     let currentDatetime = new Date();
+                    updateOrderTimestamp(2);
                     setEndDatetimeToRestaurant(getUnixTime(currentDatetime));
                   }}
                   disabled={goToRestaurantCompleted}
@@ -144,7 +167,7 @@ function RiderOrderCard(props) {
 
           <Step completed={receivedFoodCompleted}>
             <Step.Content style={{ display: "flex", flexDirection: "column" }}>
-              <Step.Title>Receive food</Step.Title>
+              <Step.Title>Received food and left restaurant</Step.Title>
               <Step.Description>
                 Food ready to be delivered to customer
             </Step.Description>
@@ -157,6 +180,7 @@ function RiderOrderCard(props) {
                   color="green"
                   onClick={() => {
                     let currentDatetime = new Date();
+                    updateOrderTimestamp(3);
                     setStartDatetimeToCustomer(getUnixTime(currentDatetime));
                   }}
                   disabled={receivedFoodCompleted}
@@ -185,6 +209,7 @@ function RiderOrderCard(props) {
                   color="green"
                   onClick={() => {
                     let currentDatetime = new Date();
+                    updateOrderTimestamp(4);
                     setEndDatetimeToCustomer(getUnixTime(currentDatetime));
                   }}
                   disabled={deliverToCustomerCompleted}

@@ -10,7 +10,7 @@ const {
     getOrders,
     getOrder,
     createOrder,
-    updateOrder,
+    updateOrderTime,
     deleteOrder,
     // getEligibleRiders
 } = require('../controllers/orders');
@@ -23,7 +23,7 @@ router
 
 router.route('/:id')
     .get(getOrder)
-    .put(updateOrder)
+    .put(updateOrderTime)
     .delete(deleteOrder);
 
 // router.route('/:id/eligible-riders')
