@@ -5,6 +5,7 @@ const UserContext = createContext({
   role: null,
   name: null,
   email: null,
+  reload: null,
 });
 
 export default UserContext;

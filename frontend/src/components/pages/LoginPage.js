@@ -31,8 +31,8 @@ function LoginPage(props) {
         if (response.status === 200) {
           let { id, role, name, email } = response.data;
           props.login(id, role, name, email);
-          setLoading(false);
         }
+        setLoading(false);
       })
       .catch((error) => {
         console.log(error);

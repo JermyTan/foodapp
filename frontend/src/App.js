@@ -75,6 +75,7 @@ function App() {
               role: role,
               name: name,
               email: email,
+              reload: loadFromLocalStorage,
             }}
           >
             <NavigationContainer signOut={signOut}>
