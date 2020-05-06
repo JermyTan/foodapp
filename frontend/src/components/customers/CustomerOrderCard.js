@@ -7,7 +7,7 @@ import Axios from "axios";
 function CustomerOrderCard(props) {
   const [isExpanded, setExpanded] = useState(false);
   const order = props.order;
-  const [rating, setRating] = useState(order.rating)
+  const [rating, setRating] = useState(order.rating);
 
   const getStatus = () => {
     switch (order.status) {
@@ -26,19 +26,19 @@ function CustomerOrderCard(props) {
   };
 
   const handleRate = (e, { rating, MaxRating }) => {
-    console.log("Rate clicked:", rating)
-    const url = `http://localhost:5000/api/customers/rating`
+    console.log("Rate clicked:", rating);
+    const url = `http://localhost:5000/api/customers/rating`;
     Axios.post(url, {
       rating: `${rating}`,
-      oid: `${order.oid}`
+      oid: `${order.oid}`,
     })
       .then((response) => {
-        console.log("Successfully updated rating for order", response)
+        console.log("Successfully updated rating for order", response);
       })
       .catch((error) => {
-        console.log("Error updating rating for order", error)
-      })
-  }
+        console.log("Error updating rating for order", error);
+      });
+  };
 
   return (
     <Card fluid raised color={getStatus()[1]}>
@@ -65,7 +65,10 @@ function CustomerOrderCard(props) {
                 rname={order.rname}
                 review={order.review}
               />
-              <Rating icon="star" maxRating={5} defaultRating={rating}
+              <Rating
+                icon="star"
+                maxRating={5}
+                defaultRating={rating}
                 onRate={handleRate}
               />
             </>
