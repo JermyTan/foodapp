@@ -1,3 +1,4 @@
+DROP VIEW IF EXISTS effective_mws CASCADE;
 DROP VIEW IF EXISTS rider_info CASCADE;
 DROP VIEW IF EXISTS ftr_mth_sal CASCADE;
 DROP VIEW IF EXISTS ptr_wk_sal CASCADE;
@@ -9,6 +10,13 @@ DROP FUNCTION IF EXISTS check_min_daily_hourly_rider_for_day() CASCADE;
 DROP TRIGGER IF EXISTS wws_min_rider_trigger ON wws CASCADE;
 DROP TRIGGER IF EXISTS mws_min_rider_trigger ON mws CASCADE;
 
+-- Give all ftrider schedules in its stime and etime breakdown per entry, following wws structure
+CREATE OR REPLACE VIEW effective_mws AS
+SELECT id, dmy, stime1 AS stime, etime1 AS etime
+FROM mws JOIN mwsshift mss ON (mws.shift = mss.shift)
+UNION
+SELECT id, dmy, stime2 AS stime, etime2 AS etime
+FROM mws JOIN mwsshift mss ON (mws.shift = mss.shift);
 
 -- Gives all permanent rider info, including FT status
 CREATE OR REPLACE VIEW rider_info AS
@@ -73,7 +81,7 @@ SELECT
 	END AS isFT
 FROM
 	wws w FULL OUTER JOIN 
-	mws m ON (w.id = m.id)
+	effective_mws m ON (w.id = m.id)
 ;
 
 CREATE OR REPLACE VIEW st_hr_gen AS
@@ -139,43 +147,6 @@ CREATE OR REPLACE VIEW count_daily_hourly_rider AS
 	FROM
 		RiderDailyHourlyCount
 	ORDER BY yr, wknum, dow, sthour;
-
--- Check at least 1 hour break between a part time rider's entries for the day CRUD was done on
--- CREATE OR REPLACE FUNCTION check_wws_break()
--- RETURNS TRIGGER
--- AS $$
--- DECLARE
--- r1 record;
--- check_id INTEGER;
--- check_date DATE;
--- BEGIN
--- 	IF (TG_OP = 'UPDATE') THEN
--- 		check_id := OLD.id;
--- 		check_date := OLD.dmy;
--- 	ELSE
--- 		check_id := NEW.id;
--- 		check_date := NEW.dmy;
--- 	END IF;
-
--- 	SELECT * INTO r1
--- 	FROM wws
--- 	WHERE wws.id = check_id
--- 	AND wws.dmy = check_date;
-
--- 	IF r1 IS NOT NULL THEN
--- 		RAISE exception 'Less than 5 riders for table on table name: % for date: % for input values %', TG_TABLE_NAME, check_date, r1;
--- 	END IF;
--- 	RETURN NULL;
--- END;
--- $$ LANGUAGE plpgsql;
-
--- Create corresponding trigger that activates on CRUD of wws
--- CREATE CONSTRAINT TRIGGER wws_break_trigger
--- 	AFTER INSERT OR UPDATE
--- 	ON wws
--- 	DEFERRABLE INITIALLY DEFERRED
--- 	FOR EACH ROW 
--- 	EXECUTE PROCEDURE check_wws_break();
 
 -- Checks 5 riders are assigned hourly, daily for the day
 CREATE OR REPLACE FUNCTION check_min_daily_hourly_rider_for_day()
