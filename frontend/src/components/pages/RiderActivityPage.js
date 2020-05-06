@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Menu, Container, Segment, Card } from "semantic-ui-react";
 import RiderOrderCard from "components/riders/RiderOrderCard";
+import Axios from "axios";
+import { set } from "date-fns";
 
 const order1 = {
   oid: 43242342,
   startDatetimeToRestaurant: null,
   endDatetimeToRestaurant: null,
   startDatetimeToCustomer: null,
-  endDatetimeToCustomer: null
+  endDatetimeToCustomer: null,
+  odatetime: 1588579582
 };
 
 const order2 = {
@@ -15,7 +18,8 @@ const order2 = {
   startDatetimeToRestaurant: null,
   endDatetimeToRestaurant: null,
   startDatetimeToCustomer: null,
-  endDatetimeToCustomer: null
+  endDatetimeToCustomer: null,
+  odatetime: 1588579582
 };
 
 const order3 = {
@@ -23,20 +27,37 @@ const order3 = {
   startDatetimeToRestaurant: null,
   endDatetimeToRestaurant: null,
   startDatetimeToCustomer: null,
-  endDatetimeToCustomer: null
+  endDatetimeToCustomer: null,
+  odatetime: 1588579582
 };
 
-const totalOrders = [order1, order2, order3];
+//const totalOrders = [order1, order2, order3];
 
 function RiderActivityPage() {
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState({});
 
+  const refreshOrders = () => {
+    let id = 107
+    const url = `http://localhost:5000/api/riders/${id}/orders`
+    Axios.get(url)
+      .then((response) => {
+        console.log(`Fetch all orders for rider ${id}`, response.data)
+        // load rider's current order if any or any lobang
+        // totalOrders.forEach(order => (orders[order.oid] = order));
+        // setOrders(orders);
+        let orders = {}
+        response.data.forEach(order => (orders[order.oid] = order));
+        setOrders(orders);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log("Error fetching orders for rider", error)
+      })
+  }
+
   useEffect(() => {
-    // load rider's current order if any or any lobang
-    totalOrders.forEach(order => (orders[order.oid] = order));
-    setOrders(orders);
-    setLoading(false);
+    refreshOrders()
   }, []);
 
   return (
@@ -48,20 +69,22 @@ function RiderActivityPage() {
           <Card.Group>
             {Object.entries(orders).map(pair => {
               let order = pair[1];
-              return <RiderOrderCard order={order} />;
+              return <RiderOrderCard
+                refreshOrders={refreshOrders}
+                order={order} />;
             })}
           </Card.Group>
         ) : (
-          <Segment
-            raised
-            placeholder
-            textAlign="center"
-            size="big"
-            loading={loading}
-          >
-            You currently do not have any activity
-          </Segment>
-        )}
+            <Segment
+              raised
+              placeholder
+              textAlign="center"
+              size="big"
+              loading={loading}
+            >
+              You currently do not have any activity
+            </Segment>
+          )}
       </Container>
       <br />
       <br />

@@ -5,17 +5,17 @@ const db = require('../db')
 // @access   Public
 exports.getRiders = async (req, response) => {
   const rows = await db.query('SELECT * FROM rider_info', (err, result) => {
-      if (err) {
-          console.error(err.stack);
-          throw err
+    if (err) {
+      console.error(err.stack);
+      throw err
+    } else {
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to get all riders. There could be no rider created yet.`)
       } else {
-          if (!result.rows[0]) {
-              response.status(404).json(`Failed to get all riders. There could be no rider created yet.`)
-          } else {
-              console.log('Successfully get all riders')
-              response.status(200).json(result.rows)
-          }
+        console.log('Successfully get all riders')
+        response.status(200).json(result.rows)
       }
+    }
   })
 
 }
@@ -44,8 +44,8 @@ exports.getRider = async (req, response) => {
 // @access   Private
 exports.getRiderSalary = async (req, response) => {
   const id = req.params.id
-  const getRiderSalaryQuery = 
-  `With CombinedSalTable AS (
+  const getRiderSalaryQuery =
+    `With CombinedSalTable AS (
     SELECT id, wkmthyr AS st_mth_wk, wk_sal AS sal
     FROM ptr_wk_sal
     UNION
@@ -74,8 +74,8 @@ exports.getRiderSalary = async (req, response) => {
 // @access   Private
 exports.getRiderSchedule = async (req, response) => {
   const id = req.params.id
-  const getRiderSalaryQuery = 
-  `SELECT sc_date, lower(timerange) AS st_time, upper(timerange) AS e_time
+  const getRiderSalaryQuery =
+    `SELECT sc_date, lower(timerange) AS st_time, upper(timerange) AS e_time
     FROM CombinedScheduleTable
     WHERE id = ${id}
     ORDER BY sc_date;`
@@ -105,8 +105,8 @@ exports.createRider = async (req, response) => {
   const createRiderQuery =
     `BEGIN;
     SET CONSTRAINTS ALL DEFERRED;
-    INSERT INTO Users (email, name)
-    VALUES(${email},${name});
+    INSERT INTO Users (email, name, role)
+    VALUES(${email},${name}, 2);
     
     INSERT INTO Riders (id, bsalary)
     VALUES((SELECT currval('users_id_seq')), 1000);
@@ -157,12 +157,17 @@ exports.getRiderOrders = async (req, response) => {
     `SELECT json_build_object(
     'oid', oid,
     'fprice', fprice,
+    'cname', (SELECT name FROM Users U WHERE U.id = O.cid),
     'location', location,
     'dfee', dfee,
     'rname', rname,
     'odatetime', odatetime,
     'status', status,
-    'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', (${getItemPriceQuery})))
+    'departdatetime1', departdatetime1,
+    'departdatetime2', departdatetime2,
+    'arrivedatetime', arrivedatetime,
+    'deliverdatetime', deliverdatetime,
+    'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', itemprice))
               FROM Consists C
               WHERE C.oid = O.oid))
     AS order
@@ -205,6 +210,10 @@ exports.getProcessingOrders = async (req, response) => {
     'rname', rname,
     'odatetime', odatetime,
     'status', status,
+    'departdatetime1', departdatetime1,
+    'departdatetime2', departdatetime2,
+    'arrivedatetime', arrivedatetime,
+    'deliverdatetime', deliverdatetime,
     'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', (${getItemPriceQuery})))
               FROM Consists C
               WHERE C.oid = O.oid))
@@ -236,6 +245,31 @@ exports.getProcessingOrders = async (req, response) => {
   })
 }
 
-exports.acceptOrder = async (req, response) => {
-  const { rid, oid, datetime } = req.body
+// @desc    Get all eligible riders for the order (ie. order falls in rider's work schedule)
+// @route   GET /riders/order?time=:time
+// @access   Private
+exports.getEligibleRiders = async (req, response) => {
+  const odatetime = req.query.time
+
+  // Query to get all processing orders that fall in rider's work schedule
+  const getEligibleRidersQuery =
+    `SELECT cst.id
+          FROM CombinedScheduleTable cst
+          WHERE cst.timerange @> EXTRACT(HOUR from to_timestamp(${odatetime}))::int4
+          AND cst.sc_date = date_trunc('day', to_timestamp(${odatetime}))::date
+          ORDER BY cst.id ASC;`
+
+  const rows = await db.query(getEligibleRidersQuery, async (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json(`Failed to get eligible riders.`)
+    } else {
+      console.log(result.rows)
+      let allEligibleRiders = []
+      result.rows.forEach(item => {
+        allEligibleRiders.push(item.id)
+      })
+      response.status(200).json({ 'rid': allEligibleRiders })
+    }
+  })
 }

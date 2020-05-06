@@ -47,31 +47,10 @@ exports.createOrder = async (req, response) => {
     //TODO: Check that order reaches minimum amount
     //TODO: Check that customer can only pay by card if customer has a card
 
-    const { location, dfee, odatetime, paymethod, cid, rname, foodlist, fprice } = req.body;
-    const createOrderQuery = `INSERT INTO Orders (location, dfee, status, fprice, odatetime, paymethod, cid, rname) 
-    VALUES(${location}, ${dfee}, 0, ${fprice}, ${odatetime}, ${paymethod}, ${cid}, ${rname}) RETURNING *`
+    const { location, dfee, odatetime, paymethod, cid, rname, foodlist, fprice, rid } = req.body;
+    const createOrderQuery = `INSERT INTO Orders (location, dfee, status, fprice, odatetime, paymethod, cid, rname, rid)
+    VALUES(${location}, ${dfee}, 0, ${fprice}, ${odatetime}, ${paymethod}, ${cid}, ${rname}, ${rid}) RETURNING *`
 
-    // await db.query(checkMinAmt, (err, result) => {
-    //     if (err) {
-    //         console.error("Error:", err.stack)
-    //         response.status(404).json({ msg: `Unable to check min amt` })
-    //     } else {
-    //         console.log("Min amount: ", result.rows[0].minamt)
-    //         let minamt = result.rows.minamt
-    //         if (minamt > fprice) {
-    //             response.status(400).json({ msg: 'Min amount not met, order cannot be made' })
-    //         } else {
-    //             db.query(checkCard, (err, result2) => {
-    //                 if (err) {
-    //                     console.error(err.stack)
-    //                     response.status(404).json({ msg: `Unable to check customer card` })
-    //                 } else {
-    //                     console.log("Cardnum", result2.rows.cardnum)
-    // if (result2.rows[0].cardnum === null && paymethod == 1) {
-    //     console.log("Error: card payment selected but no card available")
-    //     response.status(400).json({ msg: `No card available for payment` })
-    // } else {
-    //passed both checks
     await db.query(createOrderQuery, (err, result) => {
         if (err) {
             console.error(err.stack)
@@ -93,7 +72,7 @@ exports.createOrder = async (req, response) => {
                             console.log("Some error occured for adding ", food.fname)
                             console.log(err.stack)
                         } else {
-                            console.log("Added item:")
+                            console.log("Added item to Consists:")
                             console.log(result2.rows)
                         }
                     })
@@ -102,28 +81,73 @@ exports.createOrder = async (req, response) => {
             }
         }
     });
-    //}
+
 }
 
+const getFieldAndStatus = (type) => {
+    switch (type) {
+        case '1':
+            return {
+                field: 'departdatetime1',
+                status: 1
+            }
+            break;
+        case '2':
+            return {
+                field: 'arrivedatetime',
+                status: 1
+            }
+            break;
+        case '3':
+            return {
+                field: 'departdatetime2',
+                status: 1
+            }
+            break;
+        case '4':
+            return {
+                field: 'deliverdatetime',
+                status: 2
+            }
+            break;
+        default:
+            return {
+                field: '',
+                status: 0
+            }
+    }
+}
 
-// @desc    Update existing order's location
+// @desc    Update the timings for the orders
 // @route   PUT /orders/:oid
 // @acess   Private
-exports.updateOrder = async (req, response) => {
-    const oid = req.params.oid
-    const { location } = req.body
+exports.updateOrderTime = async (req, response) => {
+    const id = req.params.id
+    /*
+    Timing types: 1-> Depart for restaurant, 2-> Arrive at restaurant. 3-> Depart from restaurant, 4-> Arrive at delivery location
+    */
+    let timestamp = req.body.timestamp
+    let type = req.body.type
+
+    console.log(getFieldAndStatus(type))
+
+    let field = getFieldAndStatus(type).field
+    let status = getFieldAndStatus(type).status
+
+    console.log("field:", field)
+    console.log("status:", status)
 
     // TODO: handle update of variable number of fields
-    const row = await db.query('UPDATE orders SET location = $1 WHERE oid = $2 returning *', [location, oid], (err, result) => {
+    const row = await db.query(`UPDATE orders SET ${field} = ${timestamp}, status = ${status} WHERE oid = ${id} returning *`, (err, result) => {
         if (err) {
             console.error(err.stack)
-            throw err
+            response.status(404).json(`Failed to update order ${id}. Order does not exist.`)
         } else {
             if (!result.rows[0]) {
                 response.status(404).json(`Failed to update order ${id}. Order does not exist.`)
             } else {
-                console.log(`Successfully updated order with oid ${oid}`)
-                response.status(200).json(result.rows[0])
+                console.log(`Successfully updated order with oid ${id}`)
+                response.status(200).json({ msg: `Successfully updated order ${id} timestamp and status`, order: result.rows[0] })
             }
         }
     })
@@ -147,36 +171,62 @@ exports.deleteOrder = async (req, response) => {
     })
 }
 
-// @desc    Get all eligible riders for the order (ie. order falls in rider's work schedule)
-// @route   GET /orders/:oid/eligible-riders
-// @access   Private
-exports.getEligibleRiders = async (req, response) => {
-    const oid = req.params.id
-  
-    // Query to get all processing orders that fall in rider's work schedule
-    const getEligibleRidersQuery =
-      `SELECT cst.id
-      FROM CombinedScheduleTable cst
-      WHERE EXISTS (
-        SELECT 1
-          FROM Orders o
-          WHERE o.oid = ${oid}
-          AND cst.timerange @> EXTRACT(HOUR from to_timestamp(O.odatetime))::int4
-          AND cst.sc_date = date_trunc('day', to_timestamp(O.odatetime))::date  
-      )
-      ORDER BY cst.id ASC;`
-  
-    const rows = await db.query(getEligibleRidersQuery, async (err, result) => {
-      if (err) {
-        console.error(err.stack);
-        response.status(404).json(`Failed to get eligible riders.`)
-      } else {
-        console.log(result.rows)
-        let allEligibleRiders = []
-        result.rows.forEach(item => {
-          allEligibleRiders.push(item.id)
-        })
-        response.status(200).json({'rid': allEligibleRiders})
-      }
-    })
-  }
+// // @desc    Get all eligible riders for the order (ie. order falls in rider's work schedule)
+// // @route   GET /riders?time=:time
+// // @access   Private
+// exports.getEligibleRiders = async (req, response) => {
+//     const odatetime = req.query.time
+
+//     // Query to get all processing orders that fall in rider's work schedule
+//     const getEligibleRidersQuery =
+//         `SELECT cst.id
+//             FROM CombinedScheduleTable cst
+//             WHERE cst.timerange @> EXTRACT(HOUR from to_timestamp(${odatetime}))::int4
+//             AND cst.sc_date = date_trunc('day', to_timestamp(${odatetime}))::date
+//             ORDER BY cst.id ASC;`
+
+//     const rows = await db.query(getEligibleRidersQuery, async (err, result) => {
+//         if (err) {
+//             console.error(err.stack);
+//             response.status(404).json(`Failed to get eligible riders.`)
+//         } else {
+//             console.log(result.rows)
+//             let allEligibleRiders = []
+//             result.rows.forEach(item => {
+//                 allEligibleRiders.push(item.id)
+//             })
+//             response.status(200).json({ 'rid': allEligibleRiders })
+//         }
+//     })
+// }
+
+// exports.getEligibleRiders = async (req, response) => {
+//     const oid = req.params.id
+
+//     // Query to get all processing orders that fall in rider's work schedule
+//     const getEligibleRidersQuery =
+//         `SELECT cst.id
+//       FROM CombinedScheduleTable cst
+//       WHERE EXISTS (
+//         SELECT 1
+//           FROM Orders o
+//           WHERE o.oid = ${oid}
+//           AND cst.timerange @> EXTRACT(HOUR from to_timestamp(O.odatetime))::int4
+//           AND cst.sc_date = date_trunc('day', to_timestamp(O.odatetime))::date  
+//       )
+//       ORDER BY cst.id ASC;`
+
+//     const rows = await db.query(getEligibleRidersQuery, async (err, result) => {
+//         if (err) {
+//             console.error(err.stack);
+//             response.status(404).json(`Failed to get eligible riders.`)
+//         } else {
+//             console.log(result.rows)
+//             let allEligibleRiders = []
+//             result.rows.forEach(item => {
+//                 allEligibleRiders.push(item.id)
+//             })
+//             response.status(200).json({ 'rid': allEligibleRiders })
+//         }
+//     })
+// }

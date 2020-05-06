@@ -14,7 +14,7 @@ BEGIN
   IF min_amt IS NULL THEN
   RAISE exception '%Min order is not met%', rest_name, min_amt;
   END IF;
-  RETURN NULL;
+  RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
