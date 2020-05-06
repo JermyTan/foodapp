@@ -13,7 +13,8 @@ const {
   getCustomerOrders,
   addOrderReview,
   addOrderRating,
-  updateCustomerCard
+  updateCustomerCard,
+  getRecentOrderLocations
 } = require('../controllers/customers');
 
 // map routes to controller
@@ -28,6 +29,9 @@ router.route('/:id')
 
 router.route('/:id/orders')
   .get(getCustomerOrders)
+
+router.route('/:id/locations')
+  .get(getRecentOrderLocations)
 
 router.route('/review')
   .post(addOrderReview)

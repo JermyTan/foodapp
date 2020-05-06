@@ -23,17 +23,18 @@ exports.getCustomers = async (req, response) => {
 // @route   POST /customers
 // @acess   Private
 exports.createCustomer = async (req, response) => {
-  const { email, name, cardnum, joindate } = req.body
+  const { email, name } = req.body
+  let joindate = new Date().getTime() / 1000;
   const checkCustomerEmailQuery = `SELECT * FROM Users WHERE email = ${email}`
   const createCustomerQuery =
     `BEGIN;
 
     SET CONSTRAINTS ALL DEFERRED;
-    INSERT INTO Users (email, name)
-    VALUES(${email}, ${name}) RETURNING id;
+    INSERT INTO Users (email, name, role)
+    VALUES(${email}, ${name}, 0) RETURNING id;
 
-    INSERT INTO Customers (id, rpoints, cardNum, joindate)
-    VALUES((SELECT currval('users_id_seq')), 0, (SELECT NULLIF(${cardnum}, 0)), ${joindate}) RETURNING *;
+    INSERT INTO Customers (id, rpoints, joindate)
+    VALUES((SELECT currval('users_id_seq')), 0, ${joindate}) RETURNING *;
 
     COMMIT;`
 
@@ -69,7 +70,8 @@ exports.createCustomer = async (req, response) => {
 // @route   GET /customers
 // @acess   Private
 exports.getCustomer = async (req, response) => {
-  const rows = await db.query('SELECT * FROM customers NATURAL JOIN users WHERE id = $1', [req.params.id], (err, result) => {
+  let email = req.params.email
+  const rows = await db.query('SELECT * FROM customers NATURAL JOIN users WHERE email = $1', [email], (err, result) => {
     if (err) {
       console.error(err.stack);
     } else {
@@ -121,6 +123,8 @@ exports.getCustomerOrders = async (req, response) => {
     'dfee', dfee,
     'rname', rname,
     'odatetime', odatetime,
+    'review', COALESCE((SELECT review FROM Reviews R WHERE R.oid = O.oid), ''),
+    'rating', COALESCE((SELECT rating FROM Ratings R WHERE R.oid = O.oid), 0),
     'status', status,
     'items', (SELECT array_agg(json_build_object('fname', fname, 'qty', quantity, 'price', itemprice))
               FROM Consists C
@@ -195,6 +199,35 @@ exports.addOrderRating = async (req, response) => {
       } else {
         console.log('Successfully added a review')
         response.status(200).json({ msg: `Successfully added/updated rating for order ${oid}` })
+      }
+    }
+  })
+}
+
+// @desc    Gets the 5 most recent order locations of the user
+// @route   GET /customers/:id/locations
+// @acess   Private
+exports.getRecentOrderLocations = async (req, response) => {
+  let id = req.params.id
+
+  //TODO: Add trigger to check if the order is completed (status 2) before adding the review/rating
+  const getRecentLocationsQuery = `SELECT DISTINCT location, COUNT(*) as num
+  FROM Orders O WHERE O.cid = ${id}
+  GROUP BY location
+  ORDER BY num DESC
+  LIMIT 5;`
+
+  db.query(getRecentLocationsQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+    } else {
+      console.log(result)
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to retrieve recent delivery locations`)
+      } else {
+        console.log('Successfully retrieved locations')
+        console.log(result.rows)
+        response.status(200).json(result.rows)
       }
     }
   })

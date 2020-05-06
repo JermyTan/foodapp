@@ -10,8 +10,8 @@ exports.createManager = async (req, response) => {
     `BEGIN;
 
     SET CONSTRAINTS ALL DEFERRED;
-    INSERT INTO Users (email, name)
-    VALUES(${email}, ${name}) RETURNING id;
+    INSERT INTO Users (email, name, role)
+    VALUES(${email}, ${name}, 3) RETURNING id;
 
     INSERT INTO Managers (id)
     VALUES((SELECT currval('users_id_seq'))) RETURNING *;

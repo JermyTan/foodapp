@@ -10,8 +10,9 @@ const {
     getOrders,
     getOrder,
     createOrder,
-    updateOrder,
-    deleteOrder
+    updateOrderTime,
+    deleteOrder,
+    // getEligibleRiders
 } = require('../controllers/orders');
 
 // map routes to controller
@@ -22,7 +23,10 @@ router
 
 router.route('/:id')
     .get(getOrder)
-    .put(updateOrder)
+    .put(updateOrderTime)
     .delete(deleteOrder);
+
+// router.route('/:id/eligible-riders')
+//     .get(getEligibleRiders);
 
 module.exports = router;

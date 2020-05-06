@@ -116,13 +116,13 @@ function HistoryPage() {
 
   useEffect(() => {
     //need props for user id
-    let id = 1;
+    let id = 6;
     let url = `http://localhost:5000/api/customers/${id}/orders`;
     Axios.get(url)
       .then((response) => {
         console.log("response", response.data);
         // TODO: switch to load from api when db is populated
-        setOrders(data);
+        setOrders(response.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -145,13 +145,13 @@ function HistoryPage() {
             textAlign="center"
           />
         ) : (
-          <Card.Group>
-            {orders.map((value, index) => {
-              console.log(orders);
-              return <OrderCard key={index} order={value} />;
-            })}
-          </Card.Group>
-        )}
+            <Card.Group>
+              {orders.map((value, index) => {
+                console.log(orders);
+                return <OrderCard key={index} order={value} />;
+              })}
+            </Card.Group>
+          )}
       </Container>
       <br />
       <br />

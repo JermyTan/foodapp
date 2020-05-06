@@ -67,3 +67,12 @@ WHERE NOT EXISTS (SELECT fname FROM Food WHERE fname = 'Pepperoni Pizza') LIMIT 
 INSERT INTO Sells
 VALUES('Pepperoni Pizza', 'Dominos', true, 20, 18.90);
 COMMIT;
+
+-- Populate default valid shifts for full time riders
+BEGIN;
+SET CONSTRAINTS ALL DEFERRED;
+INSERT INTO "public"."mwsshift" ("shift", "stime1", "etime1", "stime2", "etime2") VALUES ('1', '10', '14', '15', '19');
+INSERT INTO "public"."mwsshift" ("shift", "stime1", "etime1", "stime2", "etime2") VALUES ('2', '11', '15', '16', '20');
+INSERT INTO "public"."mwsshift" ("shift", "stime1", "etime1", "stime2", "etime2") VALUES ('3', '12', '16', '17', '21');
+INSERT INTO "public"."mwsshift" ("shift", "stime1", "etime1", "stime2", "etime2") VALUES ('4', '13', '17', '18', '22');
+COMMIT;

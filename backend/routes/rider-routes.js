@@ -12,7 +12,9 @@ const {
   createRider,
   getRiderOrders,
   getRiderSalary,
-  getRiderSchedule
+  getRiderSchedule,
+  getProcessingOrders,
+  getEligibleRiders
   // updateRiders,
   // deleteRiders
 } = require('../controllers/riders');
@@ -23,13 +25,21 @@ router
   .get(getRiders)
   .post(createRider);
 
+router.route('/order')
+  .get(getEligibleRiders)
+
+
+
 router.route('/:id')
-.get(getRider);
+  .get(getRider);
 // .put(updateRider)
 // .delete(deleteRider);
 
 router.route('/:id/orders')
   .get(getRiderOrders);
+
+router.route('/:id/eligible-p-orders')
+  .get(getProcessingOrders);
 
 router.route('/:id/salary')
   .get(getRiderSalary);

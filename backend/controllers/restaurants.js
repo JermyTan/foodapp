@@ -5,7 +5,7 @@ const db = require('../db')
 // @acess   Public
 exports.getRestaurants = async (req, response) => {
   const getRestaurantsQuery =
-    `SELECT R.rname, R.imgurl,
+    `SELECT R.rname, R.imgurl, R.minamt
     ARRAY_AGG (DISTINCT cat) as categories
     FROM Restaurants R JOIN Sells S ON (R.rname = S.rname) NATURAL JOIN Food
     GROUP BY R.rname`
@@ -44,7 +44,8 @@ exports.getRestaurant = async (req, response) => {
         HAVING S.fname = C.fname
         AND S.rname = O.rname), 0) as qtylefttoday, (${getFoodCategoriesQuery}) as categories
     FROM Sells S
-    WHERE S.rname = ${rname};`
+    WHERE S.rname = ${rname}
+    ORDER BY S.fname;`
   const row = await db.query(getRestaurantFoodQuery, (err, result) => {
     if (err) {
       console.error("Error here:", err)
@@ -277,6 +278,28 @@ exports.deleteMenuItem = async (req, response) => {
     } else {
       console.log(result)
       response.status(200).json({ msg: `Successfully deleted ${fname} from menu of ${rname}` })
+    }
+  })
+
+}
+
+
+// @desc    Gets the reviews of a restaurant
+// @route   GET /restaurant/rname/reviews
+// @acess   Private
+exports.getRestaurantReviews = async (req, response) => {
+  let rname = req.params.rname
+  const getReviewsQuery = `SELECT review, reviewdatetime, name
+  FROM Reviews NATURAL JOIN Orders O JOIN Users U ON (O.cid = U.id)
+  WHERE O.rname = ${rname}`
+
+  db.query(getReviewsQuery, (err, result) => {
+    if (err) {
+      console.log("Error:", err.stack)
+      response.status(400).json({ msg: `Failed to retrieve reviews for ${rname}` })
+    } else {
+      console.log(result.rows)
+      response.status(200).json(result.rows)
     }
   })
 

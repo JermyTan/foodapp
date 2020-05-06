@@ -14,7 +14,8 @@ const {
   viewNewOrders,
   updateMenu,
   deleteMenuItem,
-  getStaffMenu
+  getStaffMenu,
+  getRestaurantReviews
   // updateRestaurant,
   // deleteRestaurant
 } = require('../controllers/restaurants');
@@ -39,5 +40,8 @@ router.route('/:rname/menu')
 
 router.route('/:rname/orders')
   .get(viewNewOrders)
+
+router.route('/:rname/reviews')
+  .get(getRestaurantReviews)
 
 module.exports = router;
