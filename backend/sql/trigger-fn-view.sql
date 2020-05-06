@@ -9,6 +9,8 @@ DROP VIEW IF EXISTS count_daily_hourly_rider CASCADE;
 DROP FUNCTION IF EXISTS check_min_daily_hourly_rider_for_day() CASCADE;
 DROP TRIGGER IF EXISTS wws_min_rider_trigger ON wws CASCADE;
 DROP TRIGGER IF EXISTS mws_min_rider_trigger ON mws CASCADE;
+DROP FUNCTION IF EXISTS check_mws_wk_same() CASCADE;
+DROP TRIGGER IF EXISTS mws_check_wk_trigger ON mws CASCADE;
 
 -- Give all ftrider schedules in its stime and etime breakdown per entry, following wws structure
 CREATE OR REPLACE VIEW effective_mws AS
@@ -177,3 +179,43 @@ CREATE CONSTRAINT TRIGGER mws_min_rider_trigger
 	DEFERRABLE INITIALLY DEFERRED
 	FOR EACH ROW 
 	EXECUTE PROCEDURE check_min_daily_hourly_rider_for_day();
+
+-- Checks all 4 weeks of the same day of the week in an mws, is the same (if available)
+CREATE OR REPLACE FUNCTION check_mws_wk_same()
+RETURNS TRIGGER
+AS $$
+DECLARE
+r1 record;
+check_id		INTEGER;
+check_date 	DATE;
+check_shift 	INTEGER;
+BEGIN
+	IF (TG_OP = 'UPDATE') THEN
+		check_id := OLD.id;
+		check_date := OLD.dmy;
+		check_shift := OLD.shift;
+	ELSE
+		check_id := NEW.id;
+		check_date := NEW.dmy;
+		check_shift := NEW.shift;
+	END IF;
+	SELECT * INTO r1
+	FROM mws
+	WHERE check_id = mws.id
+	AND floor((extract(DOY from mws.dmy) - 1) / 28) + 1 = floor((extract(DOY from check_date) - 1) / 28) + 1
+	AND (extract(ISODOW from mws.dmy)) = (extract(ISODOW from check_date))
+	AND check_shift <> mws.shift;
+
+	IF r1 IS NOT NULL THEN
+		RAISE exception 'Inconsistent shift timing found in mws for rider id: %, date: %, for input values %', check_id, check_date, r1;
+	END IF;
+	RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE CONSTRAINT TRIGGER mws_check_wk_trigger
+	AFTER INSERT OR UPDATE
+	ON mws 
+	DEFERRABLE INITIALLY DEFERRED
+	FOR EACH ROW 
+	EXECUTE PROCEDURE check_mws_wk_same();
