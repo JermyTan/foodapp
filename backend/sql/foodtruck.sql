@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS Promotions CASCADE;
 DROP TABLE IF EXISTS FDSPromotions CASCADE;
 DROP TABLE IF EXISTS RPromotions CASCADE;
 DROP TABLE IF EXISTS Food CASCADE;
+DROP TABLE IF EXISTS MWSShift CASCADE;
 DROP TABLE IF EXISTS MWS CASCADE;
 DROP TABLE IF EXISTS WWS CASCADE;
 DROP TABLE IF EXISTS Orders CASCADE;
@@ -114,17 +115,22 @@ CREATE TABLE Food (
     CHECK (cat <> '')
 );
 
---BCNF--
+CREATE TABLE MWSShift (
+    shift           INTEGER,
+    stime1          INTEGER NOT NULL,
+    etime1          INTEGER NOT NULL,
+    stime2          INTEGER NOT NULL,
+    etime2          INTEGER NOT NULL,
+    PRIMARY KEY (shift),
+    CHECK (10 <= stime1 AND stime1 < etime1 AND etime1 <= 22 AND 10 <= stime2 AND stime2 < etime2 AND etime2 <= 22
+    AND int4range(stime1, etime1, '[]') << int4range(stime2, etime2, '[]'))
+);
+
 CREATE TABLE MWS (
     id          INTEGER REFERENCES FTRiders ON DELETE CASCADE,
     dmy         DATE,
-    stime       INTEGER,
-    etime       INTEGER,
-    PRIMARY KEY (id, dmy, stime, etime),
-    CHECK (10 <= stime AND stime < etime AND etime <= 22),
-    CHECK ((stime = 10 AND etime = 14) OR (stime = 11 AND etime = 15) OR (stime = 12 AND etime = 16) OR (stime = 13 AND etime = 17)
-    OR (stime = 15 AND etime = 19) OR (stime = 16 AND etime = 20) OR (stime = 17 AND etime = 21) OR (stime = 18 AND etime = 22)),
-    EXCLUDE USING gist (id WITH =, dmy WITH =, int4range(stime, etime, '[]') WITH &&)
+    shift       INTEGER REFERENCES MWSShift ON DELETE CASCADE,
+    PRIMARY KEY (id, dmy)
 );
 
 --BCNF--
