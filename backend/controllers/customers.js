@@ -1,5 +1,3 @@
-import { getUnixTime } from "date-fns";
-
 const db = require('../db')
 
 // @desc    Get all customers
@@ -25,15 +23,15 @@ exports.getCustomers = async (req, response) => {
 // @route   POST /customers
 // @acess   Private
 exports.createCustomer = async (req, response) => {
-  const { email, name, cardnum } = req.body
-  let joindate = getUnixTime(new Date());
+  const { email, name } = req.body
+  let joindate = new Date().getTime() / 1000;
   const checkCustomerEmailQuery = `SELECT * FROM Users WHERE email = ${email}`
   const createCustomerQuery =
     `BEGIN;
 
     SET CONSTRAINTS ALL DEFERRED;
-    INSERT INTO Users (email, name)
-    VALUES(${email}, ${name}) RETURNING id;
+    INSERT INTO Users (email, name, role)
+    VALUES(${email}, ${name}, 0) RETURNING id;
 
     INSERT INTO Customers (id, rpoints, joindate)
     VALUES((SELECT currval('users_id_seq')), 0, ${joindate}) RETURNING *;

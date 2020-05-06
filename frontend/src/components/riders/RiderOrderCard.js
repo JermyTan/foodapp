@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, Step, Button } from "semantic-ui-react";
-import { getUnixTime, format, fromUnixTime } from "date-fns";
+import { getUnixTime, format } from "date-fns";
 import Axios from "axios";
 
 function RiderOrderCard(props) {

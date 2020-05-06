@@ -20,20 +20,21 @@ exports.getUsers = async (req, response) => {
 
 }
 
-// @desc    Get single user
+// @desc    Get user id and role from email login
 // @route   GET /users?email=:email
 // @acess   Public
 exports.getUser = async (req, response) => {
     const email = req.query.email
-    const row = await db.query('SELECT * FROM users WHERE id = $1', [email], (err, result) => {
+    db.query(`SELECT * FROM Users WHERE email = ${email}`, (err, result) => {
         if (err) {
             console.error(err.stack)
-            throw err
+            response.status(404).json(`Failed to get user. User does not exist.`)
         } else {
+            console.log(result.rows)
             if (!result.rows[0]) {
-                response.status(404).json(`Failed to get user ${id}. User does not exist.`)
+                response.status(404).json(`Failed to get user. User does not exist.`)
             } else {
-                console.log(`Successfully get user with id ${id}`)
+                console.log(`Successfully get user`)
                 response.status(200).json(result.rows[0])
             }
         }

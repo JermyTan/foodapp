@@ -27,8 +27,11 @@ CREATE TABLE Users (
     id          SERIAL PRIMARY KEY,
     email       VARCHAR UNIQUE NOT NULL,
     name        VARCHAR NOT NULL,
+    role        SMALLINT NOT NULL,
     CHECK (email LIKE '%@%'),
-    CHECK (name <> '')
+    CHECK (name <> ''),
+    --Role: 0 -> Customer, 1 -> Restaurant Staff, 2 -> Rider, 3 -> FDS manager
+    CHECK (role IN (0,1,2,3))
 );
 
 --BCNF--
@@ -198,7 +201,7 @@ CREATE TABLE Sells (
     CHECK (price >= 0)
 );
 
-
+--Not in BCNF or 3NF--
 CREATE TABLE Consists (
     oid         INTEGER REFERENCES Orders ON DELETE CASCADE,
     fname       VARCHAR REFERENCES Food,

@@ -105,8 +105,8 @@ exports.createRider = async (req, response) => {
   const createRiderQuery =
     `BEGIN;
     SET CONSTRAINTS ALL DEFERRED;
-    INSERT INTO Users (email, name)
-    VALUES(${email},${name});
+    INSERT INTO Users (email, name, role)
+    VALUES(${email},${name}, 2);
     
     INSERT INTO Riders (id, bsalary)
     VALUES((SELECT currval('users_id_seq')), 1000);
