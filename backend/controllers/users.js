@@ -21,11 +21,11 @@ exports.getUsers = async (req, response) => {
 }
 
 // @desc    Get single user
-// @route   GET /users/:id
+// @route   GET /users?email=:email
 // @acess   Public
 exports.getUser = async (req, response) => {
-    const id = req.params.id
-    const row = await db.query('SELECT * FROM users WHERE id = $1', [id], (err, result) => {
+    const email = req.query.email
+    const row = await db.query('SELECT * FROM users WHERE id = $1', [email], (err, result) => {
         if (err) {
             console.error(err.stack)
             throw err
