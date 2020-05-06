@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Card, Search, Input, Segment } from "semantic-ui-react";
 import RestaurantCard from "./RestaurantCard";
 import "styles/AllRestaurants.scss";
 import Axios from "axios";
+import UserContext from "utils/UserContext";
 
 function AllRestaurants(props) {
   const [restaurantsData, setRestaurantData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deliveryLocations, setDeliveryLocations] = useState([]);
-  //TODO: replace customer ID with id from context
-  let id = 6;
+  const { uid } = useContext(UserContext);
 
   useEffect(() => {
     const url = `http://localhost:5000/api/restaurants`;
@@ -26,7 +26,7 @@ function AllRestaurants(props) {
   }, []);
 
   const getDeliveryLocations = () => {
-    const url = `http://localhost:5000/api/customers/${id}/locations`;
+    const url = `http://localhost:5000/api/customers/${uid}/locations`;
     Axios.get(url)
       .then((response) => {
         console.log("Fetch recent delivery locations", response.data);
@@ -70,8 +70,8 @@ function AllRestaurants(props) {
         </span>
       </div>
 
-      {props.location &&
-        (loading ? (
+      {props.location ? (
+        loading ? (
           <Segment
             size="massive"
             basic
@@ -91,7 +91,16 @@ function AllRestaurants(props) {
               );
             })}
           </Card.Group>
-        ))}
+        )
+      ) : (
+        <Segment
+          size="massive"
+          basic
+          placeholder
+          textAlign="center"
+          content="You have not selected a location"
+        />
+      )}
     </>
   );
 }

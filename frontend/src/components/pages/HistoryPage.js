@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Menu, Container, Card, Segment } from "semantic-ui-react";
 import OrderCard from "components/customers/CustomerOrderCard";
 import Axios from "axios";
+import UserContext from "utils/UserContext";
 
 const data = [
   {
@@ -113,11 +114,10 @@ const data = [
 function HistoryPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { uid } = useContext(UserContext);
 
   useEffect(() => {
-    //need props for user id
-    let id = 6;
-    let url = `http://localhost:5000/api/customers/${id}/orders`;
+    let url = `http://localhost:5000/api/customers/${uid}/orders`;
     Axios.get(url)
       .then((response) => {
         console.log("response", response.data);
@@ -144,14 +144,22 @@ function HistoryPage() {
             loading={loading}
             textAlign="center"
           />
+        ) : orders.count > 0 ? (
+          <Card.Group>
+            {orders.map((value, index) => {
+              console.log(orders);
+              return <OrderCard key={index} order={value} />;
+            })}
+          </Card.Group>
         ) : (
-            <Card.Group>
-              {orders.map((value, index) => {
-                console.log(orders);
-                return <OrderCard key={index} order={value} />;
-              })}
-            </Card.Group>
-          )}
+          <Segment
+            size="massive"
+            basic
+            placeholder
+            textAlign="center"
+            content="You have no past orders"
+          />
+        )}
       </Container>
       <br />
       <br />
