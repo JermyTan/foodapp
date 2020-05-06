@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, Accordion } from "semantic-ui-react";
-import { MANAGER_SUMMARY_PATH, MANAGER_PROMOTION_PATH } from "../../utils/Constants";
+import {
+  MANAGER_SUMMARY_PATH,
+  MANAGER_PROMOTION_PATH,
+} from "../../utils/Constants";
 
 function ManagerTab(props) {
   const [isExpanded, setExpanded] = useState(false);
 
   return (
-    <Accordion as={Menu.Item}>
+    <Accordion as={Menu.Item} link>
       <Accordion.Title
         onClick={() => setExpanded(!isExpanded)}
         active={isExpanded}

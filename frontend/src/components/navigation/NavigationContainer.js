@@ -8,7 +8,7 @@ import RiderTab from "./RiderTab";
 import StaffTab from "./StaffTab";
 import ManagerTab from "./ManagerTab";
 
-function NavigationContainer({ children }) {
+function NavigationContainer({ signOut, children }) {
   const [sidebarOpened, setSidebarOpened] = useState(false);
 
   const onTabClick = () => {
@@ -39,14 +39,12 @@ function NavigationContainer({ children }) {
         <RiderTab onTabClick={onTabClick} />
         <StaffTab onTabClick={onTabClick} />
         <ManagerTab onTabClick={onTabClick} />
+        <Menu.Item content="Sign Out" link onClick={signOut} />
       </Sidebar>
 
       <Sidebar.Pusher dimmed={sidebarOpened}>
         <Menu borderless size="huge" fixed="top">
           <Menu.Item onClick={() => setSidebarOpened(true)} icon="sidebar" />
-          {
-            //<UserMenu activeTab={activeTab} onTabClick={onTabClick} />
-          }
         </Menu>
         <div style={{ height: "100vh", overflow: "auto" }}>{children}</div>
       </Sidebar.Pusher>
@@ -55,7 +53,7 @@ function NavigationContainer({ children }) {
 }
 
 NavigationContainer.propTypes = {
-  children: PropTypes.node
+  children: PropTypes.node,
 };
 
 export default NavigationContainer;
