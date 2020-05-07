@@ -280,7 +280,6 @@ exports.getEligibleRiders = async (req, response) => {
 exports.getSummaryInfo = async (req, response) => {
   let id = req.params.id;
   let { stime, etime } = req.query;
-  console.log(`id: ${id} stime: ${stime} etime: ${etime}`);
   const getRidersSummary = 
   `WITH RiderOrders AS (
     SELECT count(*) AS num_order
