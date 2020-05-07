@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { MonthRangeInput } from "semantic-ui-calendar-react";
+import {
+    parse,
+    isBefore,
+    format,
+    getUnixTime,
+    startOfMonth,
+    endOfMonth,
+    differenceInCalendarMonths,
+    differenceInCalendarWeeks,
+} from "date-fns";
 import Axios from "axios";
 
-function SummaryData(setOrders, setCustomerOrder, setOrderSummary, setRiderSummary) {
-    const [data, setData] = useState([]);
+function SummaryData(setOrders, setCustomerOrder, setOrderSummary, setRiderSummary, startime, endtime) {
+    const [period, setPeriod] = useState([]);
     // const url1 = `http://localhost:5000/api/customers`
     // useEffect(() => {
     //     Axios.get(url1)
@@ -75,12 +86,13 @@ function SummaryData(setOrders, setCustomerOrder, setOrderSummary, setRiderSumma
             })
     }, [])
 
-    const url7 = `http://localhost:5000/api/managers/summary/riders`
+    const url7 = `http://localhost:5000/api/managers/summary/riders?starttime=${startime}&endtime=${endtime}`;
     useEffect(() => {
         Axios.get(url7)
             .then(response => {
-                console.log("response", response.data);
-                setRiderSummary(response.data);
+                let { ridersummary } = response.data;
+                console.log(ridersummary);
+                setRiderSummary(ridersummary);
             })
             .catch(error => {
                 console.log("Error retrieving rider summary data:", error);

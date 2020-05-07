@@ -126,45 +126,56 @@ exports.getGeneralCustomerSummary = async (req, response) => {
   })
 }
 
+
 // @desc    Get rider summary info
 // @route   GET /manager/summary/riders
 // @acess   Public
 exports.getGeneralRiderSummary = async (req, response) => {
-  const getSummaryQuery =
-    `WITH newWWS AS (
-    SELECT id, dmy, SUM(etime - stime) AS hours 
-    FROM WWS 
-    GROUP BY id, dmy
-    ), 
-    getRiders AS (SELECT P.id, bsalary,(SELECT EXTRACT(MONTH FROM 
-      (SELECT dmy FROM newWWS WHERE id = W.id AND dmy = W.dmy AND hours = W.hours))) AS month, 
-    SUM(W.hours) AS hours, name, email
-    FROM (newWWS W RIGHT JOIN (Riders NATURAL JOIN PTRiders P) USING (id)) NATURAL JOIN Users
-    GROUP BY P.id, month, bsalary, name, email
-    UNION
-    SELECT F.id, bsalary, (SELECT EXTRACT(MONTH FROM 
-      (SELECT dmy FROM MWS WHERE id = M.id AND dmy = M.dmy AND shift = M.shift))) AS month, 
-    SUM((etime1-stime1) + (etime2-stime2)) AS hours, name, email
-    FROM ((MWSShift NATURAL JOIN MWS M) RIGHT JOIN (Riders NATURAL JOIN FTRiders F) USING (id))
-    NATURAL JOIN Users
-    GROUP BY F.id, month, bsalary, name, email
+  let { starttime, endtime } = req.query;
+  const getSummaryQuery = `WITH SO AS (
+    SELECT O.rid, COUNT(O.oid) AS count, SUM(O.dfee) AS sumdfee, 
+    AVG(deliverdatetime - departdatetime1) AS avgdelivertime,
+    AVG(R.rating) AS avgrating, COUNT(R.rating) AS norating
+    FROM Orders O LEFT JOIN Ratings R USING (oid)
+    WHERE O.status = 2
+    AND O.odatetime >= ${starttime}
+    AND O.odatetime <= ${endtime}
+    GROUP BY O.rid
     ),
-    getOrders AS (SELECT rid, SUM(dfee) AS sumdfee, (SELECT EXTRACT(MONTH FROM
-      (SELECT to_timestamp((SELECT odatetime FROM Orders WHERE oid = O.oid))::date))) AS month, 
-    COUNT(oid) AS noOrders, AVG(deliverdatetime - departdatetime1) AS avgdelivertime
-    FROM Orders O
-    WHERE status = 2
-    GROUP BY rid, month
-    ),
-    getRatings AS (
-    SELECT O.rid, R.rating
-    FROM Ratings R NATURAL JOIN Orders O
-    )
-    SELECT R.id, (R.bsalary + (COALESCE(O.sumdfee, 0))) AS salary, R.month, 
-    R.hours, R.name, R.email, O.noorders, O.avgdelivertime, A.rating 
-    FROM (getRiders R FULL OUTER JOIN getOrders O ON (R.id = O.rid AND R.month = O.month))
-    LEFT JOIN getRatings A ON (A.rid = id)
-    ;`
+  RR AS (
+    SELECT * FROM Riders R FULL OUTER JOIN SO S ON (S.rid = R.id)
+  ),
+  HH AS (
+    SELECT W.id, SUM(W.etime - W.stime) AS hours
+    FROM WWS W  
+    WHERE (SELECT EXTRACT(EPOCH FROM(
+      SELECT dmy FROM WWS WHERE id = W.id 
+      AND dmy = W.dmy AND etime = W.etime AND stime = W.stime))) >= ${starttime}
+    AND (SELECT EXTRACT(EPOCH FROM(
+      SELECT dmy FROM WWS WHERE id = W.id 
+      AND dmy = W.dmy AND etime = W.etime AND stime = W.stime))) <= ${endtime}
+    GROUP BY W.id
+    UNION 
+    SELECT M.id, SUM((etime1-stime1) + (etime2 - stime2)) AS hours
+    FROM MWS M NATURAL JOIN MWSShift
+    WHERE (SELECT EXTRACT(EPOCH FROM(
+      SELECT dmy FROM MWS WHERE id = M.id AND dmy = M.dmy))) >= ${starttime}
+    AND (SELECT EXTRACT(EPOCH FROM(
+      SELECT dmy FROM MWS WHERE id = M.id AND dmy = M.dmy))) <= ${endtime}
+    GROUP BY M.id
+  ),
+  TT AS (
+    SELECT * FROM HH FULL OUTER JOIN RR USING (id)
+  )
+    SELECT json_build_object (
+      'riderinfo', (SELECT json_agg(rows) as riderinfo
+      FROM (
+        SELECT R.id, (R.bsalary + R.sumdfee) AS totalsalary, R.count AS noorder, 
+        R.avgdelivertime, R.hours, R.norating, R.avgrating
+        FROM TT R
+      ) 
+      AS rows)
+    ) as ridersummary`;
 
   const rows = await db.query(getSummaryQuery, (err, result) => {
     if (err) {
