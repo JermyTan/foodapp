@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Menu,
   Container,
@@ -8,8 +8,9 @@ import {
   Label,
 } from "semantic-ui-react";
 import { MonthRangeInput } from "semantic-ui-calendar-react";
-import { parse, isBefore, format } from "date-fns";
+import { parse, isBefore, format, getUnixTime, startOfMonth } from "date-fns";
 import "styles/AllRestaurants.scss";
+import Axios from "axios";
 
 const restaurant = {
   name: "Toast Box",
@@ -43,6 +44,45 @@ const promoData = [
 
 function StaffSummaryPage() {
   const [selectedMonths, setSelectedMonths] = useState("");
+  const [restaurantName, setRestaurantName] = useState("");
+  const [summaryInfo, setSummaryInfo] = useState({});
+
+  let staffid = 131
+
+  useEffect(() => {
+    getRestaurantName();
+  })
+
+  const getRestaurantName = () => {
+    const url = `http://localhost:5000/api/staffs/${staffid}`
+    Axios.get(url)
+      .then((response) => {
+        let rname = response.data.rname
+        setRestaurantName(rname)
+      })
+      .catch((error) => {
+        console.log("Error", error)
+      })
+  }
+
+  const fetchSummaryInfo = (monthA, monthB) => {
+    console.log("Fetch some info!")
+    console.log(monthA, monthB)
+    let starttime = getUnixTime(startOfMonth(monthA));
+    let endtime = getUnixTime(startOfMonth(monthB));
+    console.log("Start unix time", starttime)
+    const url = `http://localhost:5000/api/restaurants/${restaurantName}/summary?starttime=${starttime}&endtime=${endtime}`
+    Axios.get(url)
+      .then((response) => {
+        console.log(response.data[0].rsummary);
+        setSummaryInfo(response.data[0].rsummary)
+      })
+      .catch((error) => {
+        console.log("Error", error)
+      })
+
+  }
+
 
   const getPeriod = (selectedMonths) => {
     let period = selectedMonths.split(" - ");
@@ -58,6 +98,8 @@ function StaffSummaryPage() {
       [monthA, monthB] = [monthB, monthA];
     }
 
+    fetchSummaryInfo(monthA, monthB);
+
     return [monthA, monthB];
   };
 
@@ -67,7 +109,7 @@ function StaffSummaryPage() {
     <main className="staff-summary-page">
       <Menu size="huge" style={{ opacity: 0 }}></Menu>
       <Container>
-        <h1>{restaurant.name}</h1>
+        <h1>{restaurantName}</h1>
         <div style={{ display: "flex", flexWrap: "wrap" }}>
           <h2 style={{ marginInlineEnd: "1rem" }}>Summary for</h2>
           <MonthRangeInput
@@ -102,7 +144,7 @@ function StaffSummaryPage() {
                 <Statistic.Label>Total revenue</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="dollar" />
-                  8342
+                  0
                 </Statistic.Value>
               </Statistic>
 
@@ -239,14 +281,14 @@ function StaffSummaryPage() {
             <br />
           </>
         ) : (
-          <Segment
-            size="massive"
-            basic
-            placeholder
-            content="You have not selected a period"
-            textAlign="center"
-          />
-        )}
+            <Segment
+              size="massive"
+              basic
+              placeholder
+              content="You have not selected a period"
+              textAlign="center"
+            />
+          )}
         <h1>Promotional Campaigns</h1>
         {promoData.map((promo) => {
           return (

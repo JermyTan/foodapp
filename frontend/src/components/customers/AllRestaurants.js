@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { Card, Search, Input, Segment, Dropdown } from "semantic-ui-react";
+import React, { useState, useEffect, useContext } from "react";
+import { Card, Search, Input, Segment } from "semantic-ui-react";
 import RestaurantCard from "./RestaurantCard";
 import "styles/AllRestaurants.scss";
 import Axios from "axios";
-import { set } from "date-fns";
+import UserContext from "utils/UserContext";
 
 function AllRestaurants(props) {
   const [restaurantsData, setRestaurantData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deliveryLocations, setDeliveryLocations] = useState([]);
-  //TODO: replace customer ID with id from context
-  let id = 6;
+  const { uid } = useContext(UserContext);
 
   useEffect(() => {
     const url = `http://localhost:5000/api/restaurants`;
@@ -22,21 +21,21 @@ function AllRestaurants(props) {
         getDeliveryLocations();
       })
       .catch((error) => {
-        console.log("Error retrieving past orders:", error);
+        console.log("Error retrieving restaurants:", error);
       });
   }, []);
 
   const getDeliveryLocations = () => {
-    const url = `http://localhost:5000/api/customers/${id}/locations`
+    const url = `http://localhost:5000/api/customers/${uid}/locations`;
     Axios.get(url)
       .then((response) => {
         console.log("Fetch recent delivery locations", response.data);
-        setDeliveryLocations(response.data)
+        setDeliveryLocations(response.data);
       })
       .catch((error) => {
         console.log("Unable to fetch recent delivery locations", error);
-      })
-  }
+      });
+  };
 
   return (
     <>
@@ -55,14 +54,14 @@ function AllRestaurants(props) {
             iconPosition="left"
             icon="location arrow"
             value={props.location}
-            list='orderLocations'
+            list="orderLocations"
             onChange={(event, data) => {
               props.setLocation(data.value);
             }}
           />
-          <datalist id='orderLocations'>
-            {deliveryLocations.map(value => {
-              return <option value={value.location} />
+          <datalist id="orderLocations">
+            {deliveryLocations.map((value) => {
+              return <option value={value.location} />;
             })}
           </datalist>
         </span>
@@ -71,8 +70,8 @@ function AllRestaurants(props) {
         </span>
       </div>
 
-      {props.location &&
-        (loading ? (
+      {props.location ? (
+        loading ? (
           <Segment
             size="massive"
             basic
@@ -81,18 +80,27 @@ function AllRestaurants(props) {
             textAlign="center"
           />
         ) : (
-            <Card.Group>
-              {restaurantsData.map((value, index) => {
-                return (
-                  <RestaurantCard
-                    key={index}
-                    restaurant={value}
-                    setSelectedRestaurant={props.setSelectedRestaurant}
-                  />
-                );
-              })}
-            </Card.Group>
-          ))}
+          <Card.Group>
+            {restaurantsData.map((value, index) => {
+              return (
+                <RestaurantCard
+                  key={index}
+                  restaurant={value}
+                  setSelectedRestaurant={props.setSelectedRestaurant}
+                />
+              );
+            })}
+          </Card.Group>
+        )
+      ) : (
+        <Segment
+          size="massive"
+          basic
+          placeholder
+          textAlign="center"
+          content="You have not selected a location"
+        />
+      )}
     </>
   );
 }

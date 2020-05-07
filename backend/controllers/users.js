@@ -25,7 +25,7 @@ exports.getUsers = async (req, response) => {
 // @acess   Public
 exports.getUser = async (req, response) => {
     const email = req.query.email
-    db.query(`SELECT * FROM Users WHERE email = ${email}`, (err, result) => {
+    db.query(`SELECT * FROM Users WHERE email = '${email}'`, (err, result) => {
         if (err) {
             console.error(err.stack)
             response.status(404).json(`Failed to get user. User does not exist.`)
@@ -46,8 +46,7 @@ exports.getUser = async (req, response) => {
 // @acess   Private
 exports.createUser = async (req, response) => {
     const { name, email } = req.body
-    const createUserQuery = `INSERT INTO USERS (email, name) VALUES ($1, $2) returning *`
-    const values = [email, name]
+    const createUserQuery = `INSERT INTO USERS (email, name) VALUES ('${email}', '${name}') returning *`
     try {
         const rows = await db.query(createUserQuery, values, (err, result) => {
             if (err) {
@@ -104,12 +103,12 @@ exports.createUser = async (req, response) => {
 exports.updateUser = async (req, response) => {
     const id = req.params.id
     const { email, name } = req.body
-    const checkUserEmailQuery = `SELECT * FROM Users WHERE email = ${email}`
+    const checkUserEmailQuery = `SELECT * FROM Users WHERE email = '${email}'`
 
     const updateUserQuery =
         `UPDATE users
-    SET email = ${email},
-    name = ${name}
+    SET email = '${email}',
+    name = '${name}'
     WHERE id = ${id}
     RETURNING *;`
 
@@ -119,8 +118,9 @@ exports.updateUser = async (req, response) => {
             console.log("Error:", err.stack)
             response.status(500).json('Failed to verify if email exists.')
         } else {
-            if (result.rows.length !== 0) {
-                //If email already exists in users table
+            console.log(result.rows)
+            if (result.rows.length !== 0 && result.rows[0].id !== id) {
+                //If email already exists in users table, and the one changing email is not the same person
                 response.status(400).json('This email is already registered.')
             } else {
                 db.query(updateUserQuery, async (err2, result2) => {

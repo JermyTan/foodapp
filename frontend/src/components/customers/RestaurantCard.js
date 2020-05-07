@@ -32,6 +32,10 @@ function RestaurantCard(props) {
           </span>
         </Card.Header>
 
+        <Card.Description>
+          Minimum order amount: ${restaurant.minamt}
+        </Card.Description>
+
         <Card.Meta style={{ display: "flex", justifyContent: "space-between" }}>
           {restaurant.categories.join(", ")}
 
@@ -44,13 +48,13 @@ function RestaurantCard(props) {
         >
           $3.99 delivery fee
           {data.promotions.map((value) => {
-          return (
-            <>
-              <br />
-              <strong style={{ color: "#0d97ff" }}>{value}</strong>
-            </>
-          );
-        })}
+            return (
+              <>
+                <br />
+                <strong style={{ color: "#0d97ff" }}>{value}</strong>
+              </>
+            );
+          })}
         </Card.Description>
       </Card.Content>
     </Card>

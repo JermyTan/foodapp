@@ -100,21 +100,20 @@ function ReviewsButton(props) {
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-    getReviews()
-  }, [])
+    getReviews();
+  }, []);
 
   const getReviews = () => {
-    const url = `http://localhost:5000/api/restaurants/'${props.rname}'/reviews`
+    const url = `http://localhost:5000/api/restaurants/'${props.rname}'/reviews`;
     Axios.get(url)
       .then((response) => {
-        console.log(`Get reviews for ${props.rname}`, response.data)
-        setReviews(response.data)
+        console.log(`Get reviews for ${props.rname}`, response.data);
+        setReviews(response.data);
       })
       .catch((error) => {
         console.log(`Error retrieving reviews for ${props.rname}, error`);
-      })
-  }
-
+      });
+  };
 
   return (
     <Modal

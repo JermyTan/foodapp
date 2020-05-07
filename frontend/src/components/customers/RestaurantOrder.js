@@ -3,7 +3,7 @@ import { Button, Icon, Label, Input, Item } from "semantic-ui-react";
 import FoodItemSelector from "./FoodItemSelector";
 import CheckoutButton from "./CheckoutButton";
 import Axios from "axios";
-import { startOfToday, addHours, getUnixTime } from 'date-fns'
+import { startOfToday, addHours, getUnixTime } from "date-fns";
 
 const data = [
   {
@@ -51,8 +51,8 @@ function RestaurantOrder(props) {
   const [restaurantFoodItems, setRestaurantFoodItems] = useState([]);
   const rname = props.restaurant;
   //TODO: set to 10am to 10pm today
-  const start = getUnixTime(addHours(startOfToday(), 10))  //10am today
-  const end = getUnixTime(addHours(startOfToday(), 22)) //10pm today
+  const start = getUnixTime(addHours(startOfToday(), 10)); //10am today
+  const end = getUnixTime(addHours(startOfToday(), 22)); //10pm today
   // console.log("epoch time 10am today", start)
   // console.log("epoch time 10am today", fromUnixTime(start))
   // console.log("epoch time 10pm today", fromUnixTime(end))
@@ -153,8 +153,6 @@ function RestaurantOrder(props) {
           </Button.Group>
         </span>
       </div>
-
-      <h3>Minimum order amount required: </h3>
 
       <Item.Group divided>
         {restaurantFoodItems.map((foodItem, index) => {

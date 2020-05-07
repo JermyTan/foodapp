@@ -5,11 +5,10 @@ const db = require('../db')
 // @acess   Public
 exports.getRestaurants = async (req, response) => {
   const getRestaurantsQuery =
-    `SELECT R.rname, R.imgurl, R.minamt
-    ARRAY_AGG (DISTINCT cat) as categories
+    `SELECT R.rname, R.imgurl, R.minamt, ARRAY_AGG(DISTINCT cat) as categories
     FROM Restaurants R JOIN Sells S ON (R.rname = S.rname) NATURAL JOIN Food
     GROUP BY R.rname`
-  const rows = await db.query(getRestaurantsQuery, async (err, result) => {
+  db.query(getRestaurantsQuery, async (err, result) => {
     if (err) {
       console.error(err.stack);
       response.status(404).json(`Failed to get restaurants and categories.`);
@@ -302,5 +301,63 @@ exports.getRestaurantReviews = async (req, response) => {
       response.status(200).json(result.rows)
     }
   })
+}
 
+
+// @desc    Get all restaurants with info rname, category
+// @route   GET /restaurants
+// @acess   Public
+exports.getRestaurants = async (req, response) => {
+  const getRestaurantsQuery =
+    `SELECT R.rname, R.imgurl, R.minamt, ARRAY_AGG(DISTINCT cat) as categories
+    FROM Restaurants R JOIN Sells S ON (R.rname = S.rname) NATURAL JOIN Food
+    GROUP BY R.rname`
+  db.query(getRestaurantsQuery, async (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json(`Failed to get restaurants and categories.`);
+    } else {
+      console.log("Get restaurants result:", result.rows);
+      response.status(200).json(result.rows)
+    }
+  })
+}
+
+
+exports.getSummaryInfo = async (req, response) => {
+  let { starttime, endtime } = req.query
+  let rname = req.params.rname
+
+  const getRestaurantsSummary =
+    `WITH SO AS (
+    SELECT *
+    FROM Orders O
+    WHERE O.status = 2
+    AND O.rname = '${rname}'
+    AND O.odatetime >= ${starttime}
+    AND O.odatetime <= ${endtime}
+    )
+    SELECT json_build_object (
+      'totalrevenue', COALESCE((SELECT SUM(fprice) FROM SO), 0),
+      'ordercount', (SELECT COUNT(DISTINCT oid) FROM SO),
+      'popularitems', (SELECT json_agg(rows) as popularItems 
+        FROM (
+        SELECT fname, SUM(quantity)
+        FROM Consists C
+        WHERE C.oid IN (SELECT oid FROM SO)
+        GROUP BY fname
+        ORDER BY SUM (quantity) DESC
+        LIMIT 5
+        ) 
+        AS rows)
+    ) as rsummary`
+  db.query(getRestaurantsSummary, async (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json(`Failed to get restaurants and categories.`);
+    } else {
+      console.log("Get restaurants result:", result.rows);
+      response.status(200).json(result.rows)
+    }
+  })
 }
