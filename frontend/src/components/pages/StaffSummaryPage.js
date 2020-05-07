@@ -51,7 +51,7 @@ function StaffSummaryPage() {
 
   useEffect(() => {
     getRestaurantName();
-  })
+  }, [])
 
   const getRestaurantName = () => {
     const url = `http://localhost:5000/api/staffs/${staffid}`

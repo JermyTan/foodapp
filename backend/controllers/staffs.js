@@ -12,7 +12,7 @@ exports.createStaff = async (req, response) => {
 
     SET CONSTRAINTS ALL DEFERRED;
     INSERT INTO Users (email, name)
-    VALUES('${email}', '${name}') RETURNING id;
+    VALUES('${email}', '${name}', 1) RETURNING id;
 
     INSERT INTO Staffs (id, rname)
     VALUES((SELECT currval('users_id_seq')), '${rname}') RETURNING *;
