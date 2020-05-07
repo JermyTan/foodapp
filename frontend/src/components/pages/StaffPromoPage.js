@@ -82,7 +82,6 @@ function StaffPromoPage() {
             <Button.Group>
               <CreateRPromotionButton
                 rname={restaurantName}
-
               />
             </Button.Group>
           </span>

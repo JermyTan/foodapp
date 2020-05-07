@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Form, Modal, Message } from "semantic-ui-react";
 import Axios from "axios";
 
-function CreatePromotionButton() {
+function CreatePromotionButton(props) {
   const [isModalOpened, setModalOpened] = useState(false);
   const [startdate, setStartdate] = useState("");
   const [enddate, setEnddate] = useState("");
@@ -16,11 +16,8 @@ function CreatePromotionButton() {
   var epochStartDate = new Date(startdate.toString()).getTime();
   var epochEndDate = new Date(enddate.toString()).getTime();
 
-  useEffect(() => {
-    getRestaurantItems()
-  }, [])
-
-  const getRestaurantItems = (props) => {
+  const getRestaurantItems = () => {
+    console.log("props", props)
     const url = `http://localhost:5000/api/restaurants/'${props.rname}'/menu`;
     Axios.get(url)
       .then((response) => {
@@ -36,6 +33,7 @@ function CreatePromotionButton() {
     <Modal
       size="small"
       open={isModalOpened}
+      onOpen={getRestaurantItems}
       onClose={() => setModalOpened(false)}
       trigger={
         <Button

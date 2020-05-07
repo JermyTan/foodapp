@@ -52,52 +52,29 @@ function CheckoutButton(props) {
             parsedItem.itemprice = `${item.price}`;
             parsedItems.push(parsedItem);
           }
-          console.log(parsedItems);
-          const url = `http://localhost:5000/api/orders`;
-          Axios.post(url, {
-            location: `'${props.deliveryInfo.location}'`,
-            dfee: `'${props.deliveryInfo.deliveryFee}'`,
-            odatetime: `${orderTime}`,
-            cid: `${uid}`,
-            paymethod: `${isPayByCard}`,
-            rname: `'${props.restaurant}'`,
-            fprice: `${props.subtotal}`,
-            rid: `${chosenRider}`,
-            foodlist: parsedItems,
-          })
-            .then((response) => {
-              console.log("'Successfully created order", response);
-              setLoading(false);
-              window.location.push("/history");
-            })
-            .catch((error) => {
-              setLoading(false);
-              console.log("Error occured while making an order");
-            });
         }
         console.log(parsedItems);
         const url = `http://localhost:5000/api/orders`;
-        let payMethod = isPayByCard ? 1 : 0;
         Axios.post(url, {
           location: `'${props.deliveryInfo.location}'`,
           dfee: `'${props.deliveryInfo.deliveryFee}'`,
           odatetime: `${orderTime}`,
           cid: `${uid}`,
-          paymethod: `${payMethod}`,
+          paymethod: `${isPayByCard}`,
           rname: `'${props.restaurant}'`,
           fprice: `${props.subtotal}`,
-          rid: `${127}`,
+          rid: `${chosenRider}`,
           foodlist: parsedItems,
         })
           .then((response) => {
             console.log("'Successfully created order", response);
-            //setModalOpened(false);
-            //TODO: Redirect to orders page
+            setLoading(false);
+            window.location.push("/history");
           })
           .catch((error) => {
-            console.log("Error occured while making an order");
+            setLoading(false);
+            console.log("Error occured while making an order", error);
           });
-
       })
       .catch((error) => {
         console.log("Unable to get riders working at this time:", error);

@@ -223,24 +223,24 @@ function RestaurantMenu() {
           loading={loading}
         />
       ) : (
-        <Item.Group divided>
-          {restaurantFoodItems.map((value, index) => {
-            return (
-              <FoodItemEditor
-                key={index}
-                index={index}
-                name={value.name}
-                price={value.price}
-                category={value.category}
-                limit={value.limit}
-                imgurl={value.imgurl}
-                updateFoodItem={updateFoodItem}
-                deleteFoodItem={deleteFoodItem}
-              />
-            );
-          })}
-        </Item.Group>
-      )}
+          <Item.Group divided>
+            {restaurantFoodItems.map((value, index) => {
+              return (
+                <FoodItemEditor
+                  key={index}
+                  index={index}
+                  name={value.name}
+                  price={value.price}
+                  category={value.category}
+                  limit={value.limit}
+                  imgurl={value.imgurl}
+                  updateFoodItem={updateFoodItem}
+                  deleteFoodItem={deleteFoodItem}
+                />
+              );
+            })}
+          </Item.Group>
+        )}
     </>
   );
 }
