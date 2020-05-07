@@ -162,17 +162,22 @@ CREATE CONSTRAINT TRIGGER mws_min_rider_trigger
 	FOR EACH ROW 
 	EXECUTE PROCEDURE check_min_daily_hourly_rider_for_day();
 
--- Adds 100 rpoints to the customer's account once order is delivered
+-- Adds 10 rpoints per dollar to the customer's account once order is delivered
 CREATE OR REPLACE FUNCTION add_rpoints()
 RETURNS TRIGGER
 AS $$
+DECLARE
+total_price NUMERIC(12, 2);
 BEGIN
-	RAISE NOTICE 'New column: %, status: %, cid: %', NEW, NEW.status, NEW.cid;
-	IF NEW.status = 2 THEN
-		UPDATE Customers
-		SET rpoints = rpoints + 100
-		WHERE id = NEW.cid;
-		RAISE NOTICE 'Order delivered. Added 100 rpoints into customer id: %', NEW.cid;
+	total_price := NEW.dfee + NEW.fprice;
+-- 	Do nothing when immediate status before update was already set to 2 (delivered).
+	IF NOT ((TG_OP = 'UPDATE') AND (OLD.status = 2)) THEN
+		IF NEW.status = 2 THEN
+			UPDATE Customers
+			SET rpoints = rpoints + 10*(total_price)
+			WHERE id = NEW.cid;
+			RAISE NOTICE 'Order delivered. Added % rpoints into customer id: %', 10*(total_price), NEW.cid;
+		END IF;
 	END IF;
 	RETURN NULL;
 END;
