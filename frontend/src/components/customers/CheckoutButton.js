@@ -27,44 +27,45 @@ function CheckoutButton(props) {
         let riderIds = response.data.rid;
         if (riderIds.length == 0) {
           console.log("No riders available at this time!");
-        } else {
-          console.log("Riders available:", riderIds);
-          let chosenRider = riderIds[0];
-          let parsedItems = [];
-          let chosenItems = props.selectedFoodItems;
-          for (var key in chosenItems) {
-            if (chosenItems.hasOwnProperty(key)) {
-              let item = chosenItems[key];
-              let parsedItem = {};
-              parsedItem.fname = `'${item.name}'`;
-              parsedItem.qty = `${item.quantity}`;
-              parsedItem.itemprice = `${item.price}`;
-              parsedItems.push(parsedItem);
-            }
-          }
-          console.log(parsedItems);
-          const url = `http://localhost:5000/api/orders`;
-          let payMethod = isPayByCard ? 1 : 0;
-          Axios.post(url, {
-            location: `'${props.deliveryInfo.location}'`,
-            dfee: `'${props.deliveryInfo.deliveryFee}'`,
-            odatetime: `${orderTime}`,
-            cid: `${cid}`,
-            paymethod: `${payMethod}`,
-            rname: `'${props.restaurant}'`,
-            fprice: `${props.subtotal}`,
-            rid: `${chosenRider}`,
-            foodlist: parsedItems,
-          })
-            .then((response) => {
-              console.log("'Successfully created order", response);
-              //setModalOpened(false);
-              //TODO: Redirect to orders page
-            })
-            .catch((error) => {
-              console.log("Error occured while making an order");
-            });
+          console.log("Assigning to default rider:")
         }
+        console.log("Riders available:", riderIds);
+        let chosenRider = riderIds[0];
+        let parsedItems = [];
+        let chosenItems = props.selectedFoodItems;
+        for (var key in chosenItems) {
+          if (chosenItems.hasOwnProperty(key)) {
+            let item = chosenItems[key];
+            let parsedItem = {};
+            parsedItem.fname = `'${item.name}'`;
+            parsedItem.qty = `${item.quantity}`;
+            parsedItem.itemprice = `${item.price}`;
+            parsedItems.push(parsedItem);
+          }
+        }
+        console.log(parsedItems);
+        const url = `http://localhost:5000/api/orders`;
+        let payMethod = isPayByCard ? 1 : 0;
+        Axios.post(url, {
+          location: `'${props.deliveryInfo.location}'`,
+          dfee: `'${props.deliveryInfo.deliveryFee}'`,
+          odatetime: `${orderTime}`,
+          cid: `${cid}`,
+          paymethod: `${payMethod}`,
+          rname: `'${props.restaurant}'`,
+          fprice: `${props.subtotal}`,
+          rid: `${127}`,
+          foodlist: parsedItems,
+        })
+          .then((response) => {
+            console.log("'Successfully created order", response);
+            //setModalOpened(false);
+            //TODO: Redirect to orders page
+          })
+          .catch((error) => {
+            console.log("Error occured while making an order");
+          });
+
       })
       .catch((error) => {
         console.log("Unable to get riders working at this time:", error);
@@ -144,8 +145,8 @@ function CheckoutButton(props) {
                 <span>
                   $
                   {(selectedFoodItem.quantity * selectedFoodItem.price).toFixed(
-                    2
-                  )}
+                  2
+                )}
                 </span>
               </div>
             );

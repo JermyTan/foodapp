@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, Accordion } from "semantic-ui-react";
-import { STAFF_MENU_PATH, STAFF_SUMMARY_PATH } from "../../utils/Constants";
+import { STAFF_MENU_PATH, STAFF_SUMMARY_PATH, STAFF_PROMO_PATH } from "../../utils/Constants";
 
 function StaffTab(props) {
   const [isExpanded, setExpanded] = useState(false);
@@ -31,7 +31,16 @@ function StaffTab(props) {
           content="Summary"
           onClick={props.onTabClick}
         />
+        <Menu.Item
+          as={Link}
+          to={STAFF_PROMO_PATH}
+          name={STAFF_PROMO_PATH}
+          active={window.location.pathname === STAFF_PROMO_PATH}
+          content="Promotions"
+          onClick={props.onTabClick}
+        />
       </Accordion.Content>
+
     </Accordion>
   );
 }
