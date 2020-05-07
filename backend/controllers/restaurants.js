@@ -328,14 +328,30 @@ exports.getSummaryInfo = async (req, response) => {
   let { starttime, endtime } = req.query
   let rname = req.params.rname
 
-  const getRestaurantsQuery =
-    `SELECT SUM(fprice), COUNT(DISTINCT oid)
+  const getRestaurantsSummary =
+    `WITH SO AS (
+    SELECT *
     FROM Orders O
     WHERE O.status = 2
     AND O.rname = '${rname}'
     AND O.odatetime >= ${starttime}
-    AND O.odatetime <= ${endtime}`
-  db.query(getRestaurantsQuery, async (err, result) => {
+    AND O.odatetime <= ${endtime}
+    )
+    SELECT json_build_object (
+      'totalrevenue', COALESCE((SELECT SUM(fprice) FROM SO), 0),
+      'ordercount', (SELECT COUNT(DISTINCT oid) FROM SO),
+      'popularitems', (SELECT json_agg(rows) as popularItems 
+        FROM (
+        SELECT fname, SUM(quantity)
+        FROM Consists C
+        WHERE C.oid IN (SELECT oid FROM SO)
+        GROUP BY fname
+        ORDER BY SUM (quantity) DESC
+        LIMIT 5
+        ) 
+        AS rows)
+    ) as rsummary`
+  db.query(getRestaurantsSummary, async (err, result) => {
     if (err) {
       console.error(err.stack);
       response.status(404).json(`Failed to get restaurants and categories.`);

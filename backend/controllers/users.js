@@ -119,7 +119,7 @@ exports.updateUser = async (req, response) => {
             response.status(500).json('Failed to verify if email exists.')
         } else {
             console.log(result.rows)
-            if (result.rows.length !== 0 && result.rows[0].id == id) {
+            if (result.rows.length !== 0 && result.rows[0].id !== id) {
                 //If email already exists in users table, and the one changing email is not the same person
                 response.status(400).json('This email is already registered.')
             } else {

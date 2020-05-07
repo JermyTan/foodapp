@@ -15,8 +15,8 @@ const {
   updateMenu,
   deleteMenuItem,
   getStaffMenu,
-  getRestaurantReviews
-  // updateRestaurant,
+  getRestaurantReviews,
+  getSummaryInfo
   // deleteRestaurant
 } = require('../controllers/restaurants');
 
@@ -43,5 +43,8 @@ router.route('/:rname/orders')
 
 router.route('/:rname/reviews')
   .get(getRestaurantReviews)
+
+router.route('/:rname/summary')
+  .get(getSummaryInfo);
 
 module.exports = router;
