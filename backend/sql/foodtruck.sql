@@ -66,7 +66,7 @@ CREATE TABLE Customers (
 --BCNF--
 CREATE TABLE Restaurants (
     rname       VARCHAR PRIMARY KEY,
-    minamt      FLOAT NOT NULL,
+    minamt      NUMERIC(12, 2) NOT NULL,
     imgurl      VARCHAR DEFAULT 'https://zabas.com/wp-content/uploads/2017/01/food-placeholder.png',
     CHECK (rname <> ''),
     CHECK (minamt >= 0)
@@ -212,7 +212,7 @@ CREATE TABLE Consists (
     oid         INTEGER REFERENCES Orders ON DELETE CASCADE,
     fname       VARCHAR REFERENCES Food,
     quantity    INTEGER NOT NULL,
-    itemprice   FLOAT NOT NULL,
+    itemprice   NUMERIC(12, 2) NOT NULL,
     PRIMARY KEY (oid, fname)
     CHECK (quantity > 0)
 );
