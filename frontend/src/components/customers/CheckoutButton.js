@@ -3,6 +3,7 @@ import { Button, Icon, Modal, Header, Radio } from "semantic-ui-react";
 import Axios from "axios";
 import { getUnixTime } from "date-fns";
 import UserContext from "utils/UserContext";
+import { useHistory } from "react-router-dom";
 
 function CheckoutButton(props) {
   const [isModalOpened, setModalOpened] = useState(false);
@@ -10,6 +11,7 @@ function CheckoutButton(props) {
   const [cardNum, setCardNum] = useState();
   const { uid } = useContext(UserContext);
   const [loading, setLoading] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
     Axios.get(`http://localhost:5000/api/customers/${uid}`)
@@ -37,7 +39,7 @@ function CheckoutButton(props) {
         let riderIds = response.data.rid;
         if (riderIds.length == 0) {
           console.log("No riders available at this time!");
-          console.log("Assigning to default rider:")
+          console.log("Assigning to default rider:");
         }
         console.log("Riders available:", riderIds);
         let chosenRider = 127;
@@ -69,7 +71,7 @@ function CheckoutButton(props) {
           .then((response) => {
             console.log("'Successfully created order", response);
             setLoading(false);
-            window.location.push("/history");
+            history.push("/history");
           })
           .catch((error) => {
             setLoading(false);
@@ -120,8 +122,8 @@ function CheckoutButton(props) {
                 <span>
                   $
                   {(selectedFoodItem.quantity * selectedFoodItem.price).toFixed(
-                  2
-                )}
+                    2
+                  )}
                 </span>
               </div>
             );
