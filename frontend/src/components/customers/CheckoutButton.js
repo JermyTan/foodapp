@@ -1,22 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Button, Icon, Modal, Header, Radio } from "semantic-ui-react";
 import Axios from "axios";
-import { getUnixTime, parse } from "date-fns";
-import { Redirect } from "react-router-dom";
+import { getUnixTime } from "date-fns";
+import UserContext from "utils/UserContext";
 
 function CheckoutButton(props) {
   const [isModalOpened, setModalOpened] = useState(false);
-  const [isPayByCard, setPayByCard] = useState(false);
-  //TODO: replace these with real details of customer
-  //If customer has no card, then the default cardnum is 0
-  const cid = 6;
-  const cardnum = 123;
+  const [isPayByCard, setPayByCard] = useState(0);
+  const [cardNum, setCardNum] = useState();
+  const { uid } = useContext(UserContext);
+  const [loading, setLoading] = useState(false);
 
-  const handleTogglePayMethod = () => {
-    setPayByCard(!isPayByCard);
-  };
+  useEffect(() => {
+    Axios.get(`http://localhost:5000/api/customers/${uid}`)
+      .then((response) => {
+        console.log(response);
+        if (response.status === 200) {
+          let { cardnum } = response.data;
+          setCardNum(cardnum ?? "");
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   const makeOrder = () => {
+    setLoading(true);
     console.log("selected food items", props.selectedFoodItems);
     let orderTime = getUnixTime(new Date());
 
@@ -30,7 +40,7 @@ function CheckoutButton(props) {
           console.log("Assigning to default rider:")
         }
         console.log("Riders available:", riderIds);
-        let chosenRider = riderIds[0];
+        let chosenRider = 127;
         let parsedItems = [];
         let chosenItems = props.selectedFoodItems;
         for (var key in chosenItems) {
@@ -42,6 +52,28 @@ function CheckoutButton(props) {
             parsedItem.itemprice = `${item.price}`;
             parsedItems.push(parsedItem);
           }
+          console.log(parsedItems);
+          const url = `http://localhost:5000/api/orders`;
+          Axios.post(url, {
+            location: `'${props.deliveryInfo.location}'`,
+            dfee: `'${props.deliveryInfo.deliveryFee}'`,
+            odatetime: `${orderTime}`,
+            cid: `${uid}`,
+            paymethod: `${isPayByCard}`,
+            rname: `'${props.restaurant}'`,
+            fprice: `${props.subtotal}`,
+            rid: `${chosenRider}`,
+            foodlist: parsedItems,
+          })
+            .then((response) => {
+              console.log("'Successfully created order", response);
+              setLoading(false);
+              window.location.push("/history");
+            })
+            .catch((error) => {
+              setLoading(false);
+              console.log("Error occured while making an order");
+            });
         }
         console.log(parsedItems);
         const url = `http://localhost:5000/api/orders`;
@@ -70,40 +102,6 @@ function CheckoutButton(props) {
       .catch((error) => {
         console.log("Unable to get riders working at this time:", error);
       });
-
-    // let parsedItems = [];
-    // let chosenItems = props.selectedFoodItems
-    // for (var key in chosenItems) {
-    //   if (chosenItems.hasOwnProperty(key)) {
-    //     let item = chosenItems[key];
-    //     let parsedItem = {}
-    //     parsedItem.fname = `'${item.name}'`
-    //     parsedItem.qty = `${item.quantity}`
-    //     parsedItem.itemprice = `${item.price}`
-    //     parsedItems.push(parsedItem)
-    //   }
-    // }
-    // console.log(parsedItems)
-    // const url = `http://localhost:5000/api/orders`
-    // let payMethod = isPayByCard ? 1 : 0;
-    // Axios.post(url, {
-    //   location: `'${props.deliveryInfo.location}'`,
-    //   dfee: `'${props.deliveryInfo.deliveryFee}'`,
-    //   odatetime: `${orderTime}`,
-    //   cid: `${cid}`,
-    //   paymethod: `${payMethod}`,
-    //   rname: `'${props.restaurant}'`,
-    //   fprice: `${props.subtotal}`,
-    //   foodlist: parsedItems
-    // })
-    //   .then((response) => {
-    //     console.log("'Successfully created order", response)
-    //     //setModalOpened(false);
-    //     //TODO: Redirect to orders page
-    //   })
-    //   .catch((error) => {
-    //     console.log("Error occured while making an order")
-    //   })
   };
 
   return (
@@ -176,12 +174,12 @@ function CheckoutButton(props) {
 
       <Modal.Content>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          {cardnum == 0 ? `No registered card (pay by cash)` : `Pay by card`}
+          {!cardNum ? `No registered card (pay by cash)` : `Pay by card`}
           <span>
             <Radio
               toggle
-              disabled={cardnum == 0}
-              onClick={handleTogglePayMethod}
+              disabled={!cardNum}
+              onClick={() => setPayByCard(Math.abs(isPayByCard - 1))}
             ></Radio>
           </span>
         </div>
@@ -196,6 +194,7 @@ function CheckoutButton(props) {
         <Button
           color="green"
           content="Place Order"
+          loading={loading}
           onClick={() => {
             makeOrder();
             //setModalOpened(false)

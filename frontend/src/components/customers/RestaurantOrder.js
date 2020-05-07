@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Icon, Label, Input, Item } from "semantic-ui-react";
+import { Button, Icon, Label, Input, Item, Segment } from "semantic-ui-react";
 import FoodItemSelector from "./FoodItemSelector";
 import CheckoutButton from "./CheckoutButton";
 import Axios from "axios";
@@ -49,13 +49,10 @@ function RestaurantOrder(props) {
   const [subtotal, setSubtotal] = useState(0);
   const [selectedFoodItems, setSelectedFoodItems] = useState({});
   const [restaurantFoodItems, setRestaurantFoodItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const rname = props.restaurant;
-  //TODO: set to 10am to 10pm today
   const start = getUnixTime(addHours(startOfToday(), 10)); //10am today
   const end = getUnixTime(addHours(startOfToday(), 22)); //10pm today
-  // console.log("epoch time 10am today", start)
-  // console.log("epoch time 10am today", fromUnixTime(start))
-  // console.log("epoch time 10pm today", fromUnixTime(end))
 
   useEffect(() => {
     const url = `http://localhost:5000/api/restaurants/'${rname}'?start=${start}&end=${end}`;
@@ -72,6 +69,7 @@ function RestaurantOrder(props) {
           processedData.push(processedItem);
         });
         setRestaurantFoodItems(processedData);
+        setLoading(false);
         console.log("Retrieved restaurant food items:", processedData);
       })
       .catch((error) => {
@@ -153,23 +151,32 @@ function RestaurantOrder(props) {
           </Button.Group>
         </span>
       </div>
-
-      <Item.Group divided>
-        {restaurantFoodItems.map((foodItem, index) => {
-          return (
-            <FoodItemSelector
-              key={index}
-              name={foodItem.name}
-              price={foodItem.price}
-              category={foodItem.category}
-              limit={foodItem.limit}
-              count={0}
-              updateSelectedFoodItems={updateSelectedFoodItems}
-              imgurl={foodItem.imgurl}
-            />
-          );
-        })}
-      </Item.Group>
+      {loading ? (
+        <Segment
+          size="massive"
+          basic
+          placeholder
+          loading={loading}
+          textAlign="center"
+        />
+      ) : (
+        <Item.Group divided>
+          {restaurantFoodItems.map((foodItem, index) => {
+            return (
+              <FoodItemSelector
+                key={index}
+                name={foodItem.name}
+                price={foodItem.price}
+                category={foodItem.category}
+                limit={foodItem.limit}
+                count={0}
+                updateSelectedFoodItems={updateSelectedFoodItems}
+                imgurl={foodItem.imgurl}
+              />
+            );
+          })}
+        </Item.Group>
+      )}
     </>
   );
 }

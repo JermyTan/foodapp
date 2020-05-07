@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Menu, Container, Segment, Grid, Header } from "semantic-ui-react";
+import { Menu, Container, Segment, Grid } from "semantic-ui-react";
 import EditableAccountForm from "components/customers/EditableAccountForm";
 import RegisteredCardForm from "components/customers/RegisteredCardForm";
 import UserContext from "utils/UserContext";

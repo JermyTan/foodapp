@@ -162,17 +162,63 @@ CREATE CONSTRAINT TRIGGER mws_min_rider_trigger
 	FOR EACH ROW 
 	EXECUTE PROCEDURE check_min_daily_hourly_rider_for_day();
 
--- Adds 100 rpoints to the customer's account once order is delivered
+/* Check 4 wws in an mws is the same, if it is not the first entry for that month and day of the week */
+CREATE OR REPLACE FUNCTION public.check_mws_wk_same()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+r1 record;
+check_id		INTEGER;
+check_date 	DATE;
+check_shift 	INTEGER;
+BEGIN
+	IF (TG_OP = 'UPDATE') THEN
+		check_id := OLD.id;
+		check_date := OLD.dmy;
+		check_shift := OLD.shift;
+	ELSE
+		check_id := NEW.id;
+		check_date := NEW.dmy;
+		check_shift := NEW.shift;
+	END IF;
+	SELECT * INTO r1
+	FROM mws
+	WHERE check_id = mws.id
+	AND floor((extract(DOY from mws.dmy) - 1) / 28) + 1 = floor((extract(DOY from check_date) - 1) / 28) + 1
+	AND (extract(ISODOW from mws.dmy)) = (extract(ISODOW from check_date))
+	AND check_shift <> mws.shift;
+
+	IF r1 IS NOT NULL THEN
+		RAISE exception 'Inconsistent shift timing found in mws for rider id: %, date: %, for input values %', check_id, check_date, r1;
+	END IF;
+	RETURN NULL;
+END;
+$function$ LANGUAGE plpgsql;
+
+CREATE CONSTRAINT TRIGGER mws_check_wk_trigger
+ 	AFTER INSERT OR UPDATE
+ 	ON mws 
+ 	DEFERRABLE INITIALLY DEFERRED
+ 	FOR EACH ROW 
+ 	EXECUTE PROCEDURE check_mws_wk_same();
+
+-- Adds 10 rpoints per dollar spent on the order(rounded off to the nearest $0.10) upon order delivery
 CREATE OR REPLACE FUNCTION add_rpoints()
 RETURNS TRIGGER
 AS $$
+DECLARE
+total_price NUMERIC(12, 2);
 BEGIN
-	RAISE NOTICE 'New column: %, status: %, cid: %', NEW, NEW.status, NEW.cid;
-	IF NEW.status = 2 THEN
-		UPDATE Customers
-		SET rpoints = rpoints + 100
-		WHERE id = NEW.cid;
-		RAISE NOTICE 'Order delivered. Added 100 rpoints into customer id: %', NEW.cid;
+	total_price := NEW.dfee + NEW.fprice;
+-- 	Do nothing when immediate status before update was already set to 2 (delivered).
+	IF NOT ((TG_OP = 'UPDATE') AND (OLD.status = 2)) THEN
+		IF NEW.status = 2 THEN
+			UPDATE Customers
+			SET rpoints = rpoints + 10*(total_price)
+			WHERE id = NEW.cid;
+			RAISE NOTICE 'Order delivered. Added % rpoints into customer id: %', 10*(total_price), NEW.cid;
+		END IF;
 	END IF;
 	RETURN NULL;
 END;
