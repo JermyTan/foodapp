@@ -82,7 +82,7 @@ function CheckoutButton(props) {
           location: `'${props.deliveryInfo.location}'`,
           dfee: `'${props.deliveryInfo.deliveryFee}'`,
           odatetime: `${orderTime}`,
-          cid: `${cid}`,
+          cid: `${uid}`,
           paymethod: `${payMethod}`,
           rname: `'${props.restaurant}'`,
           fprice: `${props.subtotal}`,
