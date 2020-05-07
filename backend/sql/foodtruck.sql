@@ -63,8 +63,6 @@ CREATE TABLE Customers (
     CHECK (cardnum >= 0)
 );
 
--- INSERT INTO Customers VALUES (1, 0);
-
 --BCNF--
 CREATE TABLE Restaurants (
     rname       VARCHAR PRIMARY KEY,
@@ -115,6 +113,7 @@ CREATE TABLE Food (
     CHECK (cat <> '')
 );
 
+--BCNF--
 CREATE TABLE MWSShift (
     shift           INTEGER,
     stime1          INTEGER NOT NULL,
@@ -126,6 +125,7 @@ CREATE TABLE MWSShift (
     AND int4range(stime1, etime1, '[]') << int4range(stime2, etime2, '[]'))
 );
 
+--BCNF--
 CREATE TABLE MWS (
     id          INTEGER REFERENCES FTRiders ON DELETE CASCADE,
     dmy         DATE,
@@ -207,15 +207,17 @@ CREATE TABLE Sells (
     CHECK (price >= 0)
 );
 
---Not in BCNF or 3NF--
+--BCNF--
 CREATE TABLE Consists (
     oid         INTEGER REFERENCES Orders ON DELETE CASCADE,
     fname       VARCHAR REFERENCES Food,
     quantity    INTEGER NOT NULL,
     itemprice   FLOAT NOT NULL,
+    PRIMARY KEY (oid, fname)
     CHECK (quantity > 0)
 );
 
+--BCNF--
 CREATE TABLE Offers (
     pid         INTEGER REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE,
     rname       VARCHAR REFERENCES Restaurants,
@@ -223,6 +225,7 @@ CREATE TABLE Offers (
     PRIMARY KEY (pid, rname, fname)
 );
 
+--BCNF--
 CREATE TABLE FDSOffers (
     pid         INTEGER REFERENCES Promotions,
     oid         INTEGER REFERENCES Orders,
