@@ -12,7 +12,8 @@ const {
   createManager,
   getGeneralCustomerSummary,
   // getGeneralOrderSummaryFiltered,
-  getGeneralOrderSummary
+  getGeneralOrderSummary,
+  getGeneralRiderSummary
   // deleteCustomer
 } = require('../controllers/managers');
 
@@ -32,5 +33,8 @@ router.route('/summary/customers')
 
 router.route('/summary/orders')
   .get(getGeneralOrderSummary);
+
+router.route('/summary/riders')
+  .get(getGeneralRiderSummary);
 
 module.exports = router;

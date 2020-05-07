@@ -14,6 +14,7 @@ function ManagerSummaryPage() {
   const [ordersData, setOrders] = useState([]);
   const [ridersData, setRiders] = useState([]);
   const [customerOrderSummary, setCustomerOrder] = useState([]);
+  const [riderSummary, setRiderSummary] = useState([]);
 
   const [viewCustomers, setViewCustomerOn] = useState(false);
   const [viewOrders, setViewOrderOn] = useState(false);
@@ -40,7 +41,7 @@ function ManagerSummaryPage() {
   };
 
   const period = getPeriod(selectedMonths);
-  SummaryData(setOrders, setCustomerOrder, setOrderSummaryFiltered, setOrderSummary);
+  SummaryData(setOrders, setCustomerOrder, setOrderSummary, setRiderSummary);
   const profileImages = [
     "elliot.jpg",
     "helen.jpg",

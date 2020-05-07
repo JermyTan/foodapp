@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 
-function SummaryData(setOrders, setCustomerOrder, setOrderSummaryFiltered, setOrderSummary) {
+function SummaryData(setOrders, setCustomerOrder, setOrderSummary, setRiderSummary) {
     const [data, setData] = useState([]);
     // const url1 = `http://localhost:5000/api/customers`
     // useEffect(() => {
@@ -72,6 +72,18 @@ function SummaryData(setOrders, setCustomerOrder, setOrderSummaryFiltered, setOr
             })
             .catch(error => {
                 console.log("Error retrieving order data:", error);
+            })
+    }, [])
+
+    const url7 = `http://localhost:5000/api/managers/summary/riders`
+    useEffect(() => {
+        Axios.get(url7)
+            .then(response => {
+                console.log("response", response.data);
+                setRiderSummary(response.data);
+            })
+            .catch(error => {
+                console.log("Error retrieving rider summary data:", error);
             })
     }, [])
 
