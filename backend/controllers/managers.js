@@ -97,27 +97,56 @@ exports.getGeneralOrderSummary = async (req, response) => {
 // @route   GET /manager/summary/customers
 // @acess   Public
 exports.getGeneralCustomerSummary = async (req, response) => {
+  let { starttime, endtime } = req.query
   const getSummaryQuery =
-    `SELECT json_build_object(
-  'id', C.id,
-  'name', U.name,
-  'email', U.email,
-  'joindate', C.joindate,
-  'numOrder', COUNT(O.oid),
-  'totalCost', SUM(COALESCE(O.fprice, 0))
-  )
-  AS customerorder
-  FROM (Customers C NATURAL JOIN Users U) LEFT JOIN Orders O ON (C.id = O.cid)
-  GROUP BY C.id, U.name, U.email
-  ;`
+    `WITH SO AS (
+    SELECT *
+    FROM Orders O
+    WHERE O.odatetime >= ${starttime}
+    AND O.odatetime <= ${endtime}
+    )
+    SELECT json_build_object (
+      'newcustomers', (SELECT COUNT(DISTINCT id) FROM Customers C WHERE C.joindate >= ${starttime} AND C.joindate <= ${endtime}),
+      'ordercount', (SELECT COUNT(DISTINCT oid) FROM SO),
+      'completedorders', (SELECT COUNT(DISTINCT oid) FROM SO WHERE SO.status = 2),
+      'ordersfoodcost', (SELECT SUM(fprice) FROM SO WHERE SO.status = 2),
+      'ordersdfee', (SELECT SUM(dfee) FROM SO WHERE SO.status = 2),
+      'customerorders', (SELECT json_agg(rows) as customerorders 
+      FROM (
+      SELECT cid, name, SUM(DISTINCT OID) as ordercount, SUM(fprice + dfee) AS totalpayment
+      FROM SO JOIN Users U ON (U.id = SO.cid)
+      GROUP BY (cid, name)
+      ) AS rows),
+      'orderlocations', (SELECT json_agg(rows) as orderlocations
+      FROM(
+        SELECT location, COUNT(DISTINCT oid) 
+        FROM SO
+        GROUP BY location
+        ORDER BY COUNT(DISTINCT oid) DESC
+      ) AS rows)
+    ) as fdssummary`
 
-  const rows = await db.query(getSummaryQuery, (err, result) => {
+  //   `SELECT json_build_object(
+  // 'id', C.id,
+  // 'name', U.name,
+  // 'email', U.email,
+  // 'joindate', C.joindate,
+  // 'numOrder', COUNT(O.oid),
+  // 'totalCost', SUM(COALESCE(O.fprice, 0))
+  // )
+  // AS customerorder
+  // FROM (Customers C NATURAL JOIN Users U) LEFT JOIN Orders O ON (C.id = O.cid)
+  // GROUP BY C.id, U.name, U.email
+  // ;`
+
+  db.query(getSummaryQuery, (err, result) => {
     if (err) {
       console.error("Error here:", err)
       response.status(404).json(`Failed to get general customer summary.`)
     } else {
+      console.log(result.rows)
       if (!result.rows[0]) {
-        response.status(404).json(`Failed to get customer data.`)
+        response.status(404).json(`Failed to get summary data for FDS.`)
       } else {
         console.log('Successfully get customer data')
         response.status(200).json(result.rows)

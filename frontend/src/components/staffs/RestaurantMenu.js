@@ -3,10 +3,11 @@ import {
   Item,
   Button,
   Message,
-  Container,
+  Segment,
   Form,
   Input,
   Label,
+  Loader,
 } from "semantic-ui-react";
 import FoodItemEditor from "./FoodItemEditor";
 import NewItemButton from "./NewItemButton";
@@ -59,6 +60,7 @@ function RestaurantMenu() {
   const [restaurantFoodItems, setRestaurantFoodItems] = useState([]);
   const [saveChanges, setSaveChanges] = useState(false);
   const [minAmt, setMinAmt] = useState(0);
+  const [loading, setLoading] = useState(true);
   const { uid } = useContext(UserContext);
 
   useEffect(() => {
@@ -81,6 +83,7 @@ function RestaurantMenu() {
   };
 
   const fetchData = () => {
+    setLoading(true);
     const url = `http://localhost:5000/api/staffs/${uid}`;
     Axios.get(url)
       .then((response) => {
@@ -93,6 +96,7 @@ function RestaurantMenu() {
             let menu = response.data.menu;
             setRestaurantFoodItems(menu);
             setMinAmt(minamt);
+            setLoading(false);
           })
           .catch((error) => {
             console.log("Error", error);
@@ -173,16 +177,6 @@ function RestaurantMenu() {
 
   return (
     <>
-      {/* <Modal
-        open={deleteFoodItem}
-        onClose={() => deleteFoodItem(false)}
-        trigger={
-          <Button color="teal" onClick={() => deleteFoodItem(true)} icon="plus" />
-        }
-      >
-        <Modal.Header>Confirm delete menu item</Modal.Header>
-      </Modal> */}
-
       {saveChanges && (
         <Message
           success
@@ -192,7 +186,7 @@ function RestaurantMenu() {
         />
       )}
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <h1>{restaurantName}</h1>
+        <h1>{loading ? <Loader inline active /> : restaurantName}</h1>
         <span>
           <Button color="blue" onClick={handleSaveChanges}>
             Save changes
@@ -201,42 +195,52 @@ function RestaurantMenu() {
         </span>
       </div>
 
-      <Container>
-        <Form>
-          <Form.Field inline>
-            <label>Min order amount</label>
-            <Input
-              type="number"
-              label={<Label basic>$</Label>}
-              labelPosition="left"
-              value={minAmt}
-              size="mini"
-              onChange={(event, data) => {
-                let newMinAmt = Number(Number(data.value).toFixed(2));
-                setMinAmt(newMinAmt);
-              }}
-            />
-          </Form.Field>
-        </Form>
-      </Container>
+      <Form>
+        <Form.Field inline>
+          <label>Min order amount</label>
+          <Input
+            type="number"
+            label={<Label basic>$</Label>}
+            labelPosition="left"
+            value={minAmt}
+            size="mini"
+            onChange={(event, data) => {
+              let newMinAmt = Number(Number(data.value).toFixed(2));
+              setMinAmt(newMinAmt);
+            }}
+            disabled={loading}
+            loading={loading}
+          />
+        </Form.Field>
+      </Form>
 
-      <Item.Group divided>
-        {restaurantFoodItems.map((value, index) => {
-          return (
-            <FoodItemEditor
-              key={index}
-              index={index}
-              name={value.name}
-              price={value.price}
-              category={value.category}
-              limit={value.limit}
-              imgurl={value.imgurl}
-              updateFoodItem={updateFoodItem}
-              deleteFoodItem={deleteFoodItem}
-            />
-          );
-        })}
-      </Item.Group>
+      {loading ? (
+        <Segment
+          size="massive"
+          basic
+          placeholder
+          textAlign="center"
+          loading={loading}
+        />
+      ) : (
+        <Item.Group divided>
+          {restaurantFoodItems.map((value, index) => {
+            return (
+              <FoodItemEditor
+                key={index}
+                index={index}
+                name={value.name}
+                price={value.price}
+                category={value.category}
+                limit={value.limit}
+                imgurl={value.imgurl}
+                updateFoodItem={updateFoodItem}
+                deleteFoodItem={deleteFoodItem}
+              />
+            );
+          })}
+        </Item.Group>
+      )}
     </>
   );
 }

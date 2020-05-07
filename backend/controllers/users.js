@@ -1,72 +1,73 @@
-const db = require('../db')
+const db = require("../db");
 
 // @desc    Get all users
 // @route   GET /users
 // @acess   Public
 exports.getUsers = async (req, response) => {
-    const rows = await db.query('SELECT * FROM users', (err, result) => {
-        if (err) {
-            console.error(err.stack);
-            throw err
-        } else {
-            if (!result.rows[0]) {
-                response.status(404).json(`Failed to get all users. There could be no user created yet.`)
-            } else {
-                console.log('Successfully get all users')
-                response.status(200).json(result.rows)
-            }
-        }
-    })
-
-}
+  const rows = await db.query("SELECT * FROM users", (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      throw err;
+    } else {
+      if (!result.rows[0]) {
+        response
+          .status(404)
+          .json(`Failed to get all users. There could be no user created yet.`);
+      } else {
+        console.log("Successfully get all users");
+        response.status(200).json(result.rows);
+      }
+    }
+  });
+};
 
 // @desc    Get user id and role from email login
 // @route   GET /users?email=:email
 // @acess   Public
 exports.getUser = async (req, response) => {
-    const email = req.query.email
-    db.query(`SELECT * FROM Users WHERE email = '${email}'`, (err, result) => {
-        if (err) {
-            console.error(err.stack)
-            response.status(404).json(`Failed to get user. User does not exist.`)
-        } else {
-            console.log(result.rows)
-            if (!result.rows[0]) {
-                response.status(404).json(`Failed to get user. User does not exist.`)
-            } else {
-                console.log(`Successfully get user`)
-                response.status(200).json(result.rows[0])
-            }
-        }
-    })
-}
+  const email = req.query.email;
+  db.query(`SELECT * FROM Users WHERE email = '${email}'`, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json(`Failed to get user. User does not exist.`);
+    } else {
+      console.log(result.rows);
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to get user. User does not exist.`);
+      } else {
+        console.log(`Successfully get user`);
+        response.status(200).json(result.rows[0]);
+      }
+    }
+  });
+};
 
 // @desc    Create new user
 // @route   POST /users
 // @acess   Private
 exports.createUser = async (req, response) => {
-    const { name, email } = req.body
-    const createUserQuery = `INSERT INTO USERS (email, name) VALUES ('${email}', '${name}') returning *`
-    try {
-        const rows = await db.query(createUserQuery, values, (err, result) => {
-            if (err) {
-                console.error(err.stack)
-                throw err
-            } else {
-                console.log(result);
-                if (!result.rows[0]) {
-                    response.status(404).json(`Failed to create new user.`)
-                } else {
-                    console.log('Successfully created user')
-                    response.status(200).json(result.rows[0])
-                }
-            }
-        })
-    } catch (err) {
-        console.log("an error occured");
-        response.status(409).json(`Something went wrong. Duplicate email?`)
-    }
-}
+  const { name, email } = req.body;
+  const createUserQuery = `INSERT INTO USERS (email, name) VALUES ('${email}', '${name}') returning *`;
+  try {
+    const rows = await db.query(createUserQuery, values, (err, result) => {
+      if (err) {
+        console.error(err.stack);
+        throw err;
+      } else {
+        console.log(result);
+        if (!result.rows[0]) {
+          response.status(404).json(`Failed to create new user.`);
+        } else {
+          console.log("Successfully created user");
+          response.status(200).json(result.rows[0]);
+        }
+      }
+    });
+  } catch (err) {
+    console.log("an error occured");
+    response.status(409).json(`Something went wrong. Duplicate email?`);
+  }
+};
 
 // @desc    Update new user
 // @route   PUT /users/:id
@@ -101,61 +102,65 @@ exports.createUser = async (req, response) => {
 // @route   PUT /users/:id
 // @acess   Public
 exports.updateUser = async (req, response) => {
-    const id = req.params.id
-    const { email, name } = req.body
-    const checkUserEmailQuery = `SELECT * FROM Users WHERE email = '${email}'`
+  const id = parseInt(req.params.id);
+  const { email, name } = req.body;
+  const checkUserEmailQuery = `SELECT * FROM Users WHERE email = '${email}'`;
 
-    const updateUserQuery =
-        `UPDATE users
+  const updateUserQuery = `UPDATE users
     SET email = '${email}',
     name = '${name}'
     WHERE id = ${id}
-    RETURNING *;`
+    RETURNING *;`;
 
-    db.query(checkUserEmailQuery, async (err, result) => {
-        console.log("Checking if email exists:", result.rows)
-        if (err) {
-            console.log("Error:", err.stack)
-            response.status(500).json('Failed to verify if email exists.')
-        } else {
-            console.log(result.rows)
-            if (result.rows.length !== 0 && result.rows[0].id !== id) {
-                //If email already exists in users table, and the one changing email is not the same person
-                response.status(400).json('This email is already registered.')
-            } else {
-                db.query(updateUserQuery, async (err2, result2) => {
-                    if (err2) {
-                        console.log("Error creating customer", err2.stack)
-                        response.status(500).json('Failed to update user account.')
-                    } else {
-                        console.log("Update:", result2)
-                        if (result2.rows)
-                            response.status(200).json({ msg: `Updated customer with id ${id}` })
-                        else {
-                            response.status(404).json({ msg: `Failed to create customer.` })
-                        }
-                    }
-                })
+  db.query(checkUserEmailQuery, async (err, result) => {
+    console.log("Checking if email exists:", result.rows);
+    if (err) {
+      console.log("Error:", err.stack);
+      response.status(500).json("Failed to verify if email exists.");
+    } else {
+      console.log(result.rows.id, id);
+      if (result.rows.length !== 0 && result.rows[0].id !== id) {
+        //If email already exists in users table, and the one changing email is not the same person
+        response.status(400).json("This email is already registered.");
+      } else {
+        db.query(updateUserQuery, async (err2, result2) => {
+          if (err2) {
+            console.log("Error creating customer", err2.stack);
+            response.status(500).json("Failed to update user account.");
+          } else {
+            console.log("Update:", result2);
+            if (result2.rows)
+              response
+                .status(200)
+                .json({ msg: `Updated customer with id ${id}` });
+            else {
+              response.status(404).json({ msg: `Failed to create customer.` });
             }
-        }
-    })
-
-}
+          }
+        });
+      }
+    }
+  });
+};
 
 // @desc    Delete user
 // @route   DELETE /users/:id
 // @acess   Private
 exports.deleteUser = async (req, response) => {
-    const id = req.params.id
-    const row = await db.query('DELETE FROM users WHERE id = $1', [id], (err, result) => {
-        if (err) {
-            console.error(err.stack)
-            throw err
-        } else {
-            // TODO: detect case and handle when nothing is deleted
+  const id = req.params.id;
+  const row = await db.query(
+    "DELETE FROM users WHERE id = $1",
+    [id],
+    (err, result) => {
+      if (err) {
+        console.error(err.stack);
+        throw err;
+      } else {
+        // TODO: detect case and handle when nothing is deleted
 
-            console.log(`Successfully deleted user with id ${id}`)
-            response.status(200).json(`Successfully deleted user with id ${id}`)
-        }
-    })
-}
+        console.log(`Successfully deleted user with id ${id}`);
+        response.status(200).json(`Successfully deleted user with id ${id}`);
+      }
+    }
+  );
+};

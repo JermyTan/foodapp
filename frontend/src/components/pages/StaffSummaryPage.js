@@ -78,8 +78,8 @@ function StaffSummaryPage() {
     setStatisticsLoading(true);
     console.log("Fetch some info!");
     console.log(monthA, monthB);
-    let starttime = getUnixTime(startOfMonth(monthA));
-    let endtime = getUnixTime(endOfMonth(monthB));
+    let starttime = getUnixTime(monthA);
+    let endtime = getUnixTime(monthB);
     console.log("Start unix time", starttime);
     const url = `http://localhost:5000/api/restaurants/${restaurantName}/summary?starttime=${starttime}&endtime=${endtime}`;
     Axios.get(url)
@@ -98,6 +98,7 @@ function StaffSummaryPage() {
 
   const onMonthInput = (range) => {
     setSelectedMonths(range);
+    setPeriod({});
     let period = range.split(" - ");
     console.log(period);
     if (period.length < 2 || period[0] === "" || period[1] === "") {
@@ -111,7 +112,7 @@ function StaffSummaryPage() {
       [monthA, monthB] = [monthB, monthA];
     }
 
-    fetchSummaryInfo(monthA, monthB);
+    fetchSummaryInfo(startOfMonth(monthA), endOfMonth(monthB));
   };
 
   const getTotalRevenue = () => {
@@ -119,7 +120,7 @@ function StaffSummaryPage() {
   };
 
   const getAvgMonthlyRevenue = () => {
-    let months = differenceInCalendarMonths(period[1], period[0]);
+    let months = differenceInCalendarMonths(period[1], period[0]) + 1;
     console.log(months);
     return getTotalRevenue() / months;
   };
@@ -134,7 +135,7 @@ function StaffSummaryPage() {
   };
 
   const getAvgMonthlyOrders = () => {
-    let months = differenceInCalendarMonths(period[1], period[0]);
+    let months = differenceInCalendarMonths(period[1], period[0]) + 1;
     return getTotalOrders() / months;
   };
 
@@ -142,6 +143,8 @@ function StaffSummaryPage() {
     let weeks = differenceInCalendarWeeks(period[1], period[0]);
     return getTotalOrders() / weeks;
   };
+
+  const popularFood = summaryInfo.popularitems;
 
   return (
     <main className="staff-summary-page">
@@ -174,7 +177,6 @@ function StaffSummaryPage() {
               <font color="#3445c3">{format(period[0], "MMM yyyy")}</font> to{" "}
               <font color="#3445c3">{format(period[1], "MMM yyyy")}</font>
             </h1>
-
             <Statistic.Group
               widths="3"
               size="large"
@@ -204,7 +206,6 @@ function StaffSummaryPage() {
                 </Statistic.Value>
               </Statistic>
             </Statistic.Group>
-
             <Statistic.Group
               widths="3"
               size="large"
@@ -234,103 +235,93 @@ function StaffSummaryPage() {
                 </Statistic.Value>
               </Statistic>
             </Statistic.Group>
+            <br />
+            <br />
+            <br />
 
-            <Statistic.Group
-              widths="2"
-              size="large"
-              style={{ margin: "1em 0 1em 0" }}
-            >
-              <Statistic color="violet">
-                <Statistic.Label>Total ratings</Statistic.Label>
-                <Statistic.Value>
-                  <Icon name="star" />
-                  67
-                </Statistic.Value>
-              </Statistic>
-
-              <Statistic color="violet">
-                <Statistic.Label>Average ratings</Statistic.Label>
-                <Statistic.Value>
-                  <Icon name="star" />
-                  4.6
-                </Statistic.Value>
-              </Statistic>
-            </Statistic.Group>
-            <br />
-            <br />
-            <br />
             <Statistic.Group widths="1" size="huge">
               <Statistic>
                 <Statistic.Label>Top</Statistic.Label>
-                <Statistic.Value text>5 Food</Statistic.Value>
+                <Statistic.Value text>Top Food</Statistic.Value>
               </Statistic>
             </Statistic.Group>
+            {popularFood && (
+              <Statistic.Group widths={popularFood.length} size="tiny">
+                {popularFood.length >= 1 && (
+                  <Statistic>
+                    <Statistic.Value>1st</Statistic.Value>
+                    <Statistic.Value text>
+                      <font color="#643cc6">{popularFood[0].fname}</font>
+                    </Statistic.Value>
+                    <Statistic.Label>
+                      {popularFood[0].sum} Orders
+                    </Statistic.Label>
+                  </Statistic>
+                )}
 
-            <Statistic.Group widths="5" size="tiny">
-              <Statistic>
-                <Statistic.Value>1st</Statistic.Value>
-                <Statistic.Value text>
-                  <font color="#643cc6">{restaurant.food1.name}</font>
-                </Statistic.Value>
-                <Statistic.Label>
-                  {restaurant.food1.orders} Orders
-                </Statistic.Label>
-              </Statistic>
+                {popularFood.length >= 2 && (
+                  <Statistic>
+                    <Statistic.Value>2nd</Statistic.Value>
+                    <Statistic.Value text>
+                      <font color="#643cc6">{popularFood[1].fname}</font>
+                    </Statistic.Value>
+                    <Statistic.Label>
+                      {popularFood[1].sum} Orders
+                    </Statistic.Label>
+                  </Statistic>
+                )}
 
-              <Statistic>
-                <Statistic.Value>2nd</Statistic.Value>
-                <Statistic.Value text>
-                  <font color="#643cc6">{restaurant.food2.name}</font>
-                </Statistic.Value>
-                <Statistic.Label>
-                  {restaurant.food2.orders} Orders
-                </Statistic.Label>
-              </Statistic>
+                {popularFood.length >= 3 && (
+                  <Statistic>
+                    <Statistic.Value>3rd</Statistic.Value>
+                    <Statistic.Value text>
+                      <font color="#643cc6">{popularFood[2].fname}</font>
+                    </Statistic.Value>
+                    <Statistic.Label>
+                      {popularFood[2].sum} Orders
+                    </Statistic.Label>
+                  </Statistic>
+                )}
 
-              <Statistic>
-                <Statistic.Value>3rd</Statistic.Value>
-                <Statistic.Value text>
-                  <font color="#643cc6">{restaurant.food3.name}</font>
-                </Statistic.Value>
-                <Statistic.Label>
-                  {restaurant.food3.orders} Orders
-                </Statistic.Label>
-              </Statistic>
+                {popularFood.length >= 4 && (
+                  <Statistic>
+                    <Statistic.Value>4th</Statistic.Value>
+                    <Statistic.Value text>
+                      <font color="#643cc6">{popularFood[3].fname}</font>
+                    </Statistic.Value>
+                    <Statistic.Label>
+                      {popularFood[3].sum} Orders
+                    </Statistic.Label>
+                  </Statistic>
+                )}
 
-              <Statistic>
-                <Statistic.Value>4th</Statistic.Value>
-                <Statistic.Value text>
-                  <font color="#643cc6">{restaurant.food4.name}</font>
-                </Statistic.Value>
-                <Statistic.Label>
-                  {restaurant.food4.orders} Orders
-                </Statistic.Label>
-              </Statistic>
-
-              <Statistic>
-                <Statistic.Value>5th</Statistic.Value>
-                <Statistic.Value text>
-                  <font color="#643cc6">{restaurant.food5.name}</font>
-                </Statistic.Value>
-                <Statistic.Label>
-                  {restaurant.food5.orders} Orders
-                </Statistic.Label>
-              </Statistic>
-            </Statistic.Group>
+                {popularFood.length >= 5 && (
+                  <Statistic>
+                    <Statistic.Value>5th</Statistic.Value>
+                    <Statistic.Value text>
+                      <font color="#643cc6">{popularFood[4].fname}</font>
+                    </Statistic.Value>
+                    <Statistic.Label>
+                      {popularFood[4].sum} Orders
+                    </Statistic.Label>
+                  </Statistic>
+                )}
+              </Statistic.Group>
+            )}
             <br />
             <br />
             <br />
           </>
         ) : (
-          <Segment
-            size="massive"
-            basic
-            placeholder
-            content="You have not selected a period"
-            textAlign="center"
-            loading={statisticsLoading}
-          />
-        )}
+            <Segment
+              size="massive"
+              basic
+              placeholder
+              content="You have not selected a period"
+              textAlign="center"
+              loading={statisticsLoading}
+            />
+          )}
         <h1>Promotional Campaigns</h1>
         {promoData.map((promo, index) => {
           return (
