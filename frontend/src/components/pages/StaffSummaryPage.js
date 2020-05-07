@@ -1,16 +1,26 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Menu,
   Container,
   Statistic,
   Icon,
   Segment,
-  Label,
+  Loader,
 } from "semantic-ui-react";
 import { MonthRangeInput } from "semantic-ui-calendar-react";
-import { parse, isBefore, format, getUnixTime, startOfMonth } from "date-fns";
+import {
+  parse,
+  isBefore,
+  format,
+  getUnixTime,
+  startOfMonth,
+  endOfMonth,
+  differenceInCalendarMonths,
+  differenceInCalendarWeeks,
+} from "date-fns";
 import "styles/AllRestaurants.scss";
 import Axios from "axios";
+import UserContext from "utils/UserContext";
 
 const restaurant = {
   name: "Toast Box",
@@ -45,47 +55,50 @@ const promoData = [
 function StaffSummaryPage() {
   const [selectedMonths, setSelectedMonths] = useState("");
   const [restaurantName, setRestaurantName] = useState("");
+  const [period, setPeriod] = useState([]);
   const [summaryInfo, setSummaryInfo] = useState({});
-
-  let staffid = 131
+  const { uid } = useContext(UserContext);
+  const [statisticsLoading, setStatisticsLoading] = useState(false);
+  const [nameLoading, setNameLoading] = useState(true);
 
   useEffect(() => {
-    getRestaurantName();
-  })
-
-  const getRestaurantName = () => {
-    const url = `http://localhost:5000/api/staffs/${staffid}`
-    Axios.get(url)
+    Axios.get(`http://localhost:5000/api/staffs/${uid}`)
       .then((response) => {
-        let rname = response.data.rname
-        setRestaurantName(rname)
+        console.log(response);
+        let { rname } = response.data;
+        setRestaurantName(rname);
+        setNameLoading(false);
       })
       .catch((error) => {
-        console.log("Error", error)
-      })
-  }
+        console.log("Error", error);
+      });
+  }, []);
 
   const fetchSummaryInfo = (monthA, monthB) => {
-    console.log("Fetch some info!")
-    console.log(monthA, monthB)
+    setStatisticsLoading(true);
+    console.log("Fetch some info!");
+    console.log(monthA, monthB);
     let starttime = getUnixTime(startOfMonth(monthA));
-    let endtime = getUnixTime(startOfMonth(monthB));
-    console.log("Start unix time", starttime)
-    const url = `http://localhost:5000/api/restaurants/${restaurantName}/summary?starttime=${starttime}&endtime=${endtime}`
+    let endtime = getUnixTime(endOfMonth(monthB));
+    console.log("Start unix time", starttime);
+    const url = `http://localhost:5000/api/restaurants/${restaurantName}/summary?starttime=${starttime}&endtime=${endtime}`;
     Axios.get(url)
       .then((response) => {
-        console.log(response.data[0].rsummary);
-        setSummaryInfo(response.data[0].rsummary)
+        let { rsummary } = response.data;
+        console.log(rsummary);
+        setSummaryInfo(rsummary);
+        setPeriod([monthA, monthB]);
+        setStatisticsLoading(false);
       })
       .catch((error) => {
-        console.log("Error", error)
-      })
+        console.log("Error", error);
+        setStatisticsLoading(false);
+      });
+  };
 
-  }
-
-
-  const getPeriod = (selectedMonths) => {
-    let period = selectedMonths.split(" - ");
+  const onMonthInput = (range) => {
+    setSelectedMonths(range);
+    let period = range.split(" - ");
     console.log(period);
     if (period.length < 2 || period[0] === "" || period[1] === "") {
       console.log("period invalid");
@@ -99,17 +112,42 @@ function StaffSummaryPage() {
     }
 
     fetchSummaryInfo(monthA, monthB);
-
-    return [monthA, monthB];
   };
 
-  const period = getPeriod(selectedMonths);
+  const getTotalRevenue = () => {
+    return summaryInfo.totalrevenue;
+  };
+
+  const getAvgMonthlyRevenue = () => {
+    let months = differenceInCalendarMonths(period[1], period[0]);
+    console.log(months);
+    return getTotalRevenue() / months;
+  };
+
+  const getAvgWeeklyRevenue = () => {
+    let weeks = differenceInCalendarWeeks(period[1], period[0]);
+    return getTotalRevenue() / weeks;
+  };
+
+  const getTotalOrders = () => {
+    return summaryInfo.ordercount;
+  };
+
+  const getAvgMonthlyOrders = () => {
+    let months = differenceInCalendarMonths(period[1], period[0]);
+    return getTotalOrders() / months;
+  };
+
+  const getAvgWeeklyOrders = () => {
+    let weeks = differenceInCalendarWeeks(period[1], period[0]);
+    return getTotalOrders() / weeks;
+  };
 
   return (
     <main className="staff-summary-page">
       <Menu size="huge" style={{ opacity: 0 }}></Menu>
       <Container>
-        <h1>{restaurantName}</h1>
+        <h1>{nameLoading ? <Loader inline active /> : restaurantName}</h1>
         <div style={{ display: "flex", flexWrap: "wrap" }}>
           <h2 style={{ marginInlineEnd: "1rem" }}>Summary for</h2>
           <MonthRangeInput
@@ -118,16 +156,18 @@ function StaffSummaryPage() {
             placeholder="Select month(s)"
             popupPosition="bottom center"
             onChange={(event, data) => {
-              setSelectedMonths(data.value);
+              onMonthInput(data.value);
             }}
-            dateFormat="MM/YYYY"
             value={selectedMonths}
+            dateFormat="MM/YYYY"
             closable
             maxDate={new Date()}
+            disabled={nameLoading}
+            loading={nameLoading}
           />
         </div>
 
-        {period.length > 0 ? (
+        {period.length === 2 ? (
           <>
             <h1>
               Period{" "}
@@ -144,7 +184,7 @@ function StaffSummaryPage() {
                 <Statistic.Label>Total revenue</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="dollar" />
-                  0
+                  {getTotalRevenue().toFixed(2)}
                 </Statistic.Value>
               </Statistic>
 
@@ -152,7 +192,7 @@ function StaffSummaryPage() {
                 <Statistic.Label>Average revenue per month</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="dollar" />
-                  2424
+                  {getAvgMonthlyRevenue().toFixed(2)}
                 </Statistic.Value>
               </Statistic>
 
@@ -160,7 +200,7 @@ function StaffSummaryPage() {
                 <Statistic.Label>Average revenue per week</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="dollar" />
-                  823
+                  {getAvgWeeklyRevenue().toFixed(2)}
                 </Statistic.Value>
               </Statistic>
             </Statistic.Group>
@@ -174,7 +214,7 @@ function StaffSummaryPage() {
                 <Statistic.Label>Total orders</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="food" />
-                  3432
+                  {getTotalOrders().toFixed(0)}
                 </Statistic.Value>
               </Statistic>
 
@@ -182,14 +222,15 @@ function StaffSummaryPage() {
                 <Statistic.Label>Average orders per month</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="food" />
-                  34
+                  {getAvgMonthlyOrders().toFixed(2)}
                 </Statistic.Value>
               </Statistic>
 
               <Statistic>
                 <Statistic.Label>Average orders per week</Statistic.Label>
                 <Statistic.Value>
-                  <Icon name="food" />8
+                  <Icon name="food" />
+                  {getAvgWeeklyOrders().toFixed(2)}
                 </Statistic.Value>
               </Statistic>
             </Statistic.Group>
@@ -281,18 +322,19 @@ function StaffSummaryPage() {
             <br />
           </>
         ) : (
-            <Segment
-              size="massive"
-              basic
-              placeholder
-              content="You have not selected a period"
-              textAlign="center"
-            />
-          )}
+          <Segment
+            size="massive"
+            basic
+            placeholder
+            content="You have not selected a period"
+            textAlign="center"
+            loading={statisticsLoading}
+          />
+        )}
         <h1>Promotional Campaigns</h1>
-        {promoData.map((promo) => {
+        {promoData.map((promo, index) => {
           return (
-            <>
+            <div key={index}>
               <h2>{promo}</h2>
 
               <Statistic.Group
@@ -305,7 +347,7 @@ function StaffSummaryPage() {
                   <Statistic.Label>Days</Statistic.Label>
                 </Statistic>
 
-                <Statistic size>
+                <Statistic>
                   <Statistic.Label>Total orders</Statistic.Label>
                   <Statistic.Value>
                     <Icon name="food" />
@@ -321,7 +363,7 @@ function StaffSummaryPage() {
                   </Statistic.Value>
                 </Statistic>
               </Statistic.Group>
-            </>
+            </div>
           );
         })}
       </Container>
