@@ -53,7 +53,7 @@ exports.getRiderSalary = async (req, response) => {
     FROM ftr_mth_sal)
     SELECT * 
     FROM CombinedSalTable
-    WHERE id = ${id};`
+    WHERE id = '${id}';`
   const rows = await db.query(getRiderSalaryQuery, (err, result) => {
     if (err) {
       console.error(err.stack);
@@ -77,7 +77,7 @@ exports.getRiderSchedule = async (req, response) => {
   const getRiderSalaryQuery =
     `SELECT sc_date, lower(timerange) AS st_time, upper(timerange) AS e_time
     FROM CombinedScheduleTable
-    WHERE id = ${id}
+    WHERE id = '${id}'
     ORDER BY sc_date;`
   const rows = await db.query(getRiderSalaryQuery, (err, result) => {
     if (err) {
@@ -94,13 +94,13 @@ exports.getRiderSchedule = async (req, response) => {
   })
 }
 
-// @desc    Create new rider
+// @desc    Create new rider with default base salary of $1000
 // @route   POST /riders
 // @access   Public
 exports.createRider = async (req, response) => {
   const { email, name, isFT } = req.body
   const checkRiderEmailQuery = `SELECT * FROM Users WHERE email = '${email}'`
-  var riderType = Boolean(parseInt(isFT)) ? 'FTRiders' : 'PTRiders'
+  var riderType = Boolean(parseInt(isFT)) ? `FTRiders` : `PTRiders`
 
   const createRiderQuery =
     `BEGIN;
@@ -172,7 +172,7 @@ exports.getRiderOrders = async (req, response) => {
               WHERE C.oid = O.oid))
     AS order
     FROM Orders O
-    WHERE O.rid = ${rid}
+    WHERE O.rid = '${rid}'
     ORDER BY O.odatetime DESC
     ;`
 
@@ -222,7 +222,7 @@ exports.getProcessingOrders = async (req, response) => {
     WHERE EXISTS (
       SELECT 1
         FROM CombinedScheduleTable cst
-        WHERE cst.id = ${rid}
+        WHERE cst.id = '${rid}'
         AND cst.timerange @> EXTRACT(HOUR from to_timestamp(O.odatetime))::int4
         AND cst.sc_date = date_trunc('day', to_timestamp(O.odatetime))::date  
     )
@@ -255,8 +255,8 @@ exports.getEligibleRiders = async (req, response) => {
   const getEligibleRidersQuery =
     `SELECT cst.id
           FROM CombinedScheduleTable cst
-          WHERE cst.timerange @> EXTRACT(HOUR from to_timestamp(${odatetime}))::int4
-          AND cst.sc_date = date_trunc('day', to_timestamp(${odatetime}))::date
+          WHERE cst.timerange @> EXTRACT(HOUR from to_timestamp('${odatetime}'))::int4
+          AND cst.sc_date = date_trunc('day', to_timestamp('${odatetime}'))::date
           ORDER BY cst.id ASC;`
 
   const rows = await db.query(getEligibleRidersQuery, async (err, result) => {

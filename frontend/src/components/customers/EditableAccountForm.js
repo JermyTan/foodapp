@@ -1,28 +1,52 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Form, Header, Button, Message } from "semantic-ui-react";
+import UserContext from "utils/UserContext";
+import axios from "axios";
 
-const data = {
-  name: "Jeremy",
-  email: "helloword@gmail.com",
-  password: "helloword"
-};
+const passwordPlaceholder = "password";
 
 function EditableAccountForm() {
+  const { uid, name, email, reload } = useContext(UserContext);
   const [isEditing, setEditing] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
   const [password, setPassword] = useState("");
   const [didUpdateSuccessfully, setUpdateSuccessfully] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const resetState = () => {
-    setName(data.name);
-    setEmail(data.email);
-    setPassword(data.password);
+    setNewName(name);
+    setNewEmail(email);
+    setPassword(passwordPlaceholder);
   };
 
   useEffect(() => {
     resetState();
   }, []);
+
+  const onConfirm = () => {
+    setLoading(true);
+
+    axios
+      .put(`http://localhost:5000/api/users/${uid}`, {
+        name: newName,
+        email: newEmail,
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          setEditing(false);
+          setUpdateSuccessfully(true);
+          localStorage.setItem("name", newName);
+          localStorage.setItem("email", newEmail);
+          reload();
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setLoading(false);
+      });
+  };
 
   return (
     <>
@@ -32,8 +56,10 @@ function EditableAccountForm() {
           label="Name"
           icon="user"
           iconPosition="left"
-          value={name}
-          onChange={(event, data) => setName(data.value)}
+          value={newName}
+          onChange={(event, data) => {
+            setNewName(data.value);
+          }}
           disabled={!isEditing}
         />
         <Form.Input
@@ -41,8 +67,10 @@ function EditableAccountForm() {
           icon="mail"
           iconPosition="left"
           type="email"
-          value={email}
-          onChange={(event, data) => setEmail(data.value)}
+          value={newEmail}
+          onChange={(event, data) => {
+            setNewEmail(data.value);
+          }}
           disabled={!isEditing}
         />
         <Form.Input
@@ -51,7 +79,9 @@ function EditableAccountForm() {
           iconPosition="left"
           type={isEditing ? "text" : "password"}
           value={password}
-          onChange={(event, data) => setPassword(data.value)}
+          onChange={(event, data) => {
+            setPassword(data.value);
+          }}
           disabled={!isEditing}
         />
         <Button.Group widths="2">
@@ -68,10 +98,8 @@ function EditableAccountForm() {
             content="Confirm"
             primary
             disabled={!isEditing}
-            onClick={() => {
-              setEditing(false);
-              setUpdateSuccessfully(true);
-            }}
+            loading={loading}
+            onClick={onConfirm}
           />
         </Button.Group>
       </Form>

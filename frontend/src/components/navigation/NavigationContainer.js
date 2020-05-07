@@ -1,15 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
 import { Sidebar, Menu, Header, Icon } from "semantic-ui-react";
+import WelcomeTab from "./WelcomeTab";
 import HomeTab from "./HomeTab";
 import HistoryTab from "./HistoryTab";
 import ProfileTab from "./ProfileTab";
 import RiderTab from "./RiderTab";
 import StaffTab from "./StaffTab";
 import ManagerTab from "./ManagerTab";
+import UserContext from "utils/UserContext";
+import { CUSTOMER, STAFF, RIDER, MANAGER } from "utils/Constants";
 
-function NavigationContainer({ children }) {
+function NavigationContainer({ signOut, children }) {
   const [sidebarOpened, setSidebarOpened] = useState(false);
+  const { role } = useContext(UserContext);
 
   const onTabClick = () => {
     setSidebarOpened(false);
@@ -33,20 +37,19 @@ function NavigationContainer({ children }) {
           <Icon name="truck" />
           Food Truck
         </Header>
-        <HomeTab onTabClick={onTabClick} />
-        <HistoryTab onTabClick={onTabClick} />
+        <WelcomeTab onTabClick={onTabClick} />
+        {role === CUSTOMER && <HomeTab onTabClick={onTabClick} />}
+        {role === CUSTOMER && <HistoryTab onTabClick={onTabClick} />}
         <ProfileTab onTabClick={onTabClick} />
-        <RiderTab onTabClick={onTabClick} />
-        <StaffTab onTabClick={onTabClick} />
-        <ManagerTab onTabClick={onTabClick} />
+        {role === RIDER && <RiderTab onTabClick={onTabClick} />}
+        {role === STAFF && <StaffTab onTabClick={onTabClick} />}
+        {role === MANAGER && <ManagerTab onTabClick={onTabClick} />}
+        <Menu.Item content="Sign Out" link onClick={signOut} />
       </Sidebar>
 
       <Sidebar.Pusher dimmed={sidebarOpened}>
         <Menu borderless size="huge" fixed="top">
           <Menu.Item onClick={() => setSidebarOpened(true)} icon="sidebar" />
-          {
-            //<UserMenu activeTab={activeTab} onTabClick={onTabClick} />
-          }
         </Menu>
         <div style={{ height: "100vh", overflow: "auto" }}>{children}</div>
       </Sidebar.Pusher>
@@ -55,7 +58,7 @@ function NavigationContainer({ children }) {
 }
 
 NavigationContainer.propTypes = {
-  children: PropTypes.node
+  children: PropTypes.node,
 };
 
 export default NavigationContainer;

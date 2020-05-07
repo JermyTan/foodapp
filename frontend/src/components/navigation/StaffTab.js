@@ -7,7 +7,7 @@ function StaffTab(props) {
   const [isExpanded, setExpanded] = useState(false);
 
   return (
-    <Accordion as={Menu.Item}>
+    <Accordion as={Menu.Item} link>
       <Accordion.Title
         onClick={() => setExpanded(!isExpanded)}
         active={isExpanded}

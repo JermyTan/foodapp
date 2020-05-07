@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Button, Icon, Modal, Header, Radio } from "semantic-ui-react";
 import Axios from "axios";
-import { getUnixTime, parse } from 'date-fns'
-import { Redirect } from 'react-router-dom';
+import { getUnixTime, parse } from "date-fns";
+import { Redirect } from "react-router-dom";
 
 function CheckoutButton(props) {
   const [isModalOpened, setModalOpened] = useState(false);
@@ -14,36 +14,36 @@ function CheckoutButton(props) {
 
   const handleTogglePayMethod = () => {
     setPayByCard(!isPayByCard);
-  }
+  };
 
   const makeOrder = () => {
     console.log("selected food items", props.selectedFoodItems);
-    let orderTime = getUnixTime(new Date())
+    let orderTime = getUnixTime(new Date());
 
     //Get list of riders working at this time
-    const riderUrl = `http://localhost:5000/api/riders/order?time=${orderTime}`
+    const riderUrl = `http://localhost:5000/api/riders/order?time=${orderTime}`;
     Axios.get(riderUrl)
       .then((response) => {
-        let riderIds = response.data.rid
+        let riderIds = response.data.rid;
         if (riderIds.length == 0) {
-          console.log("No riders available at this time!")
+          console.log("No riders available at this time!");
         } else {
-          console.log("Riders available:", riderIds)
-          let chosenRider = riderIds[0]
+          console.log("Riders available:", riderIds);
+          let chosenRider = riderIds[0];
           let parsedItems = [];
-          let chosenItems = props.selectedFoodItems
+          let chosenItems = props.selectedFoodItems;
           for (var key in chosenItems) {
             if (chosenItems.hasOwnProperty(key)) {
               let item = chosenItems[key];
-              let parsedItem = {}
-              parsedItem.fname = `'${item.name}'`
-              parsedItem.qty = `${item.quantity}`
-              parsedItem.itemprice = `${item.price}`
-              parsedItems.push(parsedItem)
+              let parsedItem = {};
+              parsedItem.fname = `'${item.name}'`;
+              parsedItem.qty = `${item.quantity}`;
+              parsedItem.itemprice = `${item.price}`;
+              parsedItems.push(parsedItem);
             }
           }
-          console.log(parsedItems)
-          const url = `http://localhost:5000/api/orders`
+          console.log(parsedItems);
+          const url = `http://localhost:5000/api/orders`;
           let payMethod = isPayByCard ? 1 : 0;
           Axios.post(url, {
             location: `'${props.deliveryInfo.location}'`,
@@ -54,22 +54,21 @@ function CheckoutButton(props) {
             rname: `'${props.restaurant}'`,
             fprice: `${props.subtotal}`,
             rid: `${chosenRider}`,
-            foodlist: parsedItems
+            foodlist: parsedItems,
           })
             .then((response) => {
-              console.log("'Successfully created order", response)
+              console.log("'Successfully created order", response);
               //setModalOpened(false);
               //TODO: Redirect to orders page
             })
             .catch((error) => {
-              console.log("Error occured while making an order")
-            })
+              console.log("Error occured while making an order");
+            });
         }
       })
       .catch((error) => {
-        console.log("Unable to get riders working at this time:", error)
-      })
-
+        console.log("Unable to get riders working at this time:", error);
+      });
 
     // let parsedItems = [];
     // let chosenItems = props.selectedFoodItems
@@ -104,8 +103,7 @@ function CheckoutButton(props) {
     //   .catch((error) => {
     //     console.log("Error occured while making an order")
     //   })
-
-  }
+  };
 
   return (
     <Modal
@@ -137,7 +135,7 @@ function CheckoutButton(props) {
 
       <Modal.Content>
         <Modal.Description>
-          {Object.entries(props.selectedFoodItems).map(value => {
+          {Object.entries(props.selectedFoodItems).map((value) => {
             let name = value[0];
             let selectedFoodItem = value[1];
             return (
@@ -146,8 +144,8 @@ function CheckoutButton(props) {
                 <span>
                   $
                   {(selectedFoodItem.quantity * selectedFoodItem.price).toFixed(
-                  2
-                )}
+                    2
+                  )}
                 </span>
               </div>
             );
@@ -173,18 +171,19 @@ function CheckoutButton(props) {
             </div>
           </strong>
         </Modal.Description>
-
       </Modal.Content>
 
       <Modal.Content>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           {cardnum == 0 ? `No registered card (pay by cash)` : `Pay by card`}
           <span>
-            <Radio toggle disabled={cardnum == 0} onClick={handleTogglePayMethod}>
-            </Radio>
+            <Radio
+              toggle
+              disabled={cardnum == 0}
+              onClick={handleTogglePayMethod}
+            ></Radio>
           </span>
         </div>
-
       </Modal.Content>
 
       <Modal.Actions>
@@ -197,7 +196,7 @@ function CheckoutButton(props) {
           color="green"
           content="Place Order"
           onClick={() => {
-            makeOrder()
+            makeOrder();
             //setModalOpened(false)
           }}
         />

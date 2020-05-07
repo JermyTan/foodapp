@@ -4,11 +4,14 @@ DROP VIEW IF EXISTS ftr_mth_sal CASCADE;
 DROP VIEW IF EXISTS ptr_wk_sal CASCADE;
 DROP VIEW IF EXISTS CombinedScheduleTable CASCADE;
 DROP VIEW IF EXISTS st_hr_gen CASCADE;
-DROP VIEW IF EXISTS day_gen CASCADE;
 DROP VIEW IF EXISTS count_daily_hourly_rider CASCADE;
 DROP FUNCTION IF EXISTS check_min_daily_hourly_rider_for_day() CASCADE;
 DROP TRIGGER IF EXISTS wws_min_rider_trigger ON wws CASCADE;
 DROP TRIGGER IF EXISTS mws_min_rider_trigger ON mws CASCADE;
+DROP FUNCTION IF EXISTS check_mws_wk_same() CASCADE;
+DROP TRIGGER IF EXISTS mws_check_wk_trigger ON mws CASCADE;
+DROP FUNCTION IF EXISTS add_rpoints() CASCADE;
+DROP TRIGGER IF EXISTS add_rpoints_trigger ON orders CASCADE;
 
 -- Give all ftrider schedules in its stime and etime breakdown per entry, following wws structure
 CREATE OR REPLACE VIEW effective_mws AS
@@ -76,14 +79,7 @@ ORDER BY sc_date , lower(timerange), upper(timerange);
 
 CREATE OR REPLACE VIEW st_hr_gen AS
 	SELECT *
-	FROM generate_series(10, 22, 1) as sthour;
-
-CREATE OR REPLACE VIEW day_gen AS
-	SELECT t.day::date AS date, starthour
-	FROM   generate_series(timestamp '2010-01-01'
-                     , timestamp '2038-12-31'
-                     , interval  '1 day') AS t(day)
-			, generate_series(10, 21, 1) AS starthour;
+	FROM generate_series(10, 21, 1) as sthour;
 
 -- Checks the combined daily hourly count of riders for all existing entries in wws and mws 
 CREATE OR REPLACE VIEW count_daily_hourly_rider AS 
@@ -98,36 +94,24 @@ CREATE OR REPLACE VIEW count_daily_hourly_rider AS
 	GROUP BY
 		sc_date,
 		sthour
-	ORDER BY
-		sc_date,
-		sthour
-	), RiderDailyHourlyCount AS (
-		SELECT
-			*
-		FROM
-			RiderCount rc
 		UNION
 		SELECT
-			dg.date,
-			dg.starthour,
+			t.sc_date,
+			dsh.sthour,
 			0 AS cnt
 		FROM
-			day_gen dg
-		WHERE
-			dg.date IN (
-				SELECT
-					sc_date FROM RiderCount rc)
-			AND dg.starthour NOT IN(
-				SELECT
-					rc2.sthour FROM RiderCount rc2
-				WHERE
-					rc2.sc_date = dg.date
+			CombinedScheduleTable t, st_hr_gen dsh
+		WHERE NOT EXISTS (
+				SELECT 1
+				FROM CombinedScheduleTable t2
+				WHERE t2.sc_date = t.sc_date
+				AND t2.timerange @> dsh.sthour
 			)
 	)
 	SELECT
 		*
 	FROM
-		RiderDailyHourlyCount
+		RiderCount
 	ORDER BY sc_date, sthour;
 
 -- Checks 5 riders are assigned hourly, daily for the day
@@ -177,3 +161,26 @@ CREATE CONSTRAINT TRIGGER mws_min_rider_trigger
 	DEFERRABLE INITIALLY DEFERRED
 	FOR EACH ROW 
 	EXECUTE PROCEDURE check_min_daily_hourly_rider_for_day();
+
+-- Adds 100 rpoints to the customer's account once order is delivered
+CREATE OR REPLACE FUNCTION add_rpoints()
+RETURNS TRIGGER
+AS $$
+BEGIN
+	RAISE NOTICE 'New column: %, status: %, cid: %', NEW, NEW.status, NEW.cid;
+	IF NEW.status = 2 THEN
+		UPDATE Customers
+		SET rpoints = rpoints + 100
+		WHERE id = NEW.cid;
+		RAISE NOTICE 'Order delivered. Added 100 rpoints into customer id: %', NEW.cid;
+	END IF;
+	RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE CONSTRAINT TRIGGER add_rpoints_trigger
+	AFTER UPDATE of status OR INSERT
+	ON orders
+	DEFERRABLE INITIALLY DEFERRED
+	FOR EACH ROW
+	EXECUTE PROCEDURE add_rpoints();
