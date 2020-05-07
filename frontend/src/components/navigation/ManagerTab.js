@@ -20,18 +20,18 @@ function ManagerTab(props) {
       <Accordion.Content active={isExpanded}>
         <Menu.Item
           as={Link}
-          to={MANAGER_SUMMARY_PATH}
-          name={MANAGER_SUMMARY_PATH}
-          active={window.location.pathname === MANAGER_SUMMARY_PATH}
-          content="Summary"
-          onClick={props.onTabClick}
-        />
-        <Menu.Item
-          as={Link}
           to={MANAGER_PROMOTION_PATH}
           name={MANAGER_PROMOTION_PATH}
           active={window.location.pathname === MANAGER_PROMOTION_PATH}
           content="Promotions"
+          onClick={props.onTabClick}
+        />
+        <Menu.Item
+          as={Link}
+          to={MANAGER_SUMMARY_PATH}
+          name={MANAGER_SUMMARY_PATH}
+          active={window.location.pathname === MANAGER_SUMMARY_PATH}
+          content="Summary"
           onClick={props.onTabClick}
         />
       </Accordion.Content>

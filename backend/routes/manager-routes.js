@@ -10,7 +10,10 @@ const {
   // getStaffs,
   // getStaff,
   createManager,
-  // updateCustomer,
+  getGeneralCustomerSummary,
+  // getGeneralOrderSummaryFiltered,
+  getGeneralOrderSummary,
+  getGeneralRiderSummary
   // deleteCustomer
 } = require('../controllers/managers');
 
@@ -20,9 +23,18 @@ router
   // .get(getStaffs)
   .post(createManager);
 
-router.route('/:id')
-// .get(getStaff)
+router.route('/summary/customers')
+  .get(getGeneralCustomerSummary);
 // .put(updateCustomer)
 //   .delete(deleteCustomer);
+
+// router.route('/summary/orders/filtered')
+//   .get(getGeneralOrderSummaryFiltered);
+
+router.route('/summary/orders')
+  .get(getGeneralOrderSummary);
+
+router.route('/summary/riders')
+  .get(getGeneralRiderSummary);
 
 module.exports = router;
