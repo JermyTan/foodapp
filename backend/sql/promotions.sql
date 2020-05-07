@@ -12,7 +12,7 @@ COMMIT;
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
 INSERT INTO Promotions (sdatetime, edatetime, discount) 
-VALUES(1588420800000, 1591099200000, 0.3);
+VALUES(1588420800, 1591099200, 0.3);
 
 INSERT INTO FDSPromotions
 VALUES((SELECT currval('promotions_pid_seq')));
@@ -21,7 +21,7 @@ COMMIT;
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
 INSERT INTO Promotions (sdatetime, edatetime, discount) 
-VALUES(1585834200000, 1588426200000, 1);
+VALUES(1585834200, 1588426200, 1);
 
 INSERT INTO FDSPromotions
 VALUES((SELECT currval('promotions_pid_seq')));
@@ -30,7 +30,7 @@ COMMIT;
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
 INSERT INTO Promotions (sdatetime, edatetime, discount) 
-VALUES(1593167400000, 1595766600000, 0.2);
+VALUES(1593167400, 1595766600, 0.2);
 
 INSERT INTO FDSPromotions
 VALUES((SELECT currval('promotions_pid_seq')));
@@ -39,7 +39,7 @@ COMMIT;
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
 INSERT INTO Promotions (sdatetime, edatetime, discount) 
-VALUES(1587384000000, 1589976000000, 0.4);
+VALUES(1587384000, 1589976000, 0.4);
 
 INSERT INTO FDSPromotions
 VALUES((SELECT currval('promotions_pid_seq')));
@@ -49,7 +49,7 @@ COMMIT;
 --Pizza Hut--
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO Promotions (sdatetime, edatetime, discount) VALUES(1587384000000, 1592654400000, 0.2);
+INSERT INTO Promotions (sdatetime, edatetime, discount) VALUES(1587384000, 1592654400, 0.2);
 
 INSERT INTO RPromotions
 VALUES((SELECT currval('promotions_pid_seq')));
@@ -60,7 +60,7 @@ COMMIT;
 
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO Promotions (sdatetime, edatetime, discount) VALUES(1587284032400, 1589654400000, 0.1);
+INSERT INTO Promotions (sdatetime, edatetime, discount) VALUES(1587284032, 1589654400, 0.1);
 
 INSERT INTO RPromotions
 VALUES((SELECT currval('promotions_pid_seq')));
@@ -72,7 +72,7 @@ COMMIT;
 --McDonalds--
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO Promotions (sdatetime, edatetime, discount) VALUES(1591012800000, 1592654400000, 0.5);
+INSERT INTO Promotions (sdatetime, edatetime, discount) VALUES(1591012800, 1592654400, 0.5);
 
 INSERT INTO RPromotions
 VALUES((SELECT currval('promotions_pid_seq')));
@@ -83,7 +83,7 @@ COMMIT;
 
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
-INSERT INTO Promotions (sdatetime, edatetime, discount) VALUES(1581296400000, 1586480400000, 0.1);
+INSERT INTO Promotions (sdatetime, edatetime, discount) VALUES(1581296400, 1586480400, 0.1);
 
 INSERT INTO RPromotions
 VALUES((SELECT currval('promotions_pid_seq')));
