@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Menu, Container, Statistic, Icon } from "semantic-ui-react";
 import { MonthRangeInput } from "semantic-ui-calendar-react";
 import { parse, isBefore, format } from "date-fns";
 import "styles/AllRestaurants.scss";
+import SummaryData from "components/riders/SummaryData";
+import UserContext from "utils/UserContext";
 
 function RiderSummaryPage() {
   const [selectedMonths, setSelectedMonths] = useState("");
+  const [riderSummary, setRiderSummary] = useState([]);
+  const { uid } = useContext(UserContext);
 
   const getPeriod = selectedMonths => {
     let period = selectedMonths.split(" - ");
@@ -25,6 +29,8 @@ function RiderSummaryPage() {
   };
 
   const period = getPeriod(selectedMonths);
+  SummaryData(setRiderSummary, period, uid);
+  console.log("rider summary is: " + riderSummary);
 
   return (
     <main className="rider-summary-page">
@@ -65,6 +71,7 @@ function RiderSummaryPage() {
                 <Statistic.Value>
                   <Icon name="dollar" />
                   8342
+                  {/* setRiderSummary.total_sal */}
                 </Statistic.Value>
               </Statistic>
 
@@ -95,6 +102,7 @@ function RiderSummaryPage() {
                 <Statistic.Value>
                   <Icon name="time" />
                   1032
+                  {/* riderSummary.total_hr */}
                 </Statistic.Value>
               </Statistic>
 
@@ -125,6 +133,7 @@ function RiderSummaryPage() {
                 <Statistic.Value>
                   <Icon name="truck" />
                   3432
+                  {/* riderSummary.num_order */}
                 </Statistic.Value>
               </Statistic>
 
