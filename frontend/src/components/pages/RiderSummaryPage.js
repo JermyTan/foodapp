@@ -12,6 +12,7 @@ function RiderSummaryPage() {
   const [riderSalary, setRiderSalary] = useState([]);
   const [riderSchedule, setRiderSchedule] = useState([]);
   const [riderOrder, setRiderOrder] = useState([]);
+  const [riderRatings, setRiderRatings] = useState([]);
   const { uid } = useContext(UserContext);
 
   const getPeriod = selectedMonths => {
@@ -36,7 +37,7 @@ function RiderSummaryPage() {
   const numWk = Math.round((new Date() - period[0]) / (7 * 24 * 60 * 60 *1000)) + 1;
   // console.log("numMth is: " + numMth)
   // console.log("numWk is: " + numWk)
-  SummaryData(setRiderSummary, setRiderSalary, setRiderSchedule, setRiderOrder, uid);
+  SummaryData(setRiderSummary, setRiderSalary, setRiderSchedule, setRiderOrder, setRiderRatings, uid);
   // console.log("SUMMARY: " + riderSummary + " SALARY: " + riderSalary + " SCHEDULE: " + riderSchedule + " ORDERS: " + riderOrder);
 
   return (
@@ -239,7 +240,7 @@ function RiderSummaryPage() {
                 <Statistic.Label>Total ratings</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="star" />
-                  67
+                  {(riderRatings.length)}
                 </Statistic.Value>
               </Statistic>
 
@@ -247,7 +248,7 @@ function RiderSummaryPage() {
                 <Statistic.Label>Average ratings</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="star" />
-                  4.6
+                  {+(riderRatings.reduce((acc, curr) => parseInt(acc) + parseInt(curr['rating']), 0) / riderRatings.length).toFixed(2)}
                 </Statistic.Value>
               </Statistic>
             </Statistic.Group>

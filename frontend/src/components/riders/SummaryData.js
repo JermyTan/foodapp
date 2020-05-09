@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 
-function SummaryData(setRiderSummary, setSalary, setSchedule, setOrders, id) {
+function SummaryData(setRiderSummary, setSalary, setSchedule, setOrders, setRatings, id) {
     const [data, setData] = useState([]);
     const url1 = `http://localhost:5000/api/riders/${id}/summary`
     useEffect(() => {
@@ -48,6 +48,18 @@ function SummaryData(setRiderSummary, setSalary, setSchedule, setOrders, id) {
             })
             .catch(error => {
                 console.log("Error retrieving rider's order data:", error);
+            })
+    }, [])
+
+    const url5 = `http://localhost:5000/api/riders/${id}/ratings`
+    useEffect(() => {
+        Axios.get(url5)
+            .then(response => {
+                console.log("response", response.data);
+                setRatings(response.data);
+            })
+            .catch(error => {
+                console.log("Error retrieving rider's ratings :", error);
             })
     }, [])
 

@@ -94,6 +94,30 @@ exports.getRiderSchedule = async (req, response) => {
   })
 }
 
+// @desc    Get a rider's ratings
+// @route   GET /riders/:id/ratings
+// @access   Private
+exports.getRiderRatings = async (req, response) => {
+  const id = req.params.id
+  const getRiderRatingsQuery =
+    `SELECT r.rating AS rating
+    FROM Orders o JOIN Ratings r ON (r.oid = o.oid)
+    WHERE o.rid = '${id}';`
+  const rows = await db.query(getRiderRatingsQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json(`Failed to get rider's ${id} ratings.`)
+    } else {
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to get rider's ${id} ratings.`)
+      } else {
+        console.log('Successfully get rider ratings.')
+        response.status(200).json(result.rows)
+      }
+    }
+  })
+}
+
 // @desc    Create new rider with default base salary of $1000
 // @route   POST /riders
 // @access   Public
