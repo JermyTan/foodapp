@@ -3,6 +3,7 @@ import { Button, Icon, Modal, Header, Radio } from "semantic-ui-react";
 import Axios from "axios";
 import { getUnixTime } from "date-fns";
 import UserContext from "utils/UserContext";
+import { useHistory } from "react-router-dom";
 
 function CheckoutButton(props) {
   const [isModalOpened, setModalOpened] = useState(false);
@@ -10,6 +11,7 @@ function CheckoutButton(props) {
   const [cardNum, setCardNum] = useState();
   const { uid } = useContext(UserContext);
   const [loading, setLoading] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
     Axios.get(`http://localhost:5000/api/customers/${uid}`)
@@ -37,7 +39,7 @@ function CheckoutButton(props) {
         let riderIds = response.data.rid;
         if (riderIds.length == 0) {
           console.log("No riders available at this time!");
-          console.log("Assigning to default rider:")
+          console.log("Assigning to default rider:");
         }
         console.log("Riders available:", riderIds);
         let chosenRider = 127;
@@ -52,52 +54,29 @@ function CheckoutButton(props) {
             parsedItem.itemprice = `${item.price}`;
             parsedItems.push(parsedItem);
           }
-          console.log(parsedItems);
-          const url = `http://localhost:5000/api/orders`;
-          Axios.post(url, {
-            location: `'${props.deliveryInfo.location}'`,
-            dfee: `'${props.deliveryInfo.deliveryFee}'`,
-            odatetime: `${orderTime}`,
-            cid: `${uid}`,
-            paymethod: `${isPayByCard}`,
-            rname: `'${props.restaurant}'`,
-            fprice: `${props.subtotal}`,
-            rid: `${chosenRider}`,
-            foodlist: parsedItems,
-          })
-            .then((response) => {
-              console.log("'Successfully created order", response);
-              setLoading(false);
-              window.location.push("/history");
-            })
-            .catch((error) => {
-              setLoading(false);
-              console.log("Error occured while making an order");
-            });
         }
         console.log(parsedItems);
         const url = `http://localhost:5000/api/orders`;
-        let payMethod = isPayByCard ? 1 : 0;
         Axios.post(url, {
           location: `'${props.deliveryInfo.location}'`,
           dfee: `'${props.deliveryInfo.deliveryFee}'`,
           odatetime: `${orderTime}`,
           cid: `${uid}`,
-          paymethod: `${payMethod}`,
+          paymethod: `${isPayByCard}`,
           rname: `'${props.restaurant}'`,
           fprice: `${props.subtotal}`,
-          rid: `${127}`,
+          rid: `${chosenRider}`,
           foodlist: parsedItems,
         })
           .then((response) => {
             console.log("'Successfully created order", response);
-            //setModalOpened(false);
-            //TODO: Redirect to orders page
+            setLoading(false);
+            history.push("/history");
           })
           .catch((error) => {
-            console.log("Error occured while making an order");
+            setLoading(false);
+            console.log("Error occured while making an order", error);
           });
-
       })
       .catch((error) => {
         console.log("Unable to get riders working at this time:", error);
@@ -143,8 +122,8 @@ function CheckoutButton(props) {
                 <span>
                   $
                   {(selectedFoodItem.quantity * selectedFoodItem.price).toFixed(
-                  2
-                )}
+                    2
+                  )}
                 </span>
               </div>
             );

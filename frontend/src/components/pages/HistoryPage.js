@@ -144,7 +144,7 @@ function HistoryPage() {
             loading={loading}
             textAlign="center"
           />
-        ) : orders.count > 0 ? (
+        ) : orders.length > 0 ? (
           <Card.Group>
             {orders.map((value, index) => {
               console.log(orders);
@@ -152,14 +152,14 @@ function HistoryPage() {
             })}
           </Card.Group>
         ) : (
-          <Segment
-            size="massive"
-            basic
-            placeholder
-            textAlign="center"
-            content="You have no past orders"
-          />
-        )}
+              <Segment
+                size="massive"
+                basic
+                placeholder
+                textAlign="center"
+                content="You have no past orders"
+              />
+            )}
       </Container>
       <br />
       <br />
