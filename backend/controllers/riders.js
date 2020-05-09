@@ -94,6 +94,30 @@ exports.getRiderSchedule = async (req, response) => {
   })
 }
 
+// @desc    Get a rider's ratings
+// @route   GET /riders/:id/ratings
+// @access   Private
+exports.getRiderRatings = async (req, response) => {
+  const id = req.params.id
+  const getRiderRatingsQuery =
+    `SELECT r.rating AS rating
+    FROM Orders o JOIN Ratings r ON (r.oid = o.oid)
+    WHERE o.rid = '${id}';`
+  const rows = await db.query(getRiderRatingsQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json(`Failed to get rider's ${id} ratings.`)
+    } else {
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to get rider's ${id} ratings.`)
+      } else {
+        console.log('Successfully get rider ratings.')
+        response.status(200).json(result.rows)
+      }
+    }
+  })
+}
+
 // @desc    Create new rider with default base salary of $1000
 // @route   POST /riders
 // @access   Public
@@ -277,16 +301,64 @@ exports.getEligibleRiders = async (req, response) => {
 // @desc    Get summmary info for riders
 // @route   GET /riders/:id/summary?stime=:stime&etime=:etime
 // @access   Private
+// exports.getSummaryInfo = async (req, response) => {
+//   let id = req.params.id;
+//   let { stime, etime } = req.query;
+//   const getRidersSummary = 
+//   `WITH RiderOrders AS (
+//     SELECT count(*) AS num_order
+//     FROM Orders O
+//     WHERE O.rid = ${id}
+//     AND O.odatetime >= ${stime}
+//     AND O.odatetime <= ${etime}
+//     AND O.status = 2
+//   )
+//   , RiderSalary AS (
+//     With CombinedSalTable AS (
+//       SELECT id, EXTRACT(EPOCH from wkmthyr) AS epoch_date, wk_sal AS sal
+//       FROM ptr_wk_sal
+//       UNION
+//       SELECT id, EXTRACT(EPOCH from mthyr) AS epoch_date, mth_sal AS sal
+//       FROM ftr_mth_sal)
+//     SELECT SUM(sal) AS total_sal
+//     FROM CombinedSalTable
+//     WHERE id = ${id}
+//     AND epoch_date >= ${stime}
+//     AND epoch_date <= ${etime}
+//   )
+//   , RiderHours AS (
+//     SELECT SUM(upper(timerange) - lower(timerange)) AS total_hr
+//     FROM CombinedScheduleTable
+//     WHERE id = ${id}
+//     AND EXTRACT(EPOCH from sc_date) >= ${stime}
+//     AND EXTRACT(EPOCH from sc_date) <= ${etime}
+//   )
+//   SELECT
+//     total_sal,
+//     num_order,
+//     total_hr
+//       FROM RiderOrders, RiderSalary, RiderHours;`;
+//   db.query(getRidersSummary, async (err, result) => {
+//     if (err) {
+//       console.error(err.stack);
+//       response.status(404).json(`Failed to get rider's summary.`);
+//     } else {
+//       console.log("Get rider summary result:", result.rows[0]);
+//       response.status(200).json(result.rows[0]);
+//     }
+//   });
+// };
+
+// @desc    Get summmary info for riders
+// @route   GET /riders/:id/summary
+// @access   Private
 exports.getSummaryInfo = async (req, response) => {
   let id = req.params.id;
-  let { stime, etime } = req.query;
   const getRidersSummary = 
   `WITH RiderOrders AS (
     SELECT count(*) AS num_order
     FROM Orders O
     WHERE O.rid = ${id}
-    AND O.odatetime >= ${stime}
-    AND O.odatetime <= ${etime}
     AND O.status = 2
   )
   , RiderSalary AS (
@@ -299,15 +371,11 @@ exports.getSummaryInfo = async (req, response) => {
     SELECT SUM(sal) AS total_sal
     FROM CombinedSalTable
     WHERE id = ${id}
-    AND epoch_date >= ${stime}
-    AND epoch_date <= ${etime}
   )
   , RiderHours AS (
     SELECT SUM(upper(timerange) - lower(timerange)) AS total_hr
     FROM CombinedScheduleTable
     WHERE id = ${id}
-    AND EXTRACT(EPOCH from sc_date) >= ${stime}
-    AND EXTRACT(EPOCH from sc_date) <= ${etime}
   )
   SELECT
     total_sal,

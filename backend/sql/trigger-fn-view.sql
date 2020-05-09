@@ -52,67 +52,87 @@ SELECT id, (SELECT date_trunc('week', dldatetime)) AS wkmthyr, round(sum(dfee) +
 FROM PTRiderPastSalary 
 GROUP BY id, (SELECT date_trunc('week', dldatetime));
 
--- Combined mws and wws table
-CREATE OR REPLACE VIEW CombinedScheduleTable AS
-With UnorderedTable AS (
+-- Combined mws and wws table 
+CREATE OR REPLACE VIEW CombinedScheduleTable AS 
+WITH UnorderedTable AS (
+	SELECT
+		COALESCE(w.id,
+			m.id) AS id,
+		CASE WHEN m.dmy IS NULL THEN
+			int4range(w.stime,
+				w.etime,
+				'[)')
+		ELSE
+			int4range(m.stime,
+				m.etime,
+				'[)')
+		END AS timerange,
+		COALESCE(m.dmy,
+			w.dmy) AS sc_date,
+		CASE WHEN m.dmy IS NULL THEN
+			0
+		ELSE
+			1
+		END AS isFT
+	FROM
+		wws w
+	FULL OUTER JOIN effective_mws m ON (w.id = m.id)
+)
 SELECT
-	COALESCE(w.id, m.id) as id,
-	CASE 
-		WHEN m.dmy IS NULL 
-		THEN int4range(w.stime, w.etime, '[)') 
-		ELSE int4range(m.stime, m.etime, '[)')
-	END AS timerange,
-	COALESCE(m.dmy, w.dmy) AS sc_date,
-	CASE 
-		WHEN m.dmy IS NULL 
-		THEN 0
-		ELSE 1
-	END AS isFT
+	*
 FROM
-	wws w FULL OUTER JOIN
-	effective_mws m ON (w.id = m.id)
-) 
-SELECT *
-FROM UnorderedTable
-ORDER BY sc_date , lower(timerange), upper(timerange);
-;
+	UnorderedTable
+ORDER BY
+	sc_date,
+	lower(timerange),
+	upper(timerange
+);
 
 CREATE OR REPLACE VIEW st_hr_gen AS
-	SELECT *
-	FROM generate_series(10, 21, 1) as sthour;
+SELECT
+	*
+FROM
+	generate_series(
+		10, 21, 1) AS sthour;
 
--- Checks the combined daily hourly count of riders for all existing entries in wws and mws 
+-- Checks the combined daily hourly count of riders for all existing entries in wws and mws
 CREATE OR REPLACE VIEW count_daily_hourly_rider AS 
-	WITH RiderCount AS (
-		SELECT
-			sc_date,
-			sthour,
-			count(*) AS cnt
-		FROM
-			st_hr_gen AS dsh
-		LEFT OUTER JOIN CombinedScheduleTable t ON sthour <@ t.timerange
-	GROUP BY
-		sc_date,
-		sthour
-		UNION
-		SELECT
-			t.sc_date,
-			dsh.sthour,
-			0 AS cnt
-		FROM
-			CombinedScheduleTable t, st_hr_gen dsh
-		WHERE NOT EXISTS (
-				SELECT 1
-				FROM CombinedScheduleTable t2
-				WHERE t2.sc_date = t.sc_date
-				AND t2.timerange @> dsh.sthour
-			)
-	)
+WITH RiderCount AS (
 	SELECT
-		*
+		sc_date,
+		sthour,
+		count(*) AS cnt
 	FROM
-		RiderCount
-	ORDER BY sc_date, sthour;
+		st_hr_gen AS dsh
+	LEFT OUTER JOIN CombinedScheduleTable t ON sthour <@ t.timerange
+GROUP BY
+	sc_date,
+	sthour
+UNION
+SELECT
+	t.sc_date,
+	dsh.sthour,
+	0 AS cnt
+FROM
+	CombinedScheduleTable t,
+	st_hr_gen dsh
+WHERE
+	NOT EXISTS (
+		SELECT
+			1
+		FROM
+			CombinedScheduleTable t2
+		WHERE
+			t2.sc_date = t.sc_date
+			AND t2.timerange @> dsh.sthour)
+)
+SELECT
+	*
+FROM
+	RiderCount
+ORDER BY
+	sc_date,
+	sthour;
 
 -- Checks 5 riders are assigned hourly, daily for the day
 CREATE OR REPLACE FUNCTION check_min_daily_hourly_rider_for_day()

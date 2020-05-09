@@ -10,6 +10,7 @@ const {
   getRiders,
   getRider,
   createRider,
+  getRiderRatings,
   getRiderOrders,
   getRiderSalary,
   getRiderSchedule,
@@ -35,6 +36,9 @@ router.route('/:id')
   .get(getRider);
 // .put(updateRider)
 // .delete(deleteRider);
+
+router.route('/:id/ratings')
+  .get(getRiderRatings);
 
 router.route('/:id/orders')
   .get(getRiderOrders);
