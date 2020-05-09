@@ -74,16 +74,16 @@ function RiderSummaryPage() {
                 <Statistic.Value>
                   <Icon name="dollar" />
                   {(riderSalary.filter(date => {
-                    console.log(date);
-                    console.log('st_mth_wk is: ' + date['st_mth_wk'])
-                    console.log('sal is: ' + date['sal'])
-                    console.log('period[0] is: ' + period[0])
-                    console.log('New date class of st_mth_wk is:' + new Date(date['st_mth_wk']));
+                    // console.log(date);
+                    // console.log('st_mth_wk is: ' + date['st_mth_wk'])
+                    // console.log('sal is: ' + date['sal'])
+                    // console.log('period[0] is: ' + period[0])
+                    // console.log('New date class of st_mth_wk is:' + new Date(date['st_mth_wk']));
                     return new Date(date['st_mth_wk']).getMonth() >= new Date(period[0]).getMonth() &&
                     new Date(date['st_mth_wk']).getMonth() <= new Date(period[1]).getMonth()
                   }).reduce((acc, curr) => {
-                    console.log('curr is: ' + curr)
-                    console.log('curr sal is: ' + curr['sal'])
+                    // console.log('curr is: ' + curr)
+                    // console.log('curr sal is: ' + curr['sal'])
                     return (parseFloat(acc) + parseFloat(curr['sal'])).toFixed(2)
                   }
                   , 0))
@@ -124,8 +124,14 @@ function RiderSummaryPage() {
                 <Statistic.Label>Total hours</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="time" />
-                  1032
-                  {/* riderSummary.total_hr */}
+                  {(riderSchedule.filter(date => {
+                    return new Date(date['sc_date']).getMonth() >= new Date(period[0]).getMonth() &&
+                    new Date(date['sc_date']).getMonth() <= new Date(period[1]).getMonth()
+                  }).reduce((acc, curr) => {
+                    return (parseInt(acc) + (parseInt(curr['e_time']) - parseInt(curr['st_time'])))
+                  }
+                  , 0))
+                  }
                 </Statistic.Value>
               </Statistic>
 
@@ -133,7 +139,14 @@ function RiderSummaryPage() {
                 <Statistic.Label>Average hours per month</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="time" />
-                  345
+                  {(riderSchedule.filter(date => {
+                    return new Date(date['sc_date']).getMonth() >= new Date(period[0]).getMonth() &&
+                    new Date(date['sc_date']).getMonth() <= new Date(period[1]).getMonth()
+                  }).reduce((acc, curr) => {
+                    return (parseInt(acc) + (parseInt(curr['e_time']) - parseInt(curr['st_time'])))
+                  }
+                  , 0)) / (period[1].getMonth() - period[0].getMonth() + 1)
+                  }
                 </Statistic.Value>
               </Statistic>
 

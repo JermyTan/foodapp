@@ -29,7 +29,7 @@ function SummaryData(setRiderSummary, setSalary, setSchedule, setOrders, id) {
 
     const url3 = `http://localhost:5000/api/riders/${id}/schedule`
     useEffect(() => {
-        Axios.get(url2)
+        Axios.get(url3)
             .then(response => {
                 console.log("response", response.data);
                 setSchedule(response.data);
@@ -41,7 +41,7 @@ function SummaryData(setRiderSummary, setSalary, setSchedule, setOrders, id) {
 
     const url4 = `http://localhost:5000/api/riders/${id}/order`
     useEffect(() => {
-        Axios.get(url2)
+        Axios.get(url4)
             .then(response => {
                 console.log("response", response.data);
                 setOrders(response.data);
