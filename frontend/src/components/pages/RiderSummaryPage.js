@@ -32,8 +32,12 @@ function RiderSummaryPage() {
   };
 
   const period = getPeriod(selectedMonths);
+  const numMth = new Date(new Date() - period[0]).getMonth() + 1;
+  const numWk = Math.round((new Date() - period[0]) / (7 * 24 * 60 * 60 *1000)) + 1;
+  // console.log("numMth is: " + numMth)
+  // console.log("numWk is: " + numWk)
   SummaryData(setRiderSummary, setRiderSalary, setRiderSchedule, setRiderOrder, uid);
-  console.log("SUMMARY: " + riderSummary + " SALARY: " + riderSalary + " SCHEDULE: " + riderSchedule + " ORDERS: " + riderOrder);
+  // console.log("SUMMARY: " + riderSummary + " SALARY: " + riderSalary + " SCHEDULE: " + riderSchedule + " ORDERS: " + riderOrder);
 
   return (
     <main className="rider-summary-page">
@@ -74,16 +78,11 @@ function RiderSummaryPage() {
                 <Statistic.Value>
                   <Icon name="dollar" />
                   {(riderSalary.filter(date => {
-                    // console.log(date);
-                    // console.log('st_mth_wk is: ' + date['st_mth_wk'])
-                    // console.log('sal is: ' + date['sal'])
-                    // console.log('period[0] is: ' + period[0])
-                    // console.log('New date class of st_mth_wk is:' + new Date(date['st_mth_wk']));
                     return new Date(date['st_mth_wk']).getMonth() >= new Date(period[0]).getMonth() &&
-                    new Date(date['st_mth_wk']).getMonth() <= new Date(period[1]).getMonth()
+                    new Date(date['st_mth_wk']).getMonth() <= new Date(period[1]).getMonth() &&
+                    new Date(date['st_mth_wk']).getFullYear() >= new Date(period[0]).getFullYear() &&
+                    new Date(date['st_mth_wk']).getFullYear() <= new Date(period[1]).getFullYear()
                   }).reduce((acc, curr) => {
-                    // console.log('curr is: ' + curr)
-                    // console.log('curr sal is: ' + curr['sal'])
                     return (parseFloat(acc) + parseFloat(curr['sal'])).toFixed(2)
                   }
                   , 0))
@@ -97,11 +96,13 @@ function RiderSummaryPage() {
                   <Icon name="dollar" />
                   {(riderSalary.filter(date => {
                     return new Date(date['st_mth_wk']).getMonth() >= new Date(period[0]).getMonth() &&
-                    new Date(date['st_mth_wk']).getMonth() <= new Date(period[1]).getMonth()
+                    new Date(date['st_mth_wk']).getMonth() <= new Date(period[1]).getMonth() &&
+                    new Date(date['st_mth_wk']).getFullYear() >= new Date(period[0]).getFullYear() &&
+                    new Date(date['st_mth_wk']).getFullYear() <= new Date(period[1]).getFullYear()
                   }).reduce((acc, curr) => {
                     return (parseFloat(acc) + parseFloat(curr['sal']))
                   }
-                  , 0) / (period[1].getMonth() - period[0].getMonth() + 1).toFixed(2))
+                  , 0) / numMth).toFixed(2)
                   }
                 </Statistic.Value>
               </Statistic>
@@ -110,7 +111,16 @@ function RiderSummaryPage() {
                 <Statistic.Label>Average earnings per week</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="dollar" />
-                  823
+                  {(riderSalary.filter(date => {
+                    return new Date(date['st_mth_wk']).getMonth() >= new Date(period[0]).getMonth() &&
+                    new Date(date['st_mth_wk']).getMonth() <= new Date(period[1]).getMonth() &&
+                    new Date(date['st_mth_wk']).getFullYear() >= new Date(period[0]).getFullYear() &&
+                    new Date(date['st_mth_wk']).getFullYear() <= new Date(period[1]).getFullYear()
+                  }).reduce((acc, curr) => {
+                    return (parseFloat(acc) + parseFloat(curr['sal']))
+                  }
+                  , 0) / numWk).toFixed(2)
+                  }
                 </Statistic.Value>
               </Statistic>
             </Statistic.Group>
@@ -126,7 +136,9 @@ function RiderSummaryPage() {
                   <Icon name="time" />
                   {(riderSchedule.filter(date => {
                     return new Date(date['sc_date']).getMonth() >= new Date(period[0]).getMonth() &&
-                    new Date(date['sc_date']).getMonth() <= new Date(period[1]).getMonth()
+                    new Date(date['sc_date']).getMonth() <= new Date(period[1]).getMonth() &&
+                    new Date(date['sc_date']).getFullYear() >= new Date(period[0]).getFullYear() &&
+                    new Date(date['sc_date']).getFullYear() <= new Date(period[1]).getFullYear()
                   }).reduce((acc, curr) => {
                     return (parseInt(acc) + (parseInt(curr['e_time']) - parseInt(curr['st_time'])))
                   }
@@ -139,13 +151,15 @@ function RiderSummaryPage() {
                 <Statistic.Label>Average hours per month</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="time" />
-                  {(riderSchedule.filter(date => {
+                  {+(riderSchedule.filter(date => {
                     return new Date(date['sc_date']).getMonth() >= new Date(period[0]).getMonth() &&
-                    new Date(date['sc_date']).getMonth() <= new Date(period[1]).getMonth()
+                    new Date(date['sc_date']).getMonth() <= new Date(period[1]).getMonth() &&
+                    new Date(date['sc_date']).getFullYear() >= new Date(period[0]).getFullYear() &&
+                    new Date(date['sc_date']).getFullYear() <= new Date(period[1]).getFullYear()
                   }).reduce((acc, curr) => {
                     return (parseInt(acc) + (parseInt(curr['e_time']) - parseInt(curr['st_time'])))
                   }
-                  , 0)) / (period[1].getMonth() - period[0].getMonth() + 1)
+                  , 0) / numMth).toFixed(2)
                   }
                 </Statistic.Value>
               </Statistic>
@@ -154,7 +168,16 @@ function RiderSummaryPage() {
                 <Statistic.Label>Average hours per week</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="time" />
-                  83
+                  {+(riderSchedule.filter(date => {
+                    return new Date(date['sc_date']).getMonth() >= new Date(period[0]).getMonth() &&
+                    new Date(date['sc_date']).getMonth() <= new Date(period[1]).getMonth() &&
+                    new Date(date['sc_date']).getFullYear() >= new Date(period[0]).getFullYear() &&
+                    new Date(date['sc_date']).getFullYear() <= new Date(period[1]).getFullYear()
+                  }).reduce((acc, curr) => {
+                    return (parseInt(acc) + (parseInt(curr['e_time']) - parseInt(curr['st_time'])))
+                  }
+                  , 0) / numWk).toFixed(2)
+                  }
                 </Statistic.Value>
               </Statistic>
             </Statistic.Group>
@@ -168,8 +191,13 @@ function RiderSummaryPage() {
                 <Statistic.Label>Total orders</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="truck" />
-                  3432
-                  {/* riderSummary.num_order */}
+                  {(riderOrder.filter(date => {
+                    return new Date(date['odatetime']*1000).getMonth() >= new Date(period[0]).getMonth() &&
+                    new Date(date['odatetime']*1000).getMonth() <= new Date(period[1]).getMonth() &&
+                    new Date(date['odatetime']*1000).getFullYear() >= new Date(period[0]).getFullYear() &&
+                    new Date(date['odatetime']*1000).getFullYear() <= new Date(period[1]).getFullYear()
+                  }).length)
+                  }
                 </Statistic.Value>
               </Statistic>
 
@@ -177,14 +205,27 @@ function RiderSummaryPage() {
                 <Statistic.Label>Average orders per month</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="truck" />
-                  34
+                  {+(riderOrder.filter(date => {
+                    return new Date(date['odatetime']*1000).getMonth() >= new Date(period[0]).getMonth() &&
+                    new Date(date['odatetime']*1000).getMonth() <= new Date(period[1]).getMonth() &&
+                    new Date(date['odatetime']*1000).getFullYear() >= new Date(period[0]).getFullYear() &&
+                    new Date(date['odatetime']*1000).getFullYear() <= new Date(period[1]).getFullYear()
+                  }).length / numMth).toFixed(2)
+                  }
                 </Statistic.Value>
               </Statistic>
 
               <Statistic>
                 <Statistic.Label>Average orders per week</Statistic.Label>
                 <Statistic.Value>
-                  <Icon name="truck" />8
+                  <Icon name="truck" />
+                  {+(riderOrder.filter(date => {
+                    return new Date(date['odatetime']*1000).getMonth() >= new Date(period[0]).getMonth() &&
+                    new Date(date['odatetime']*1000).getMonth() <= new Date(period[1]).getMonth() &&
+                    new Date(date['odatetime']*1000).getFullYear() >= new Date(period[0]).getFullYear() &&
+                    new Date(date['odatetime']*1000).getFullYear() <= new Date(period[1]).getFullYear()
+                  }).length / numWk).toFixed(2)
+                  }
                 </Statistic.Value>
               </Statistic>
             </Statistic.Group>

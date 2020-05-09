@@ -39,7 +39,7 @@ function SummaryData(setRiderSummary, setSalary, setSchedule, setOrders, id) {
             })
     }, [])
 
-    const url4 = `http://localhost:5000/api/riders/${id}/order`
+    const url4 = `http://localhost:5000/api/riders/${id}/orders`
     useEffect(() => {
         Axios.get(url4)
             .then(response => {
