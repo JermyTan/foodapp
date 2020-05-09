@@ -9,6 +9,9 @@ import UserContext from "utils/UserContext";
 function RiderSummaryPage() {
   const [selectedMonths, setSelectedMonths] = useState("");
   const [riderSummary, setRiderSummary] = useState([]);
+  const [riderSalary, setRiderSalary] = useState([]);
+  const [riderSchedule, setRiderSchedule] = useState([]);
+  const [riderOrder, setRiderOrder] = useState([]);
   const { uid } = useContext(UserContext);
 
   const getPeriod = selectedMonths => {
@@ -29,8 +32,8 @@ function RiderSummaryPage() {
   };
 
   const period = getPeriod(selectedMonths);
-  SummaryData(setRiderSummary, period, uid);
-  console.log("rider summary is: " + riderSummary);
+  SummaryData(setRiderSummary, setRiderSalary, setRiderSchedule, setRiderOrder, uid);
+  console.log("SUMMARY: " + riderSummary + " SALARY: " + riderSalary + " SCHEDULE: " + riderSchedule + " ORDERS: " + riderOrder);
 
   return (
     <main className="rider-summary-page">
@@ -70,8 +73,21 @@ function RiderSummaryPage() {
                 <Statistic.Label>Total earnings</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="dollar" />
-                  8342
-                  {/* setRiderSummary.total_sal */}
+                  {(riderSalary.filter(date => {
+                    console.log(date);
+                    console.log('st_mth_wk is: ' + date['st_mth_wk'])
+                    console.log('sal is: ' + date['sal'])
+                    console.log('period[0] is: ' + period[0])
+                    console.log('New date class of st_mth_wk is:' + new Date(date['st_mth_wk']));
+                    return new Date(date['st_mth_wk']).getMonth() >= new Date(period[0]).getMonth() &&
+                    new Date(date['st_mth_wk']).getMonth() <= new Date(period[1]).getMonth()
+                  }).reduce((acc, curr) => {
+                    console.log('curr is: ' + curr)
+                    console.log('curr sal is: ' + curr['sal'])
+                    return (parseFloat(acc) + parseFloat(curr['sal'])).toFixed(2)
+                  }
+                  , 0))
+                  }
                 </Statistic.Value>
               </Statistic>
 
@@ -79,7 +95,14 @@ function RiderSummaryPage() {
                 <Statistic.Label>Average earnings per month</Statistic.Label>
                 <Statistic.Value>
                   <Icon name="dollar" />
-                  2424
+                  {(riderSalary.filter(date => {
+                    return new Date(date['st_mth_wk']).getMonth() >= new Date(period[0]).getMonth() &&
+                    new Date(date['st_mth_wk']).getMonth() <= new Date(period[1]).getMonth()
+                  }).reduce((acc, curr) => {
+                    return (parseFloat(acc) + parseFloat(curr['sal']))
+                  }
+                  , 0) / (period[1].getMonth() - period[0].getMonth() + 1).toFixed(2))
+                  }
                 </Statistic.Value>
               </Statistic>
 
