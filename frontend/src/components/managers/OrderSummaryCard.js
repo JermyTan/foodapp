@@ -1,36 +1,18 @@
-import React, { useState } from "react";
-import { Card, Button, Icon } from "semantic-ui-react";
-import { format } from "date-fns";
+import React from "react";
+import { Card, Icon } from "semantic-ui-react";
 
 function OrderSummaryCard(props) {
-    const [isExpanded, setExpanded] = useState(false);
     return (
         <Card fluid raised color={"teal"}>
             <Card.Content>
                 <Card.Header>
-                    {/* <Icon name="file alternate" /> */}
-                    Order ID: {props.oid}
-                    <Button
-                        primary
-                        floated="right"
-                        onClick={() => setExpanded(!isExpanded)}
-                    >
-                        {isExpanded ? "View less" : "View more"}
-                    </Button>
+                    <Icon name="location arrow" />
+                    Delivery Location: {props.location}
                 </Card.Header>
-                {isExpanded && (
-                    <Card.Description>
-                        <Icon name="calendar alternate outline" />
-                        <strong>Order Date: {format(props.odatetime * 1000, "dd/MM/yyyy")}</strong>
-                        <br />
-                        <Icon name="dollar" />
-                        <strong>Order Cost: {props.cost}</strong>
-                        <br />
-                        <Icon name="location arrow" />
-                        <strong>Delivery Location: {props.location}</strong>
-
-                    </Card.Description>
-                )}
+                <Card.Description>
+                    <Icon name="file alternate" />
+                    <strong>Order Count: {props.count}</strong>
+                </Card.Description>
             </Card.Content>
         </Card >
     );

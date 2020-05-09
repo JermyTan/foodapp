@@ -12,17 +12,6 @@ function RiderSummaryCard(props) {
                     style={{ display: "flex", justifyContent: "space-between" }}
                 >
                     Rider ID: {props.id}
-                </Card.Header>
-            </Card.Content>
-
-            <Card.Content>
-                <Card.Header>
-                    <Icon name="User" />
-                    Name: {props.name}
-                </Card.Header>
-                <Card.Description>
-                    <Icon name="mail" />
-                    <a href>{props.email}</a>
                     <Button
                         primary
                         floated="right"
@@ -30,23 +19,30 @@ function RiderSummaryCard(props) {
                     >
                         {isExpanded ? "View less" : "View more"}
                     </Button>
-                </Card.Description>
+                </Card.Header>
                 {isExpanded && (
                     <Card.Description>
                         <Icon name="dollar" />
-                        <strong>Total Salary = {props.salary}</strong>
+                        <strong>Total Salary = {props.totalsalary}</strong>
                         <br />
-                        <Icon name="calendar alternate outline" />
-                        <strong>Join Date: {format(props.joindate * 1000, "dd/MM/yyyy")}</strong>
+                        <Icon name="clock outline" />
+                        <strong>{props.hours} hours worked </strong>
                         <br />
                         <Icon name="motorcycle" />
-                        <strong>No. of orders delivered: {props.noorder}</strong>
+                        <strong>{props.noorder} orders delivered</strong>
                         <br />
-                        <Icon name="dollar" />
-                        <strong>Total cost of orders: {props.totalCost}</strong>
+                        <Icon name="clock" />
+                        <strong>Average delivery time of {props.avgdelivertime} mins</strong>
+                        <br />
+                        <Icon name="star outline" />
+                        <strong>{props.norating} ratings received </strong>
+                        <br />
+                        <strong>{" "}Average rating: {props.avgrating} <Icon name="star" /></strong>
                     </Card.Description>
                 )}
+
             </Card.Content>
+
         </Card >
     );
 }

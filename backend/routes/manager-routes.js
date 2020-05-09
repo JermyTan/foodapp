@@ -13,7 +13,8 @@ const {
   getGeneralCustomerSummary,
   // getGeneralOrderSummaryFiltered,
   getGeneralOrderSummary,
-  getGeneralRiderSummary
+  getGeneralRiderSummary,
+  getGeneralSummary
   // deleteCustomer
 } = require('../controllers/managers');
 
@@ -36,5 +37,8 @@ router.route('/summary/orders')
 
 router.route('/summary/riders')
   .get(getGeneralRiderSummary);
+
+router.route('/summary/general')
+  .get(getGeneralSummary);
 
 module.exports = router;

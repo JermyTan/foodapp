@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { MonthRangeInput } from "semantic-ui-calendar-react";
 import {
     parse,
     isBefore,
     format,
     getUnixTime,
     startOfMonth,
-    endOfMonth,
-    differenceInCalendarMonths,
-    differenceInCalendarWeeks,
+    endOfMonth
 } from "date-fns";
 import Axios from "axios";
 
-function SummaryData(setOrders, setCustomerOrder, setOrderSummary, setRiderSummary, startime, endtime) {
-    const [period, setPeriod] = useState([]);
+function SummaryData(setLoading, setOverviewSummary) {
     // const url1 = `http://localhost:5000/api/customers`
     // useEffect(() => {
     //     Axios.get(url1)
@@ -26,17 +22,17 @@ function SummaryData(setOrders, setCustomerOrder, setOrderSummary, setRiderSumma
     //         })
     // }, [])
 
-    const url2 = `http://localhost:5000/api/orders`
-    useEffect(() => {
-        Axios.get(url2)
-            .then(response => {
-                console.log("response", response.data);
-                setOrders(response.data);
-            })
-            .catch(error => {
-                console.log("Error retrieving order data:", error);
-            })
-    }, [])
+    // const url2 = `http://localhost:5000/api/orders`
+    // useEffect(() => {
+    //     Axios.get(url2)
+    //         .then(response => {
+    //             console.log("response", response.data);
+    //             setOrders(response.data);
+    //         })
+    //         .catch(error => {
+    //             console.log("Error retrieving order data:", error);
+    //         })
+    // }, [])
 
     // const url3 = `http://localhost:5000/api/riders`
     // useEffect(() => {
@@ -49,16 +45,19 @@ function SummaryData(setOrders, setCustomerOrder, setOrderSummary, setRiderSumma
     //             console.log("Error retrieving rider data:", error);
     //         })
     // }, [])
+    // setLoading(true);
 
-    const url4 = `http://localhost:5000/api/managers/summary/customers`
+    const url = `http://localhost:5000/api/managers/summary/general`
     useEffect(() => {
-        Axios.get(url4)
+        Axios.get(url)
             .then(response => {
-                console.log("response", response.data)
-                setCustomerOrder(response.data)
+                let { overviewsummary } = response.data;
+                console.log(overviewsummary);
+                setOverviewSummary(overviewsummary);
+                setLoading(false);
             })
             .catch(error => {
-                console.log("Error retrieving customer data:", error);
+                console.log("Error retrieving overview:", error);
             })
     }, [])
 
@@ -74,30 +73,25 @@ function SummaryData(setOrders, setCustomerOrder, setOrderSummary, setRiderSumma
     //         })
     // }, [])
 
-    const url6 = `http://localhost:5000/api/managers/summary/orders`
-    useEffect(() => {
-        Axios.get(url6)
-            .then(response => {
-                console.log("response", response.data);
-                setOrderSummary(response.data);
-            })
-            .catch(error => {
-                console.log("Error retrieving order data:", error);
-            })
-    }, [])
+    // const url6 = `http://localhost:5000/api/managers/summary/orders`
+    // useEffect(() => {
+    //     Axios.get(url6)
+    //         .then(response => {
+    //             console.log("response", response.data);
+    //             setOrderSummary(response.data);
+    //         })
+    //         .catch(error => {
+    //             console.log("Error retrieving order data:", error);
+    //         })
+    // }, [])
 
-    const url7 = `http://localhost:5000/api/managers/summary/riders?starttime=${startime}&endtime=${endtime}`;
-    useEffect(() => {
-        Axios.get(url7)
-            .then(response => {
-                let { ridersummary } = response.data;
-                console.log(ridersummary);
-                setRiderSummary(ridersummary);
-            })
-            .catch(error => {
-                console.log("Error retrieving rider summary data:", error);
-            })
-    }, [])
+
+
+
+
+
+
+
 
 }
 
