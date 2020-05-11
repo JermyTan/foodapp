@@ -289,7 +289,7 @@ exports.getAllRiderSchedule = async (req, response) => {
   })
 }
 
-// @desc    Valid part time riders schedule (10 to 48h)
+// @desc    Validate part time riders schedule (10 to 48h)
 // @route   GET /managers/riders/schedule/validate-pt
 // @access  Private
 exports.validatePTSchedule = async (req, response) => {
@@ -305,6 +305,27 @@ exports.validatePTSchedule = async (req, response) => {
         response.status(200).json({ invalid_schedule: result.rows });
       } else {
         response.status(200).json(`Part-time rider schedule is valid.`);
+      }
+    }
+  })
+}
+
+// @desc    Validate full time riders schedule
+// @route   GET /managers/riders/schedule/validate-ft
+// @access  Private
+exports.validateFTSchedule = async (req, response) => {
+  const validateFTScheduleQuery =
+    `SELECT * FROM check_ft_work_hr();`
+  const rows = await db.query(validateFTScheduleQuery, (err, result) => {
+    if (err) {
+      console.error(err);
+      response.status(500).json(err);
+    } else {
+      console.log('Successfully validated FT rider schedule');
+      if (result.rows.length > 0) {
+        response.status(200).json({ invalid_schedule: result.rows });
+      } else {
+        response.status(200).json(`Full-time rider schedule is valid.`);
       }
     }
   })
