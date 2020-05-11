@@ -222,12 +222,8 @@ exports.getAllRiderSchedule = async (req, response) => {
       console.error(err.stack);
       response.status(500).json(`Failed to get rider schedule.`)
     } else {
-      // if (!result.rows[0]) {
-      //   response.status(404).json(`No rider schedule found.`)
-      // } else {
-        console.log('Successfully get rider schedule')
-        response.status(200).json(result.rows)
-      // }
+      console.log('Successfully get rider schedule')
+      response.status(200).json(result.rows)
     }
   })
 }
@@ -239,17 +235,20 @@ exports.createRiderSchedule = async (req, response) => {
   // shape of request body is an array of json obj with either { id, date, shift } or { id, date, stime, etime }
   let createRiderScheduleQuery = 
   `BEGIN;
-  SET CONSTRAINTS ALL DEFERRED;`;
+  SET CONSTRAINTS ALL DEFERRED;
+  `;
   const arr = req.body;
   console.log(arr);
   arr.map((data) => {
     let query = ``
     if (data['shift']) {
       const { id, date, shift } = data;
-      query = `INSERT INTO MWS (id, dmy, shift) VALUES (${id}, (SELECT to_date('${date}','YYYY-MM-DD')), ${shift}) RETURNING *;`
+      query = `INSERT INTO MWS (id, dmy, shift) VALUES (${id}, (SELECT to_date('${date}','YYYY-MM-DD')), ${shift}) RETURNING *;
+      `
     } else {
       const { id, date, stime, etime } = data;
-      query = `INSERT INTO WWS (id, dmy, stime, etime) VALUES (${id}, (SELECT to_date('${date}','YYYY-MM-DD')), ${stime}, ${etime}) RETURNING *;`
+      query = `INSERT INTO WWS (id, dmy, stime, etime) VALUES (${id}, (SELECT to_date('${date}','YYYY-MM-DD')), ${stime}, ${etime}) RETURNING *;
+      `
     }
     createRiderScheduleQuery += query;
   })
@@ -259,10 +258,8 @@ exports.createRiderSchedule = async (req, response) => {
 
   const rows = await db.query(createRiderScheduleQuery, (err, result) => {
     if (err) {
-      console.error(err.stack);
-      response.status(500).json(`Failed to create rider schedule.`);
+      response.status(500).json(err);
     } else {
-      // console.log('Successfully created rider schedule')
       rowsUpdated = [];
       result.map((data) => {
         console.log(data);
@@ -275,7 +272,7 @@ exports.createRiderSchedule = async (req, response) => {
   })
 }
 
-// @desc    Delete all rider schedule for a partiular date
+// @desc    Delete all rider schedule for a partiular date (in YYYY-MM-DD)
 // @route   DELETE /managers/riders/schedule/:date
 // @access   Private
 exports.deleteRiderSchedule = async (req, response) => {
@@ -291,8 +288,8 @@ exports.deleteRiderSchedule = async (req, response) => {
   
   const rows = await db.query(deleteRiderScheduleQuery, (err, result) => {
     if (err) {
-      console.error(err.stack);
-      response.status(500).json(`Failed to delete rider schedule.`)
+      console.error(err);
+      response.status(500).json(err);
     } else {
       console.log('Successfully deleted rider schedule')
       rowsDeleted = [];
@@ -302,7 +299,6 @@ exports.deleteRiderSchedule = async (req, response) => {
           data.rows.forEach(element => {
             rowsDeleted.push(element);
           });
-          // rowsDeleted.push(data.rows);
         }
       })
       response.status(200).json(rowsDeleted)
