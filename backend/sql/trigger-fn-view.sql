@@ -5,6 +5,7 @@ DROP VIEW IF EXISTS ptr_wk_sal CASCADE;
 DROP VIEW IF EXISTS CombinedScheduleTable CASCADE;
 DROP VIEW IF EXISTS st_hr_gen CASCADE;
 DROP VIEW IF EXISTS count_daily_hourly_rider CASCADE;
+DROP VIEW IF EXISTS GroupConsecDay CASCADE;
 DROP FUNCTION IF EXISTS check_min_daily_hourly_rider_for_day() CASCADE;
 DROP TRIGGER IF EXISTS wws_min_rider_trigger ON wws CASCADE;
 DROP TRIGGER IF EXISTS mws_min_rider_trigger ON mws CASCADE;
@@ -12,6 +13,10 @@ DROP FUNCTION IF EXISTS check_mws_wk_same() CASCADE;
 DROP TRIGGER IF EXISTS mws_check_wk_trigger ON mws CASCADE;
 DROP FUNCTION IF EXISTS add_rpoints() CASCADE;
 DROP TRIGGER IF EXISTS add_rpoints_trigger ON orders CASCADE;
+DROP TYPE IF EXISTS pt_work_hr_tuple CASCADE;
+DROP FUNCTION IF EXISTS check_pt_work_hr() CASCADE;
+DROP TYPE IF EXISTS ft_work_hr_tuple CASCADE;
+DROP FUNCTION IF EXISTS check_ft_work_hr() CASCADE;
 
 -- Give all ftrider schedules in its stime and etime breakdown per entry, following wws structure
 CREATE OR REPLACE VIEW effective_mws AS
@@ -95,7 +100,7 @@ FROM
 	generate_series(
 		10, 21, 1) AS sthour;
 
--- Checks the combined daily hourly count of riders for all existing entries in wws and mws
+-- Shows the combined daily hourly count of riders for all existing entries in wws and mws
 CREATE OR REPLACE VIEW count_daily_hourly_rider AS 
 WITH RiderCount AS (
 	SELECT
@@ -133,6 +138,20 @@ FROM
 ORDER BY
 	sc_date,
 	sthour;
+
+CREATE OR REPLACE VIEW GroupConsecDay AS
+With showDom AS (
+	SELECT id, floor((extract(DOY from mws.dmy) - 1) / 28) + 1 AS mws_mth, mod((extract(DOY from mws.dmy) - 1)::numeric, 28) + 1 AS mws_dom, dmy
+	FROM MWS
+	WHERE (id, floor((extract(DOY from mws.dmy) - 1) / 28) + 1) IN (
+		SELECT id, floor((extract(DOY from mws.dmy) - 1) / 28) + 1 AS mws_mth
+		FROM MWS
+		GROUP BY id, floor((extract(DOY from mws.dmy) - 1) / 28) + 1
+		HAVING count(*) >= 5
+	)
+)
+SELECT id, mws_mth::numeric, mws_dom, (mws_dom - ROW_NUMBER() OVER (PARTITION BY id, mws_mth ORDER BY mws_dom)) AS GroupingSet, dmy
+FROM showDom;
 
 -- Checks 5 riders are assigned hourly, daily for the day
 CREATE OR REPLACE FUNCTION check_min_daily_hourly_rider_for_day()
@@ -250,3 +269,68 @@ CREATE CONSTRAINT TRIGGER add_rpoints_trigger
 	DEFERRABLE INITIALLY DEFERRED
 	FOR EACH ROW
 	EXECUTE PROCEDURE add_rpoints();
+
+-- Check validity of part time riders (ie. 10h to 48h)
+CREATE TYPE pt_work_hr_tuple AS (id INTEGER, wk date, hr INTEGER);
+
+CREATE OR REPLACE FUNCTION check_pt_work_hr()
+RETURNS SETOF pt_work_hr_tuple AS $$ 
+DECLARE 
+	r1 pt_work_hr_tuple; 
+BEGIN
+	for r1 IN
+		SELECT id, (SELECT date_trunc('week', dmy)) AS wk, sum(etime - stime) AS hr
+		FROM WWS
+		GROUP BY id, (SELECT date_trunc('week', dmy))
+		HAVING sum(etime - stime) < 10
+		OR sum(etime - stime) > 48
+		ORDER BY (SELECT date_trunc('week', dmy)), id
+	LOOP
+		IF r1 IS NOT NULL THEN
+			RAISE WARNING 'Invalid work hours for part time riders(below 10h or more than 48h) id: % for week: % 			work hour: %', r1.id, r1.wk, r1.hr;
+		END IF;
+		RETURN NEXT r1;
+	END LOOP;
+	
+END; 
+$$ LANGUAGE plpgsql;
+
+-- Check validity of ft riders (ie. 5 consecutive work days, check only done when 5 consecutive day blocks are filled already)
+CREATE TYPE ft_work_hr_tuple AS (id INTEGER, mws_mth NUMERIC, groupingset NUMERIC, cnt INTEGER);
+
+CREATE OR REPLACE FUNCTION check_ft_work_hr()
+RETURNS SETOF ft_work_hr_tuple AS $$ 
+DECLARE 
+	r1 ft_work_hr_tuple; 
+BEGIN
+	FOR r1 IN
+		SELECT id, mws_mth, GroupingSet, 5
+		FROM GroupConsecDay
+		WHERE EXISTS(
+			SELECT 1
+			FROM GroupConsecDay GroupConsecDay2
+			WHERE GroupConsecDay.id = GroupConsecDay2.id
+			AND GroupConsecDay.mws_mth = GroupConsecDay2.mws_mth
+			AND GroupConsecDay.groupingset <> GroupConsecDay2.groupingset
+			AND numrange(GroupConsecDay.groupingset, GroupConsecDay.groupingset + 2) @> GroupConsecDay2.groupingset
+		)
+	LOOP
+		IF r1 IS NOT NULL THEN
+			RAISE WARNING 'Invalid work hours for full time riders id: % for mws_mth: % 			groupingset: %', r1.id, r1.mws_mth, r1.groupingset;
+		END IF;
+		RETURN NEXT r1;
+	END LOOP;
+	FOR r1 IN
+			SELECT id, mws_mth, GroupingSet, count(*) AS num_consec_days
+			FROM GroupConsecDay
+			GROUP BY (id, mws_mth, GroupingSet)
+			HAVING count(*) > 5
+	LOOP
+		IF r1 IS NOT NULL THEN
+			RAISE WARNING 'Invalid work hours for full time riders id: % for mws_mth: % 			groupingset: % num of consecutive days: %', r1.id, r1.mws_mth, r1.groupingset, r1.cnt;
+		END IF;
+		RETURN NEXT r1;
+	END LOOP;
+	
+END; 
+$$ LANGUAGE plpgsql;
