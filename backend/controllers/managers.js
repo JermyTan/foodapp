@@ -258,20 +258,18 @@ exports.getGeneralSummary = async (req, response) => {
     }
   });
 };
-  //   `SELECT json_build_object(
-  // 'id', C.id,
-  // 'name', U.name,
-  // 'email', U.email,
-  // 'joindate', C.joindate,
-  // 'numOrder', COUNT(O.oid),
-  // 'totalCost', SUM(COALESCE(O.fprice, 0))
-  // )
-  // AS customerorder
-  // FROM (Customers C NATURAL JOIN Users U) LEFT JOIN Orders O ON (C.id = O.cid)
-  // GROUP BY C.id, U.name, U.email
-  // ;`
-  })
-}
+//   `SELECT json_build_object(
+// 'id', C.id,
+// 'name', U.name,
+// 'email', U.email,
+// 'joindate', C.joindate,
+// 'numOrder', COUNT(O.oid),
+// 'totalCost', SUM(COALESCE(O.fprice, 0))
+// )
+// AS customerorder
+// FROM (Customers C NATURAL JOIN Users U) LEFT JOIN Orders O ON (C.id = O.cid)
+// GROUP BY C.id, U.name, U.email
+// ;`
 
 // @desc    Get all riders schedule
 // @route   GET /managers/riders/schedule
@@ -296,8 +294,8 @@ exports.getAllRiderSchedule = async (req, response) => {
 // @access  Private
 exports.createRiderSchedule = async (req, response) => {
   // shape of request body is an array of json obj with either { id, date, shift } or { id, date, stime, etime }
-  let createRiderScheduleQuery = 
-  `BEGIN;
+  let createRiderScheduleQuery =
+    `BEGIN;
   SET CONSTRAINTS ALL DEFERRED;
   `;
   const arr = req.body;
@@ -340,15 +338,15 @@ exports.createRiderSchedule = async (req, response) => {
 // @access   Private
 exports.deleteRiderSchedule = async (req, response) => {
   const date = req.params.date;
-  let deleteRiderScheduleQuery = 
-  `BEGIN;
+  let deleteRiderScheduleQuery =
+    `BEGIN;
   SET CONSTRAINTS ALL DEFERRED;
   DELETE FROM MWS WHERE dmy = (SELECT to_date('${date}','YYYY-MM-DD')) RETURNING *;
   DELETE FROM WWS WHERE dmy = (SELECT to_date('${date}','YYYY-MM-DD')) RETURNING *;
   COMMIT;`
-  
+
   console.log(`Delete rider query is ${deleteRiderScheduleQuery}`);
-  
+
   const rows = await db.query(deleteRiderScheduleQuery, (err, result) => {
     if (err) {
       console.error(err);
