@@ -74,12 +74,12 @@ exports.getRiderSalary = async (req, response) => {
 // @access   Private
 exports.getRiderSchedule = async (req, response) => {
   const id = req.params.id
-  const getRiderSalaryQuery =
+  const getRiderScheduleQuery =
     `SELECT sc_date, lower(timerange) AS st_time, upper(timerange) AS e_time
     FROM CombinedScheduleTable
     WHERE id = '${id}'
     ORDER BY sc_date;`
-  const rows = await db.query(getRiderSalaryQuery, (err, result) => {
+  const rows = await db.query(getRiderScheduleQuery, (err, result) => {
     if (err) {
       console.error(err.stack);
       response.status(404).json(`Failed to get rider schedule.`)

@@ -71,7 +71,7 @@ exports.createManager = async (req, response) => {
 // }
 
 // @desc    Get total no. of order and total cost of these orders
-// @route   GET /manager/summary/orders
+// @route   GET /managers/summary/orders
 // @acess   Public
 exports.getGeneralOrderSummary = async (req, response) => {
   let { start, end } = req.query
@@ -94,7 +94,7 @@ exports.getGeneralOrderSummary = async (req, response) => {
 }
 
 // @desc    Get customer info, no. of orders made by them and the cost
-// @route   GET /manager/summary/customers
+// @route   GET /managers/summary/customers
 // @acess   Public
 exports.getGeneralCustomerSummary = async (req, response) => {
   let { starttime, endtime } = req.query
@@ -156,7 +156,7 @@ exports.getGeneralCustomerSummary = async (req, response) => {
 }
 
 // @desc    Get rider summary info
-// @route   GET /manager/summary/riders
+// @route   GET /managers/summary/riders
 // @acess   Public
 exports.getGeneralRiderSummary = async (req, response) => {
   const getSummaryQuery =
@@ -206,6 +206,106 @@ exports.getGeneralRiderSummary = async (req, response) => {
         console.log('Successfully get rider summary data')
         response.status(200).json(result.rows)
       }
+    }
+  })
+}
+
+// @desc    Get all riders schedule
+// @route   GET /managers/riders/schedule
+// @access   Private
+exports.getAllRiderSchedule = async (req, response) => {
+  const getRiderScheduleQuery =
+    `SELECT id, sc_date, lower(timerange) AS st_time, upper(timerange) AS e_time
+    FROM CombinedScheduleTable;`
+  const rows = await db.query(getRiderScheduleQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(500).json(`Failed to get rider schedule.`)
+    } else {
+      // if (!result.rows[0]) {
+      //   response.status(404).json(`No rider schedule found.`)
+      // } else {
+        console.log('Successfully get rider schedule')
+        response.status(200).json(result.rows)
+      // }
+    }
+  })
+}
+
+// @desc    Create rider schedule
+// @route   POST /managers/riders/schedule
+// @access  Private
+exports.createRiderSchedule = async (req, response) => {
+  // shape of request body is an array of json obj with either { id, date, shift } or { id, date, stime, etime }
+  let createRiderScheduleQuery = 
+  `BEGIN;
+  SET CONSTRAINTS ALL DEFERRED;`;
+  const arr = req.body;
+  console.log(arr);
+  arr.map((data) => {
+    let query = ``
+    if (data['shift']) {
+      const { id, date, shift } = data;
+      query = `INSERT INTO MWS (id, dmy, shift) VALUES (${id}, (SELECT to_date('${date}','YYYY-MM-DD')), ${shift}) RETURNING *;`
+    } else {
+      const { id, date, stime, etime } = data;
+      query = `INSERT INTO WWS (id, dmy, stime, etime) VALUES (${id}, (SELECT to_date('${date}','YYYY-MM-DD')), ${stime}, ${etime}) RETURNING *;`
+    }
+    createRiderScheduleQuery += query;
+  })
+
+  createRiderScheduleQuery += `COMMIT;`
+  console.log(`Create rider query is ${createRiderScheduleQuery}`);
+
+  const rows = await db.query(createRiderScheduleQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(500).json(`Failed to create rider schedule.`);
+    } else {
+      // console.log('Successfully created rider schedule')
+      rowsUpdated = [];
+      result.map((data) => {
+        console.log(data);
+        if (data.rows.length > 0) {
+          rowsUpdated.push(data.rows[0]);
+        }
+      })
+      response.status(200).json(rowsUpdated)
+    }
+  })
+}
+
+// @desc    Delete all rider schedule for a partiular date
+// @route   DELETE /managers/riders/schedule/:date
+// @access   Private
+exports.deleteRiderSchedule = async (req, response) => {
+  const date = req.params.date;
+  let deleteRiderScheduleQuery = 
+  `BEGIN;
+  SET CONSTRAINTS ALL DEFERRED;
+  DELETE FROM MWS WHERE dmy = (SELECT to_date('${date}','YYYY-MM-DD')) RETURNING *;
+  DELETE FROM WWS WHERE dmy = (SELECT to_date('${date}','YYYY-MM-DD')) RETURNING *;
+  COMMIT;`
+  
+  console.log(`Delete rider query is ${deleteRiderScheduleQuery}`);
+  
+  const rows = await db.query(deleteRiderScheduleQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(500).json(`Failed to delete rider schedule.`)
+    } else {
+      console.log('Successfully deleted rider schedule')
+      rowsDeleted = [];
+      result.map((data) => {
+        // console.log(data);
+        if (data.rows.length > 0) {
+          data.rows.forEach(element => {
+            rowsDeleted.push(element);
+          });
+          // rowsDeleted.push(data.rows);
+        }
+      })
+      response.status(200).json(rowsDeleted)
     }
   })
 }
