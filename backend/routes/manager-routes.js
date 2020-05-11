@@ -15,6 +15,7 @@ const {
   getGeneralOrderSummary,
   getGeneralRiderSummary,
   getAllRiderSchedule,
+  validatePTSchedule,
   createRiderSchedule,
   deleteRiderSchedule
   // deleteCustomer
@@ -43,6 +44,9 @@ router.route('/summary/riders')
 router.route('/riders/schedule')
   .get(getAllRiderSchedule)
   .post(createRiderSchedule);
+
+router.route('/riders/schedule/validate-pt')
+  .get(validatePTSchedule);
 
 router.route('/riders/schedule/:date')
   .delete(deleteRiderSchedule);

@@ -12,6 +12,8 @@ DROP FUNCTION IF EXISTS check_mws_wk_same() CASCADE;
 DROP TRIGGER IF EXISTS mws_check_wk_trigger ON mws CASCADE;
 DROP FUNCTION IF EXISTS add_rpoints() CASCADE;
 DROP TRIGGER IF EXISTS add_rpoints_trigger ON orders CASCADE;
+DROP FUNCTION IF EXISTS check_pt_work_hr() CASCADE;
+DROP TYPE IF EXISTS pt_work_hr_tuple CASCADE;
 
 -- Give all ftrider schedules in its stime and etime breakdown per entry, following wws structure
 CREATE OR REPLACE VIEW effective_mws AS
@@ -250,3 +252,28 @@ CREATE CONSTRAINT TRIGGER add_rpoints_trigger
 	DEFERRABLE INITIALLY DEFERRED
 	FOR EACH ROW
 	EXECUTE PROCEDURE add_rpoints();
+
+
+CREATE TYPE pt_work_hr_tuple AS (id INTEGER, wk date, hr INTEGER);
+
+CREATE OR REPLACE FUNCTION check_pt_work_hr()
+RETURNS SETOF pt_work_hr_tuple AS $$ 
+DECLARE 
+	r1 pt_work_hr_tuple; 
+BEGIN
+	for r1 IN
+		SELECT id, (SELECT date_trunc('week', dmy)) AS wk, sum(etime - stime) AS hr
+		FROM WWS
+		GROUP BY id, (SELECT date_trunc('week', dmy))
+		HAVING sum(etime - stime) < 10
+		OR sum(etime - stime) > 48
+		ORDER BY (SELECT date_trunc('week', dmy)), id
+	LOOP
+		IF r1 IS NOT NULL THEN
+			RAISE WARNING 'Invalid work hours for part time riders(below 10h or more than 48h) id: % for week: % 			work hour: %', r1.id, r1.wk, r1.hr;
+		END IF;
+		RETURN NEXT r1;
+	END LOOP;
+	
+END; 
+$$ LANGUAGE plpgsql;

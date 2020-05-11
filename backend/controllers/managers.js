@@ -212,7 +212,7 @@ exports.getGeneralRiderSummary = async (req, response) => {
 
 // @desc    Get all riders schedule
 // @route   GET /managers/riders/schedule
-// @access   Private
+// @access  Private
 exports.getAllRiderSchedule = async (req, response) => {
   const getRiderScheduleQuery =
     `SELECT id, sc_date, lower(timerange) AS st_time, upper(timerange) AS e_time
@@ -224,6 +224,27 @@ exports.getAllRiderSchedule = async (req, response) => {
     } else {
       console.log('Successfully get rider schedule')
       response.status(200).json(result.rows)
+    }
+  })
+}
+
+// @desc    Valid part time riders schedule (10 to 48h)
+// @route   GET /managers/riders/schedule/validate-pt
+// @access  Private
+exports.validatePTSchedule = async (req, response) => {
+  const validatePTScheduleQuery =
+    `SELECT * FROM check_pt_work_hr();`
+  const rows = await db.query(validatePTScheduleQuery, (err, result) => {
+    if (err) {
+      console.error(err);
+      response.status(500).json(err);
+    } else {
+      console.log('Successfully validated PT rider schedule');
+      if (result.rows.length > 0) {
+        response.status(200).json({ invalid_schedule: result.rows });
+      } else {
+        response.status(200).json(`Part-time rider schedule is valid.`);
+      }
     }
   })
 }
