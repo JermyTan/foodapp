@@ -74,12 +74,12 @@ exports.getRiderSalary = async (req, response) => {
 // @access   Private
 exports.getRiderSchedule = async (req, response) => {
   const id = req.params.id
-  const getRiderSalaryQuery =
+  const getRiderScheduleQuery =
     `SELECT sc_date, lower(timerange) AS st_time, upper(timerange) AS e_time
     FROM CombinedScheduleTable
     WHERE id = '${id}'
     ORDER BY sc_date;`
-  const rows = await db.query(getRiderSalaryQuery, (err, result) => {
+  const rows = await db.query(getRiderScheduleQuery, (err, result) => {
     if (err) {
       console.error(err.stack);
       response.status(404).json(`Failed to get rider schedule.`)
@@ -88,6 +88,30 @@ exports.getRiderSchedule = async (req, response) => {
         response.status(404).json(`Failed to get rider schedule.`)
       } else {
         console.log('Successfully get rider schedule')
+        response.status(200).json(result.rows)
+      }
+    }
+  })
+}
+
+// @desc    Get a rider's ratings
+// @route   GET /riders/:id/ratings
+// @access   Private
+exports.getRiderRatings = async (req, response) => {
+  const id = req.params.id
+  const getRiderRatingsQuery =
+    `SELECT r.rating AS rating
+    FROM Orders o JOIN Ratings r ON (r.oid = o.oid)
+    WHERE o.rid = '${id}';`
+  const rows = await db.query(getRiderRatingsQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json(`Failed to get rider's ${id} ratings.`)
+    } else {
+      if (!result.rows[0]) {
+        response.status(404).json(`Failed to get rider's ${id} ratings.`)
+      } else {
+        console.log('Successfully get rider ratings.')
         response.status(200).json(result.rows)
       }
     }
@@ -144,6 +168,56 @@ exports.createRider = async (req, response) => {
   })
 }
 
+// @desc    Update rider email, name, bsal
+// @route   PUT /riders/:id
+// @access   Public
+exports.updateRider = async (req, response) => {
+  const id = parseInt(req.params.id);
+  const { email, name, bsal } = req.body;
+
+  const updateRiderQuery =
+    `BEGIN;
+    SET CONSTRAINTS ALL DEFERRED;
+    UPDATE Users
+    SET email = '${email}',
+    name = '${name}'
+    WHERE id = ${id};
+    
+    UPDATE Riders (id, bsalary)
+    SET bsalary = '${bsal}'
+    WHERE id = ${id};
+
+    COMMIT;`
+
+    const rows = await db.query(updateRiderQuery, (err, result) => {
+      if (err) {
+        console.error("Error updating rider", err.stack)
+        response.status(500).json(`Failed to update rider ${id}.`)
+      } else {
+        console.log(result.rows);
+        response.status(200).json(`Successfully updated user/rider.`)
+      }
+    })
+  }
+
+// @desc    Delete rider
+// @route   DELETE /riders/:id
+// @access   Public
+exports.deleteRider = async (req, response) => {
+  const id = parseInt(req.params.id);
+
+  const deleteRiderQuery = `DELETE FROM Users WHERE id = ${id};`
+
+    const rows = await db.query(deleteRiderQuery, (err, result) => {
+      if (err) {
+        console.error("Error deleting rider", err.stack)
+        response.status(500).json(`Failed to delete rider ${id}.`)
+      } else {
+        console.log(result.rows);
+        response.status(200).json(`Successfully deleted user/rider.`)
+      }
+    })
+  }
 // @desc    Get all orders and related information made by a rider
 // @route   GET /riders/:id/orders
 // @acess   Private
@@ -277,16 +351,64 @@ exports.getEligibleRiders = async (req, response) => {
 // @desc    Get summmary info for riders
 // @route   GET /riders/:id/summary?stime=:stime&etime=:etime
 // @access   Private
+// exports.getSummaryInfo = async (req, response) => {
+//   let id = req.params.id;
+//   let { stime, etime } = req.query;
+//   const getRidersSummary = 
+//   `WITH RiderOrders AS (
+//     SELECT count(*) AS num_order
+//     FROM Orders O
+//     WHERE O.rid = ${id}
+//     AND O.odatetime >= ${stime}
+//     AND O.odatetime <= ${etime}
+//     AND O.status = 2
+//   )
+//   , RiderSalary AS (
+//     With CombinedSalTable AS (
+//       SELECT id, EXTRACT(EPOCH from wkmthyr) AS epoch_date, wk_sal AS sal
+//       FROM ptr_wk_sal
+//       UNION
+//       SELECT id, EXTRACT(EPOCH from mthyr) AS epoch_date, mth_sal AS sal
+//       FROM ftr_mth_sal)
+//     SELECT SUM(sal) AS total_sal
+//     FROM CombinedSalTable
+//     WHERE id = ${id}
+//     AND epoch_date >= ${stime}
+//     AND epoch_date <= ${etime}
+//   )
+//   , RiderHours AS (
+//     SELECT SUM(upper(timerange) - lower(timerange)) AS total_hr
+//     FROM CombinedScheduleTable
+//     WHERE id = ${id}
+//     AND EXTRACT(EPOCH from sc_date) >= ${stime}
+//     AND EXTRACT(EPOCH from sc_date) <= ${etime}
+//   )
+//   SELECT
+//     total_sal,
+//     num_order,
+//     total_hr
+//       FROM RiderOrders, RiderSalary, RiderHours;`;
+//   db.query(getRidersSummary, async (err, result) => {
+//     if (err) {
+//       console.error(err.stack);
+//       response.status(404).json(`Failed to get rider's summary.`);
+//     } else {
+//       console.log("Get rider summary result:", result.rows[0]);
+//       response.status(200).json(result.rows[0]);
+//     }
+//   });
+// };
+
+// @desc    Get summmary info for riders
+// @route   GET /riders/:id/summary
+// @access   Private
 exports.getSummaryInfo = async (req, response) => {
   let id = req.params.id;
-  let { stime, etime } = req.query;
   const getRidersSummary = 
   `WITH RiderOrders AS (
     SELECT count(*) AS num_order
     FROM Orders O
     WHERE O.rid = ${id}
-    AND O.odatetime >= ${stime}
-    AND O.odatetime <= ${etime}
     AND O.status = 2
   )
   , RiderSalary AS (
@@ -299,15 +421,11 @@ exports.getSummaryInfo = async (req, response) => {
     SELECT SUM(sal) AS total_sal
     FROM CombinedSalTable
     WHERE id = ${id}
-    AND epoch_date >= ${stime}
-    AND epoch_date <= ${etime}
   )
   , RiderHours AS (
     SELECT SUM(upper(timerange) - lower(timerange)) AS total_hr
     FROM CombinedScheduleTable
     WHERE id = ${id}
-    AND EXTRACT(EPOCH from sc_date) >= ${stime}
-    AND EXTRACT(EPOCH from sc_date) <= ${etime}
   )
   SELECT
     total_sal,
