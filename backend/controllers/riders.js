@@ -74,12 +74,12 @@ exports.getRiderSalary = async (req, response) => {
 // @access   Private
 exports.getRiderSchedule = async (req, response) => {
   const id = req.params.id
-  const getRiderSalaryQuery =
+  const getRiderScheduleQuery =
     `SELECT sc_date, lower(timerange) AS st_time, upper(timerange) AS e_time
     FROM CombinedScheduleTable
     WHERE id = '${id}'
     ORDER BY sc_date;`
-  const rows = await db.query(getRiderSalaryQuery, (err, result) => {
+  const rows = await db.query(getRiderScheduleQuery, (err, result) => {
     if (err) {
       console.error(err.stack);
       response.status(404).json(`Failed to get rider schedule.`)
@@ -168,6 +168,56 @@ exports.createRider = async (req, response) => {
   })
 }
 
+// @desc    Update rider email, name, bsal
+// @route   PUT /riders/:id
+// @access   Public
+exports.updateRider = async (req, response) => {
+  const id = parseInt(req.params.id);
+  const { email, name, bsal } = req.body;
+
+  const updateRiderQuery =
+    `BEGIN;
+    SET CONSTRAINTS ALL DEFERRED;
+    UPDATE Users
+    SET email = '${email}',
+    name = '${name}'
+    WHERE id = ${id};
+    
+    UPDATE Riders (id, bsalary)
+    SET bsalary = '${bsal}'
+    WHERE id = ${id};
+
+    COMMIT;`
+
+    const rows = await db.query(updateRiderQuery, (err, result) => {
+      if (err) {
+        console.error("Error updating rider", err.stack)
+        response.status(500).json(`Failed to update rider ${id}.`)
+      } else {
+        console.log(result.rows);
+        response.status(200).json(`Successfully updated user/rider.`)
+      }
+    })
+  }
+
+// @desc    Delete rider
+// @route   DELETE /riders/:id
+// @access   Public
+exports.deleteRider = async (req, response) => {
+  const id = parseInt(req.params.id);
+
+  const deleteRiderQuery = `DELETE FROM Users WHERE id = ${id};`
+
+    const rows = await db.query(deleteRiderQuery, (err, result) => {
+      if (err) {
+        console.error("Error deleting rider", err.stack)
+        response.status(500).json(`Failed to delete rider ${id}.`)
+      } else {
+        console.log(result.rows);
+        response.status(200).json(`Successfully deleted user/rider.`)
+      }
+    })
+  }
 // @desc    Get all orders and related information made by a rider
 // @route   GET /riders/:id/orders
 // @acess   Private

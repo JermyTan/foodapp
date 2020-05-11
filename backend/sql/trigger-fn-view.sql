@@ -85,8 +85,8 @@ FROM
 ORDER BY
 	sc_date,
 	lower(timerange),
-	upper(timerange
-);
+	upper(timerange),
+	id;
 
 CREATE OR REPLACE VIEW st_hr_gen AS
 SELECT

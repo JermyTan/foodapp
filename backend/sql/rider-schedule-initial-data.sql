@@ -186,14 +186,3 @@ INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users
 INSERT INTO "public"."mws" ("id", "dmy", "shift") VALUES ((SELECT currval('users_id_seq')), '2020-05-06', '4');
 
 COMMIT;
-
-
--- Schedule added to show pending order
-
--- To demo min 5 rider per week, exception will be thrown
-BEGIN;
-DELETE FROM wws where dmy = '2020-05-02' and stime = '10' and etime = '12';
-COMMIT;
-BEGIN;
-DELETE FROM mws where dmy = '2020-05-02' and shift = '1';
-COMMIT;

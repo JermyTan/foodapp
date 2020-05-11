@@ -13,7 +13,10 @@ const {
   getGeneralCustomerSummary,
   // getGeneralOrderSummaryFiltered,
   getGeneralOrderSummary,
-  getGeneralRiderSummary
+  getGeneralRiderSummary,
+  getAllRiderSchedule,
+  createRiderSchedule,
+  deleteRiderSchedule
   // deleteCustomer
 } = require('../controllers/managers');
 
@@ -36,5 +39,12 @@ router.route('/summary/orders')
 
 router.route('/summary/riders')
   .get(getGeneralRiderSummary);
+
+router.route('/riders/schedule')
+  .get(getAllRiderSchedule)
+  .post(createRiderSchedule);
+
+router.route('/riders/schedule/:date')
+  .delete(deleteRiderSchedule);
 
 module.exports = router;
