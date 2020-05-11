@@ -14,6 +14,7 @@ const {
   // getGeneralOrderSummaryFiltered,
   getGeneralOrderSummary,
   getGeneralRiderSummary,
+  getGeneralSummary,
   getAllRiderSchedule,
   createRiderSchedule,
   deleteRiderSchedule
@@ -40,6 +41,10 @@ router.route('/summary/orders')
 router.route('/summary/riders')
   .get(getGeneralRiderSummary);
 
+router.route('/summary/general')
+  .get(getGeneralSummary);
+
+module.exports = router;
 router.route('/riders/schedule')
   .get(getAllRiderSchedule)
   .post(createRiderSchedule);

@@ -94,10 +94,10 @@ exports.getGeneralOrderSummary = async (req, response) => {
 }
 
 // @desc    Get customer info, no. of orders made by them and the cost
-// @route   GET /managers/summary/customers
+// @route   GET /manager/summary/customers?starttime=:starttime&endtime=:endtime
 // @acess   Public
 exports.getGeneralCustomerSummary = async (req, response) => {
-  let { starttime, endtime } = req.query
+  let { starttime, endtime } = req.query;
   const getSummaryQuery =
     `WITH SO AS (
     SELECT *
@@ -106,16 +106,15 @@ exports.getGeneralCustomerSummary = async (req, response) => {
     AND O.odatetime <= ${endtime}
     )
     SELECT json_build_object (
-      'newcustomers', (SELECT COUNT(DISTINCT id) FROM Customers C WHERE C.joindate >= ${starttime} AND C.joindate <= ${endtime}),
-      'ordercount', (SELECT COUNT(DISTINCT oid) FROM SO),
-      'completedorders', (SELECT COUNT(DISTINCT oid) FROM SO WHERE SO.status = 2),
-      'ordersfoodcost', (SELECT SUM(fprice) FROM SO WHERE SO.status = 2),
-      'ordersdfee', (SELECT SUM(dfee) FROM SO WHERE SO.status = 2),
+      'newcustomers', (SELECT COUNT(*) FROM Customers C WHERE C.joindate >= ${starttime} AND C.joindate <= ${endtime}),
+      'ordercount', (SELECT COUNT(*) FROM SO),
+      'completedorders', (SELECT COUNT(*) FROM SO WHERE SO.status = 2),
+      'orderscost', COALESCE((SELECT SUM(fprice + dfee) FROM SO WHERE SO.status = 2), 0),
       'customerorders', (SELECT json_agg(rows) as customerorders 
       FROM (
-      SELECT cid, name, SUM(DISTINCT OID) as ordercount, SUM(fprice + dfee) AS totalpayment
+      SELECT cid, name, email, COUNT(DISTINCT OID) as ordercount, SUM(fprice + dfee) AS totalpayment
       FROM SO JOIN Users U ON (U.id = SO.cid)
-      GROUP BY (cid, name)
+      GROUP BY (cid, name, email)
       ) AS rows),
       'orderlocations', (SELECT json_agg(rows) as orderlocations
       FROM(
@@ -124,8 +123,141 @@ exports.getGeneralCustomerSummary = async (req, response) => {
         GROUP BY location
         ORDER BY COUNT(DISTINCT oid) DESC
       ) AS rows)
-    ) as fdssummary`
+    ) as fdssummary`;
 
+  db.query(getSummaryQuery, async (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json(`Failed to get general customer summary.`);
+    } else {
+      console.log("Get customer summary:", result.rows[0]);
+      response.status(200).json(result.rows[0]);
+    }
+  });
+};
+
+
+// @desc    Get rider summary info
+// @route   GET /manager/summary/riders?starttime=:starttime&endtime=:endtime
+// @acess   Public
+exports.getGeneralRiderSummary = async (req, response) => {
+  let { starttime, endtime } = req.query;
+
+  const getSummaryQuery = `WITH getOrder AS (
+    SELECT O.rid, COUNT(O.oid) AS count, SUM(O.dfee) AS sumdfee, 
+    AVG(deliverdatetime - departdatetime2) AS avgdelivertime,
+    AVG(R.rating) AS avgrating, COUNT(R.rating) AS norating
+    FROM Orders O LEFT JOIN Ratings R USING (oid)
+    WHERE O.status = 2
+    AND O.odatetime >= ${starttime}
+    AND O.odatetime <= ${endtime}
+    GROUP BY O.rid
+    ),
+  getRiders AS (
+    SELECT * FROM Riders R FULL OUTER JOIN getOrder S ON (S.rid = R.id)
+  ),
+  getHours AS (
+    SELECT W.id, SUM(W.etime - W.stime) AS hours
+    FROM WWS W  
+    WHERE (SELECT EXTRACT(EPOCH FROM(
+      SELECT dmy FROM WWS WHERE id = W.id 
+      AND dmy = W.dmy AND etime = W.etime AND stime = W.stime))) >= ${starttime}
+    AND (SELECT EXTRACT(EPOCH FROM(
+      SELECT dmy FROM WWS WHERE id = W.id 
+      AND dmy = W.dmy AND etime = W.etime AND stime = W.stime))) <= ${endtime}
+    GROUP BY W.id
+    UNION 
+    SELECT M.id, SUM((etime1-stime1) + (etime2 - stime2)) AS hours
+    FROM MWS M NATURAL JOIN MWSShift
+    WHERE (SELECT EXTRACT(EPOCH FROM(
+      SELECT dmy FROM MWS WHERE id = M.id AND dmy = M.dmy))) >= ${starttime}
+    AND (SELECT EXTRACT(EPOCH FROM(
+      SELECT dmy FROM MWS WHERE id = M.id AND dmy = M.dmy))) <= ${endtime}
+    GROUP BY M.id
+  ),
+  riderInfo AS (
+    SELECT * FROM getHours FULL OUTER JOIN getRiders USING (id)
+  )
+  SELECT json_build_object(
+    'id', R.id, 
+    'totalsalary', (R.bsalary + COALESCE(R.sumdfee, 0)), 
+    'noorder', COALESCE(R.count, 0), 
+    'avgdelivertime', COALESCE(R.avgdelivertime, 0),
+    'hours', COALESCE(R.hours, 0),
+    'norating', COALESCE(R.norating, 0),
+    'avgrating', COALESCE(R.avgrating, 0)
+    )
+    AS riderinfo
+    FROM riderInfo R
+  `;
+  // SELECT json_build_object (
+  //   'riderinfo', (SELECT json_agg(rows) as riderinfo
+  //   FROM (
+  // SELECT R.id, (R.bsalary + COALESCE(R.sumdfee, 0)) AS totalsalary, R.count AS noorder, 
+  // R.avgdelivertime, R.hours, R.norating, R.avgrating
+  // FROM riderInfo R
+  //   ) 
+  //   AS rows)
+  // ) as ridersummary`;
+
+  db.query(getSummaryQuery, async (err, result) => {
+    if (err) {
+      console.error("Error here:", err);
+      response.status(404).json(`Failed to get rider summary.`);
+    } else {
+      console.log("Get rider summary:", result.rows);
+      response.status(200).json(result.rows);
+    }
+  });
+};
+
+// @desc    Get total customers, orders, cost
+// @route   GET /manager/summary/general
+// @acess   Public
+exports.getGeneralSummary = async (req, response) => {
+  const getSummaryQuery =
+    `SELECT json_build_object(
+    'totalcustomers', (SELECT COUNT(*) FROM Customers),
+    'totalorders', (SELECT COUNT(*) FROM Orders),
+    'totalcompletedorders', (SELECT COUNT(*) FROM Orders WHERE status = 2),
+    'totalcost', (SELECT SUM(fprice + dfee) FROM Orders WHERE status = 2),
+    'goodcustomers', (SELECT json_agg(rows) as goodcustomers
+    FROM(
+    SELECT cid, name, COUNT(*), SUM(fprice + dfee) 
+    FROM Orders O JOIN Users U ON (O.cid = U.id)
+    GROUP BY (cid, name)
+    ORDER BY SUM(fprice + dfee) DESC
+    LIMIT 3
+    ) AS rows),
+    'toplocations', (SELECT json_agg(rows) as toplocations
+    FROM(
+    SELECT location, COUNT(*)
+    FROM Orders
+    GROUP BY location
+    ORDER BY COUNT(*) DESC
+    LIMIT 3
+    ) AS rows),
+    'topriders', (SELECT json_agg(rows) as topriders
+    FROM(
+    SELECT rid, name, COUNT(oid), AVG(deliverdatetime - departdatetime2)
+    FROM Orders O JOIN Users U ON (O.rid = U.id)
+    WHERE status = 2
+    GROUP BY rid, name
+    ORDER BY COUNT(oid) DESC
+    LIMIT 3
+    ) AS rows)
+  ) AS overviewsummary`;
+
+  db.query(getSummaryQuery, async (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(404).json(`Failed to get overview summary.`);
+    } else {
+      console.log("Get overview summary:", result.rows[0]);
+      response.status(200).json(result.rows[0]);
+    }
+  });
+};
   //   `SELECT json_build_object(
   // 'id', C.id,
   // 'name', U.name,
@@ -138,75 +270,6 @@ exports.getGeneralCustomerSummary = async (req, response) => {
   // FROM (Customers C NATURAL JOIN Users U) LEFT JOIN Orders O ON (C.id = O.cid)
   // GROUP BY C.id, U.name, U.email
   // ;`
-
-  db.query(getSummaryQuery, (err, result) => {
-    if (err) {
-      console.error("Error here:", err)
-      response.status(404).json(`Failed to get general customer summary.`)
-    } else {
-      console.log(result.rows)
-      if (!result.rows[0]) {
-        response.status(404).json(`Failed to get summary data for FDS.`)
-      } else {
-        console.log('Successfully get customer data')
-        response.status(200).json(result.rows)
-      }
-    }
-  })
-}
-
-// @desc    Get rider summary info
-// @route   GET /managers/summary/riders
-// @acess   Public
-exports.getGeneralRiderSummary = async (req, response) => {
-  const getSummaryQuery =
-    `WITH newWWS AS (
-    SELECT id, dmy, SUM(etime - stime) AS hours 
-    FROM WWS 
-    GROUP BY id, dmy
-    ), 
-    getRiders AS (SELECT P.id, bsalary,(SELECT EXTRACT(MONTH FROM 
-      (SELECT dmy FROM newWWS WHERE id = W.id AND dmy = W.dmy AND hours = W.hours))) AS month, 
-    SUM(W.hours) AS hours, name, email
-    FROM (newWWS W RIGHT JOIN (Riders NATURAL JOIN PTRiders P) USING (id)) NATURAL JOIN Users
-    GROUP BY P.id, month, bsalary, name, email
-    UNION
-    SELECT F.id, bsalary, (SELECT EXTRACT(MONTH FROM 
-      (SELECT dmy FROM MWS WHERE id = M.id AND dmy = M.dmy AND shift = M.shift))) AS month, 
-    SUM((etime1-stime1) + (etime2-stime2)) AS hours, name, email
-    FROM ((MWSShift NATURAL JOIN MWS M) RIGHT JOIN (Riders NATURAL JOIN FTRiders F) USING (id))
-    NATURAL JOIN Users
-    GROUP BY F.id, month, bsalary, name, email
-    ),
-    getOrders AS (SELECT rid, SUM(dfee) AS sumdfee, (SELECT EXTRACT(MONTH FROM
-      (SELECT to_timestamp((SELECT odatetime FROM Orders WHERE oid = O.oid))::date))) AS month, 
-    COUNT(oid) AS noOrders, AVG(deliverdatetime - departdatetime1) AS avgdelivertime
-    FROM Orders O
-    WHERE status = 2
-    GROUP BY rid, month
-    ),
-    getRatings AS (
-    SELECT O.rid, R.rating
-    FROM Ratings R NATURAL JOIN Orders O
-    )
-    SELECT R.id, (R.bsalary + (COALESCE(O.sumdfee, 0))) AS salary, R.month, 
-    R.hours, R.name, R.email, O.noorders, O.avgdelivertime, A.rating 
-    FROM (getRiders R FULL OUTER JOIN getOrders O ON (R.id = O.rid AND R.month = O.month))
-    LEFT JOIN getRatings A ON (A.rid = id)
-    ;`
-
-  const rows = await db.query(getSummaryQuery, (err, result) => {
-    if (err) {
-      console.error("Error here:", err)
-      response.status(404).json(`Failed to get rider summary.`)
-    } else {
-      if (!result.rows[0]) {
-        response.status(404).json(`Failed to get rider summary data.`)
-      } else {
-        console.log('Successfully get rider summary data')
-        response.status(200).json(result.rows)
-      }
-    }
   })
 }
 
