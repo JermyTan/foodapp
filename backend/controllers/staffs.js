@@ -11,7 +11,7 @@ exports.createStaff = async (req, response) => {
     `BEGIN;
 
     SET CONSTRAINTS ALL DEFERRED;
-    INSERT INTO Users (email, name)
+    INSERT INTO Users (email, name, role)
     VALUES('${email}', '${name}', 1) RETURNING id;
 
     INSERT INTO Staffs (id, rname)
