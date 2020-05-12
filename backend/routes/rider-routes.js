@@ -10,14 +10,15 @@ const {
   getRiders,
   getRider,
   createRider,
+  getRiderRatings,
   getRiderOrders,
   getRiderSalary,
   getRiderSchedule,
   getProcessingOrders,
   getEligibleRiders,
-  getSummaryInfo
-  // updateRiders,
-  // deleteRiders
+  getSummaryInfo,
+  updateRider,
+  deleteRider
 } = require('../controllers/riders');
 
 // map routes to controller
@@ -32,9 +33,12 @@ router.route('/order')
 
 
 router.route('/:id')
-  .get(getRider);
-// .put(updateRider)
-// .delete(deleteRider);
+  .get(getRider)
+  .put(updateRider)
+  .delete(deleteRider);
+
+router.route('/:id/ratings')
+  .get(getRiderRatings);
 
 router.route('/:id/orders')
   .get(getRiderOrders);
