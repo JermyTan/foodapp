@@ -231,3 +231,16 @@ CREATE TABLE FDSOffers (
     oid         INTEGER REFERENCES Orders,
     PRIMARY KEY (pid, oid)
 );
+
+CREATE TABLE DeliveryFee (
+    region1         VARCHAR REFERENCES Locations,
+    region2         VARCHAR REFERENCES Locations,
+    fee             INTEGER
+    PRIMARY KEY (region1, region2)
+);
+
+CREATE TABLE Area (
+    lid            SERIAL PRIMARY KEY,
+    location       VARCHAR,
+    region         VARCHAR
+);
