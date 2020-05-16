@@ -236,7 +236,7 @@ CREATE TABLE DeliveryFee (
     rname       VARCHAR REFERENCES Restaurant,
     region      VARCHAR REFERENCES Area,
     dfee        NUMERIC(12, 2) NOT NULL DEFAULT 5.00,
-    PRIMARY KEY (rname, region1, region2),
+    PRIMARY KEY (rname, region),
     CHECK (dfee >= 0)
 );
 
