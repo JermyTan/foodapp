@@ -149,6 +149,9 @@ CREATE TABLE WWS (
 CREATE TABLE Orders (
     oid         SERIAL PRIMARY KEY,
 
+    dfee        NUMERIC(12, 2) NOT NULL
+                CHECK (dfee >= 0),
+
     location    VARCHAR REFERENCES Area,
 
     -- status: 0 -> processing, 1 -> delivering, 2 -> delivered, 3 -> cancelled
