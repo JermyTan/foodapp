@@ -231,10 +231,9 @@ CREATE TABLE FDSOffers (
 
 CREATE TABLE DeliveryFee (
     rname       VARCHAR REFERENCES Restaurant,
-    region1     VARCHAR REFERENCES Area,
-    region2     VARCHAR REFERENCES Area,
-    dfee        NUMERIC(12, 2) NOT NULL,
-    PRIMARY KEY (region1, region2),
+    region      VARCHAR REFERENCES Area,
+    dfee        NUMERIC(12, 2) NOT NULL DEFAULT 5.00,
+    PRIMARY KEY (rname, region1, region2),
     CHECK (dfee >= 0)
 );
 
