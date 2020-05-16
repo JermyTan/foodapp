@@ -230,6 +230,7 @@ CREATE TABLE FDSOffers (
 );
 
 CREATE TABLE DeliveryFee (
+    rname       VARCHAR REFERENCES Restaurant,
     region1     VARCHAR REFERENCES Area,
     region2     VARCHAR REFERENCES Area,
     dfee        NUMERIC(12, 2) NOT NULL,
