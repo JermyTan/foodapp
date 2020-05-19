@@ -10,6 +10,7 @@ const {
     getOrders,
     getOrder,
     createOrder,
+    getDeliveryFee,
     updateOrderTime,
     deleteOrder,
     // getEligibleRiders
@@ -26,6 +27,9 @@ router.route('/:id')
     .put(updateOrderTime)
     .delete(deleteOrder);
 
+router.route('/dfee/:rname/:dregion')
+    .get(getDeliveryFee);
+    
 // router.route('/:id/eligible-riders')
 //     .get(getEligibleRiders);
 

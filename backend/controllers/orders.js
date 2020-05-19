@@ -88,7 +88,7 @@ exports.createOrder = async (req, response) => {
 // @route   GET /orders/dfee/:rname/:dregion
 // @acess   Public
 exports.getDeliveryFee = async (req, response) => {
-    const { rname, dregion} = req.params;
+    const { rname, dregion } = req.params;
     const row = await db.query('SELECT * FROM DeliveryFee WHERE rname = $1 AND region = $2', [rname, dregion], (err, result) => {
         if (err) {
             console.error(err.stack);
