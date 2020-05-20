@@ -141,7 +141,7 @@ const groupBy = (key) => (array) =>
   }, {});
 
 // @desc    View all orders made to restaurant
-// @route   GET /restaurants/orders/rname
+// @route   GET /restaurants/orders/:rname
 // @acess   Private
 exports.viewNewOrders = async (req, response) => {
   const { rname } = req.body;
@@ -316,24 +316,6 @@ exports.getRestaurantReviews = async (req, response) => {
   });
 };
 
-// @desc    Get all restaurants with info rname, category
-// @route   GET /restaurants
-// @acess   Public
-exports.getRestaurants = async (req, response) => {
-  const getRestaurantsQuery = `SELECT R.rname, R.imgurl, R.minamt, ARRAY_AGG(DISTINCT cat) as categories
-    FROM Restaurants R JOIN Sells S ON (R.rname = S.rname) NATURAL JOIN Food
-    GROUP BY R.rname`;
-  db.query(getRestaurantsQuery, async (err, result) => {
-    if (err) {
-      console.error(err.stack);
-      response.status(404).json(`Failed to get restaurants and categories.`);
-    } else {
-      console.log("Get restaurants result:", result.rows);
-      response.status(200).json(result.rows);
-    }
-  });
-};
-
 exports.getSummaryInfo = async (req, response) => {
   let { starttime, endtime } = req.query;
   let rname = req.params.rname;
@@ -367,6 +349,64 @@ exports.getSummaryInfo = async (req, response) => {
     } else {
       console.log("Get restaurants result:", result.rows[0]);
       response.status(200).json(result.rows[0]);
+    }
+  });
+};
+
+// @desc    View all delivery fees of restaurant
+// @route   GET /restaurants/dfee/:rname
+// @acess   Private
+exports.viewDeliveryFee = async (req, response) => {
+  const { rname } = req.params;
+  const viewDeliveryFeeQuery = `SELECT region, dfee
+  FROM DeliveryFee df
+  WHERE df.rname = ${rname};`;
+
+  db.query(viewDeliveryFeeQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(500).json("Unable to view delivery fee of restaurant.");
+    } else {
+      console.log(result.rows);
+      const data = result.rows;
+      response.status(200).json(data);
+    }
+  });
+};
+
+// @desc    Create a delivery fee entry for restaurant
+// @route   POST /restaurants/dfee
+// @acess   Private
+exports.createDeliveryFee = async (req, response) => {
+  // shape of request body: array of json obj with { rname, region, dfee }
+  let createDeliveryFeeQuery = 
+  `BEGIN;
+  SET CONSTRAINTS ALL DEFERRED;
+  `;
+  const arr = req.body;
+  console.log(arr);
+  arr.map((data) => {
+    const { rname, region, dfee } = data;
+    createDeliveryFeeQuery += `INSERT INTO DeliveryFee (rname, region, dfee) VALUES (${rname}, ${region}, ${dfee}) RETURNING *;
+    `
+  });
+
+  createDeliveryFeeQuery += `COMMIT;`
+  console.log(`Create delivery fee query is ${createDeliveryFeeQuery}`);
+
+  db.query(createDeliveryFeeQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(500).json(err);
+    } else {
+      rowsUpdated = [];
+      result.map((data) => {
+        console.log(data);
+        if (data.rows.length > 0) {
+          rowsUpdated.push(data.rows[0]);
+        }
+      })
+      response.status(200).json(rowsUpdated);
     }
   });
 };
