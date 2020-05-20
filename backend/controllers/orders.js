@@ -84,6 +84,26 @@ exports.createOrder = async (req, response) => {
 
 }
 
+// @desc    Get delivery fee based on restaurant's name and delivery location's region
+// @route   GET /orders/dfee/:rname/:dregion
+// @acess   Public
+exports.getDeliveryFee = async (req, response) => {
+    const { rname, dregion } = req.params;
+    const row = await db.query('SELECT * FROM DeliveryFee WHERE rname = $1 AND region = $2', [rname, dregion], (err, result) => {
+        if (err) {
+            console.error(err.stack);
+            throw err;
+        } else {
+            if (!result.rows[0]) {
+                response.status(404).json(`Failed to get delivery fee for restaurant ${rname} to the ${dregion} region. Delivery fee amount information is not available.`);
+            } else {
+                console.log(`Successfully get delivery fee for restaurant ${rname}`);
+                response.status(200).json(result.rows[0]);
+            }
+        }
+    })
+}
+
 const getFieldAndStatus = (type) => {
     switch (type) {
         case '1':

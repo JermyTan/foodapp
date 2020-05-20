@@ -149,6 +149,9 @@ CREATE TABLE WWS (
 CREATE TABLE Orders (
     oid         SERIAL PRIMARY KEY,
 
+    dfee        NUMERIC(12, 2) NOT NULL
+                CHECK (dfee >= 0),
+
     location    VARCHAR REFERENCES Area,
 
     -- status: 0 -> processing, 1 -> delivering, 2 -> delivered, 3 -> cancelled
@@ -230,10 +233,10 @@ CREATE TABLE FDSOffers (
 );
 
 CREATE TABLE DeliveryFee (
-    region1     VARCHAR REFERENCES Area,
-    region2     VARCHAR REFERENCES Area,
-    dfee        NUMERIC(12, 2) NOT NULL,
-    PRIMARY KEY (region1, region2),
+    rname       VARCHAR REFERENCES Restaurant,
+    region      VARCHAR REFERENCES Area,
+    dfee        NUMERIC(12, 2) NOT NULL DEFAULT 5.00,
+    PRIMARY KEY (rname, region),
     CHECK (dfee >= 0)
 );
 
