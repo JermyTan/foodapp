@@ -16,7 +16,10 @@ const {
   deleteMenuItem,
   getStaffMenu,
   getRestaurantReviews,
-  getSummaryInfo
+  getSummaryInfo,
+  viewDeliveryFee,
+  createDeliveryFee,
+  deleteDeliveryFee
   // deleteRestaurant
 } = require('../controllers/restaurants');
 
@@ -46,5 +49,12 @@ router.route('/:rname/reviews')
 
 router.route('/:rname/summary')
   .get(getSummaryInfo);
+
+router.route('/dfee/:rname')
+  .get(viewDeliveryFee)
+  .delete(deleteDeliveryFee);
+
+router.route('/dfee')
+  .post(createDeliveryFee);
 
 module.exports = router;
