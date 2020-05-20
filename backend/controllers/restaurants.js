@@ -1,11 +1,15 @@
 const db = require("../db");
+const getUnixTime = require("date-fns/getUnixTime")
+const addHours = require("date-fns/addHours")
+const startOfToday = require("date-fns/startOfToday")
 
 // @desc    Get all restaurants with info rname, category
-// @route   GET /restaurants
+// @route   GET /api/restaurants
 // @acess   Public
 exports.getRestaurants = async (req, response) => {
+  //TODO: Fetch promotion information after implementation
   const getRestaurantsQuery = `SELECT R.rname, R.imgurl, R.minamt, ARRAY_AGG(DISTINCT cat) as categories
-    FROM Restaurants R JOIN Sells S ON (R.rname = S.rname) NATURAL JOIN Food
+    FROM Restaurants R JOIN Sells S ON (R.rname = S.rname)
     GROUP BY R.rname`;
   db.query(getRestaurantsQuery, async (err, result) => {
     if (err) {
@@ -19,16 +23,16 @@ exports.getRestaurants = async (req, response) => {
 };
 
 // @desc    Get single restaurant and the food items, along with the amount available today
-// @route   GET /restaurant/:rname?start=:start&end=:end
+// @route   GET api/restaurant
 // @acess   Public
 exports.getRestaurant = async (req, response) => {
-  //const rname = req.params.rname
   //start and end refer to 10am and 10pm on the day the request is made
   let rname = req.params.rname;
-  let { start, end } = req.query;
+  let start = getUnixTime(addHours(startOfToday(), 10));
+  let end = getUnixTime(addHours(startOfToday(), 22));
 
-  const getFoodCategoriesQuery = `SELECT ARRAY_AGG(DISTINCT cat) FROM Food F WHERE F.fname = S.fname`;
-  const getRestaurantFoodQuery = `SELECT *, flimit - COALESCE(
+  const getRestaurantFoodQuery =
+    `SELECT *, flimit - COALESCE(
       (SELECT SUM(C.quantity) AS qtysoldtoday
         FROM (
           SELECT * FROM Orders O
@@ -37,18 +41,19 @@ exports.getRestaurant = async (req, response) => {
         JOIN Consists C ON O.oid = C.oid
         GROUP BY C.fname, O.rname
         HAVING S.fname = C.fname
-        AND S.rname = O.rname), 0) as qtylefttoday, (${getFoodCategoriesQuery}) as categories
+        AND S.rname = O.rname), 0) as qtylefttoday
     FROM Sells S
-    WHERE S.rname = ${rname}
+    WHERE S.rname = '${rname}'
     ORDER BY S.fname;`;
-  const row = await db.query(getRestaurantFoodQuery, (err, result) => {
+
+  db.query(getRestaurantFoodQuery, (err, result) => {
     if (err) {
       console.error("Error here:", err);
       response.status(404).json(`Failed to get restaurant and food items.`);
     } else {
-      console.log("RESULT:", result);
+      console.log("Restaurant and food items data:", result.rows);
       if (!result.rows) {
-        response.status(404).json(`Failed to get restaurant and food items.`);
+        response.status(404).json(`Failed to get restaurant and food items, or no restaurants exist.`);
       } else {
         console.log(result.rows);
         response.status(200).json(result.rows);
@@ -167,45 +172,26 @@ exports.viewNewOrders = async (req, response) => {
 // @acess   Private
 exports.getStaffMenu = async (req, response) => {
   let rname = req.params.rname;
-  const getMenuQuery = `SELECT *
-    FROM Sells S NATURAL JOIN Food
-    WHERE S.rname = ${rname}
-    ORDER BY S.fname
-    ;`;
+  const getMenuQuery =
+    `SELECT json_build_object (
+      'minamt', (SELECT minamt FROM Restaurants WHERE rname = '${rname}'),
+      'menu', (SELECT json_agg(rows) as menu
+      FROM (
+        SELECT fname as name, fname as ogname, flimit as limit, price, imgurl, category
+        FROM Sells S
+        WHERE S.rname = '${rname}'
+        ORDER BY S.fname
+      ) as rows)
+    ) as staffMenu`
 
   db.query(getMenuQuery, (err, result) => {
     if (err) {
       console.log(err.stack);
-      response.status(404).json("Unable to view orders.");
+      response.status(404).json("Unable to view staff menu.");
     } else {
-      console.log(result.rows);
-      //data processing
-      let menuData = [];
-      result.rows.forEach((item) => {
-        let menuItem = {};
-        menuItem.name = item.fname;
-        menuItem.price = parseFloat(item.price);
-        menuItem.limit = parseInt(item.flimit);
-        menuItem.imgurl = item.imgurl;
-        menuItem.category = item.cat;
-        menuData.push(menuItem);
-      });
-
-      db.query(
-        `SELECT minamt FROM Restaurants WHERE rname = ${rname}`,
-        (err, result2) => {
-          if (err) {
-            console.log(`Error occured retrieving min amt from ${rname}:`);
-            response
-              .status(200)
-              .json({ msg: `Error occured retrieving min amt from ${rname}:` });
-          } else {
-            console.log("Get min order amt:", result2.rows);
-            let minamt = result2.rows[0].minamt;
-            response.status(200).json({ menu: menuData, minamt: minamt });
-          }
-        }
-      );
+      let staffMenu = result.rows[0].staffmenu
+      console.log("Restaurant information retreived:", staffMenu);
+      response.status(200).json({ menu: staffMenu.menu, minamt: staffMenu.minamt })
     }
   });
 };
@@ -215,59 +201,39 @@ exports.getStaffMenu = async (req, response) => {
 // @acess   Private
 exports.updateMenu = async (req, response) => {
   let rname = req.params.rname;
-  let foodLimitPrice = req.body.foodLimitPrice;
+  let updatedMenu = req.body.updatedMenu;
   let restMinAmt = req.body.minamt;
-  //const updateMenuItemQuery = `UPDATE Sells SET flimit = $1, price = $2, imgurl = $3 WHERE rname = $4 AND fname = $5 returning *`
-  const updateMinAmtQuery = `UPDATE Restaurants SET minamt = ${restMinAmt} WHERE rname = ${rname} returning *`;
 
-  let errorFlag = false;
-  let errorList = [];
+  let updateMenuQuery =
+    `BEGIN;
+  UPDATE Restaurants SET minamt = ${restMinAmt} WHERE rname = '${rname}';`
 
-  db.query(updateMinAmtQuery, async (err, result) => {
+  console.log(updatedMenu)
+  //append queries to ensure that menu updates for individual items are all made together
+  updatedMenu.forEach((fooditem) => {
+    updateMenuQuery +=
+      `UPDATE Sells
+      SET
+      fname = '${fooditem.name}',
+      category = '${fooditem.category}',
+      flimit = ${fooditem.limit},
+      price = ${fooditem.price},
+      imgurl = '${fooditem.imgurl}'
+      WHERE rname = '${rname}'
+      AND fname = '${fooditem.ogname}'
+      RETURNING *;`
+  })
+
+  updateMenuQuery += `COMMIT;`
+
+  db.query(updateMenuQuery, async (err, result) => {
     if (err) {
-      console.log("Error updating min amount", err.stack);
-      response
-        .status(400)
-        .json({ msg: `Unable to update min amt for ${rname}` });
+      console.log("Error updating menu:", err.stack)
+      response.status(400).json({ success: "false", msg: "Unable to update menu items. Check that all items have unique names!" })
     } else {
-      for (var i = 0; i < foodLimitPrice.length; i += 1) {
-        var fooditem = foodLimitPrice[i];
-        console.log("food item:", fooditem);
-
-        db.query(
-          `    
-        UPDATE Sells SET flimit = ${fooditem.flimit}, price = ${fooditem.price}, imgurl = ${fooditem.imgurl}
-         WHERE rname = ${rname} AND fname = ${fooditem.fname} returning *`,
-          (err2, result2) => {
-            if (err2) {
-              errorFlag = true;
-              console.log(
-                "Some error occured for editing details for",
-                fooditem.fname
-              );
-              console.log(err2.stack);
-              errorList.push(fooditem.fname);
-            } else {
-              console.log("Updated item details. New datails are:");
-              console.log(result2.rows);
-            }
-          }
-        );
-      }
-      if (errorFlag) {
-        response
-          .status(400)
-          .json({
-            msg: `Unable to update details for the following:`,
-            errors: errorList,
-          });
-      } else {
-        response
-          .status(200)
-          .json({ msg: "Successfully saved changes for items" });
-      }
+      response.status(200).json({ success: "true", msg: "Successfully updated menu items and min amount" })
     }
-  });
+  })
 };
 
 // @desc    Deletes an item from the menu
@@ -320,8 +286,8 @@ exports.getRestaurantReviews = async (req, response) => {
 // @route   GET /restaurants
 // @acess   Public
 exports.getRestaurants = async (req, response) => {
-  const getRestaurantsQuery = `SELECT R.rname, R.imgurl, R.minamt, ARRAY_AGG(DISTINCT cat) as categories
-    FROM Restaurants R JOIN Sells S ON (R.rname = S.rname) NATURAL JOIN Food
+  const getRestaurantsQuery = `SELECT R.rname, R.imgurl, R.minamt, ARRAY_AGG(DISTINCT category) as categories
+    FROM Restaurants R JOIN Sells S ON (R.rname = S.rname)
     GROUP BY R.rname`;
   db.query(getRestaurantsQuery, async (err, result) => {
     if (err) {
@@ -338,7 +304,8 @@ exports.getSummaryInfo = async (req, response) => {
   let { starttime, endtime } = req.query;
   let rname = req.params.rname;
 
-  const getRestaurantsSummary = `WITH SO AS (
+  const getRestaurantsSummary =
+    `WITH SO AS (
     SELECT *
     FROM Orders O
     WHERE O.status = 2

@@ -102,7 +102,7 @@ CREATE TABLE FDSPromotions (
 
 --BCNF--
 CREATE TABLE RPromotions (
-    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
+    pid         INTEGER PRIMARY KEY REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE,
 );
 
 --BCNF--
@@ -197,8 +197,9 @@ CREATE TABLE Reviews (
 
 --BCNF--
 CREATE TABLE Sells (
-    fname       VARCHAR REFERENCES Food,
+    fname       VARCHAR,
     rname       VARCHAR REFERENCES Restaurants,
+    category    VARCHAR NOT NULL,
     flimit      INTEGER NOT NULL,
     price       NUMERIC(12, 2) NOT NULL,
     imgurl      VARCHAR DEFAULT 'https://platerate.com/images/tempfoodnotext.png',
@@ -210,7 +211,7 @@ CREATE TABLE Sells (
 --BCNF--
 CREATE TABLE Consists (
     oid         INTEGER REFERENCES Orders ON DELETE CASCADE,
-    fname       VARCHAR REFERENCES Food,
+    fname       VARCHAR NOT NULL,
     quantity    INTEGER NOT NULL,
     itemprice   NUMERIC(12, 2) NOT NULL,
     PRIMARY KEY (oid, fname)
@@ -221,7 +222,7 @@ CREATE TABLE Consists (
 CREATE TABLE Offers (
     pid         INTEGER REFERENCES Promotions ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE,
     rname       VARCHAR REFERENCES Restaurants,
-    fname       VARCHAR REFERENCES Food,
+    fname       VARCHAR NOT NULL,
     PRIMARY KEY (pid, rname, fname)
 );
 

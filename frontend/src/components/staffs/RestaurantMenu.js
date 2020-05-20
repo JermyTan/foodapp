@@ -1,59 +1,48 @@
 import React, { useState, useEffect, useContext } from "react";
-import {
-  Item,
-  Button,
-  Message,
-  Segment,
-  Form,
-  Input,
-  Label,
-  Loader,
-} from "semantic-ui-react";
+import { Item, Button, Message, Segment, Form, Input, Label, Loader } from "semantic-ui-react";
 import FoodItemEditor from "./FoodItemEditor";
 import NewItemButton from "./NewItemButton";
 import Axios from "axios";
 import UserContext from "utils/UserContext";
 
-const data = [
-  {
-    name: "Curry Chicken with Rice",
-    price: 6.3,
-    category: "Asian",
-    limit: 5,
-  },
-  {
-    name: "Dry Mee Siam",
-    price: 5.6,
-    category: "Malay",
-    limit: 3,
-  },
-  {
-    name: "Ice Milo",
-    price: 1.3,
-    category: "Drinks",
-    limit: 10,
-  },
-  {
-    name: "Fried Bee Hoon",
-    price: 4.3,
-    category: "Asian",
-    limit: 8,
-  },
-  {
-    name: "Lu Rou Fan",
-    price: 7.99,
-    category: "Asian",
-    limit: 5,
-  },
-  {
-    name: "Peanut Butter Thick Toast",
-    price: 2.1,
-    category: "Asian",
-    limit: 10,
-  },
-];
-
-const rname = "Toast Box";
+// const data = [
+//   {
+//     name: "Curry Chicken with Rice",
+//     price: 6.3,
+//     category: "Asian",
+//     limit: 5,
+//   },
+//   {
+//     name: "Dry Mee Siam",
+//     price: 5.6,
+//     category: "Malay",
+//     limit: 3,
+//   },
+//   {
+//     name: "Ice Milo",
+//     price: 1.3,
+//     category: "Drinks",
+//     limit: 10,
+//   },
+//   {
+//     name: "Fried Bee Hoon",
+//     price: 4.3,
+//     category: "Asian",
+//     limit: 8,
+//   },
+//   {
+//     name: "Lu Rou Fan",
+//     price: 7.99,
+//     category: "Asian",
+//     limit: 5,
+//   },
+//   {
+//     name: "Peanut Butter Thick Toast",
+//     price: 2.1,
+//     category: "Asian",
+//     limit: 10,
+//   },
+// ];
 
 function RestaurantMenu() {
   const [restaurantName, setRestaurantName] = useState("");
@@ -76,6 +65,7 @@ function RestaurantMenu() {
       category: affectedItem.category,
       limit: affectedItem.limit,
       imgurl: affectedItem.imgurl,
+      ogname: affectedItem.ogname
     };
     itemClone[key] = value;
     clone[index] = itemClone;
@@ -89,7 +79,7 @@ function RestaurantMenu() {
       .then((response) => {
         let rname = response.data.rname;
         setRestaurantName(rname);
-        const url2 = `http://localhost:5000/api/restaurants/'${rname}'/menu`;
+        const url2 = `http://localhost:5000/api/restaurants/${rname}/menu`;
         Axios.get(url2)
           .then((response) => {
             let minamt = response.data.minamt;
@@ -99,11 +89,11 @@ function RestaurantMenu() {
             setLoading(false);
           })
           .catch((error) => {
-            console.log("Error", error);
+            console.log("Error fetching staff menu data", error);
           });
       })
       .catch((error) => {
-        console.log("Error", error);
+        console.log("Error fetching staff restaurant", error);
       });
   };
 
@@ -141,31 +131,32 @@ function RestaurantMenu() {
   };
 
   //parses data in menu
-  const getChanges = () => {
-    let updatedItems = [];
-    restaurantFoodItems.forEach((item) => {
-      let updatedItem = {};
-      updatedItem.fname = `'${item.name}'`;
-      updatedItem.cat = `'${item.category}'`;
-      updatedItem.imgurl = `'${item.imgurl}'`;
-      updatedItem.flimit = `${item.limit}`;
-      updatedItem.price = `${item.price}`;
-      updatedItems.push(updatedItem);
-    });
-    return updatedItems;
-  };
+  // const getChanges = () => {
+  //   let updatedItems = [];
+  //   restaurantFoodItems.forEach((item) => {
+  //     let updatedItem = {};
+  //     updatedItem.fname = `'${item.name}'`;
+  //     updatedItem.cat = `'${item.category}'`;
+  //     updatedItem.imgurl = `'${item.imgurl}'`;
+  //     updatedItem.flimit = `${item.limit}`;
+  //     updatedItem.price = `${item.price}`;
+  //     updatedItems.push(updatedItem);
+  //   });
+  //   return updatedItems;
+  // };
 
   const handleSaveChanges = () => {
     // API call to patch new changes
     let updatedData = {
-      foodLimitPrice: getChanges(),
+      updatedMenu: restaurantFoodItems,
       minamt: minAmt,
     };
 
-    const url = `http://localhost:5000/api/restaurants/'${restaurantName}'/menu`;
+    const url = `http://localhost:5000/api/restaurants/${restaurantName}/menu`;
     Axios.put(url, updatedData)
       .then((response) => {
         console.log(response.data);
+        fetchData();
       })
       .catch((error) => {
         console.log("Error updating menu:", error);
