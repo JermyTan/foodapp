@@ -19,7 +19,7 @@ exports.getRestaurants = async (req, response) => {
 };
 
 // @desc    Get single restaurant and the food items, along with the amount available today
-// @route   GET /restaurant/:rname?start=:start&end=:end
+// @route   GET /restaurants/:rname?start=:start&end=:end
 // @acess   Public
 exports.getRestaurant = async (req, response) => {
   //const rname = req.params.rname
@@ -58,7 +58,7 @@ exports.getRestaurant = async (req, response) => {
 };
 
 // @desc    Create new restaurant
-// @route   POST /restaurant
+// @route   POST /restaurants
 // @acess   Private
 exports.createRestaurant = async (req, response) => {
   const { rname, minamt, imgurl } = req.body;
@@ -94,7 +94,7 @@ exports.createRestaurant = async (req, response) => {
 };
 
 // @desc    Add new food to sells table
-// @route   POST /restaurant/:rname
+// @route   POST /restaurants/:rname
 // @acess   Private
 exports.addFoodToSells = async (req, response) => {
   const { name, price, category, limit, imgurl } = req.body;
@@ -141,7 +141,7 @@ const groupBy = (key) => (array) =>
   }, {});
 
 // @desc    View all orders made to restaurant
-// @route   GET /restaurants/orders/rname
+// @route   GET /restaurants/orders/:rname
 // @acess   Private
 exports.viewNewOrders = async (req, response) => {
   const { rname } = req.body;
@@ -211,7 +211,7 @@ exports.getStaffMenu = async (req, response) => {
 };
 
 // @desc    Update food daily limit/food price for a restuarant's menu
-// @route   PATCH /restaurant/rname
+// @route   PATCH /restaurants/rname
 // @acess   Private
 exports.updateMenu = async (req, response) => {
   let rname = req.params.rname;
@@ -271,7 +271,7 @@ exports.updateMenu = async (req, response) => {
 };
 
 // @desc    Deletes an item from the menu
-// @route   DELETE /restaurant/rname
+// @route   DELETE /restaurants/:rname
 // @acess   Private
 exports.deleteMenuItem = async (req, response) => {
   let rname = req.params.rname;
@@ -295,7 +295,7 @@ exports.deleteMenuItem = async (req, response) => {
 };
 
 // @desc    Gets the reviews of a restaurant
-// @route   GET /restaurant/rname/reviews
+// @route   GET /restaurant/:rname/reviews
 // @acess   Private
 exports.getRestaurantReviews = async (req, response) => {
   let rname = req.params.rname;
@@ -311,24 +311,6 @@ exports.getRestaurantReviews = async (req, response) => {
         .json({ msg: `Failed to retrieve reviews for ${rname}` });
     } else {
       console.log(result.rows);
-      response.status(200).json(result.rows);
-    }
-  });
-};
-
-// @desc    Get all restaurants with info rname, category
-// @route   GET /restaurants
-// @acess   Public
-exports.getRestaurants = async (req, response) => {
-  const getRestaurantsQuery = `SELECT R.rname, R.imgurl, R.minamt, ARRAY_AGG(DISTINCT cat) as categories
-    FROM Restaurants R JOIN Sells S ON (R.rname = S.rname) NATURAL JOIN Food
-    GROUP BY R.rname`;
-  db.query(getRestaurantsQuery, async (err, result) => {
-    if (err) {
-      console.error(err.stack);
-      response.status(404).json(`Failed to get restaurants and categories.`);
-    } else {
-      console.log("Get restaurants result:", result.rows);
       response.status(200).json(result.rows);
     }
   });
@@ -370,3 +352,94 @@ exports.getSummaryInfo = async (req, response) => {
     }
   });
 };
+
+// @desc    View all delivery fees of restaurant
+// @route   GET /restaurants/dfee/:rname
+// @acess   Private
+exports.viewDeliveryFee = async (req, response) => {
+  const { rname } = req.params;
+  const viewDeliveryFeeQuery = `SELECT region, dfee
+  FROM DeliveryFee df
+  WHERE df.rname = '${rname}';`;
+
+  db.query(viewDeliveryFeeQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(500).json("Unable to view delivery fee of restaurant.");
+    } else {
+      console.log(result.rows);
+      const data = result.rows;
+      response.status(200).json(data);
+    }
+  });
+};
+
+// @desc    Create a delivery fee entry for restaurant
+// @route   POST /restaurants/dfee
+// @acess   Private
+exports.createDeliveryFee = async (req, response) => {
+  // shape of request body: array of json obj with { rname, region, dfee }
+  let createDeliveryFeeQuery = 
+  `BEGIN;
+  SET CONSTRAINTS ALL DEFERRED;
+  `;
+  const arr = req.body;
+  console.log(arr);
+  arr.map((data) => {
+    const { rname, region, dfee } = data;
+    createDeliveryFeeQuery += `INSERT INTO DeliveryFee (rname, region, dfee) VALUES ('${rname}', '${region}', '${dfee}') RETURNING *;
+    `
+  });
+
+  createDeliveryFeeQuery += `COMMIT;`
+  console.log(`Create delivery fee query is ${createDeliveryFeeQuery}`);
+
+  db.query(createDeliveryFeeQuery, (err, result) => {
+    if (err) {
+      console.error(err.stack);
+      response.status(500).json(err);
+    } else {
+      rowsUpdated = [];
+      result.map((data) => {
+        console.log(data);
+        if (data.rows.length > 0) {
+          rowsUpdated.push(data.rows[0]);
+        }
+      })
+      response.status(200).json(rowsUpdated);
+    }
+  });
+};
+
+// @desc    Delete a delivery fee entry
+// @route   DELETE /restaurants/dfee/?rname=:rname&region=:region
+// @access   Private
+exports.deleteDeliveryFee = async (req, response) => {
+  const { rname, region } = req.query;
+  let deleteDeliveryFeeQuery =
+    `BEGIN;
+  SET CONSTRAINTS ALL DEFERRED;
+  DELETE FROM DeliveryFee WHERE rname = ${rname} AND region = '${region}' RETURNING *;
+  COMMIT;`
+
+  console.log(`Delete delivery fee query is ${deleteDeliveryFeeQuery}`);
+
+  const rows = await db.query(deleteDeliveryFeeQuery, (err, result) => {
+    if (err) {
+      console.error(err);
+      response.status(500).json(err);
+    } else {
+      console.log('Successfully deleted delivery fee entry.')
+      rowsDeleted = [];
+      result.map((data) => {
+        // console.log(data);
+        if (data.rows.length > 0) {
+          data.rows.forEach(element => {
+            rowsDeleted.push(element);
+          });
+        }
+      })
+      response.status(200).json(rowsDeleted)
+    }
+  })
+}
