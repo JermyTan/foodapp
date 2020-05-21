@@ -29,10 +29,13 @@ CREATE TABLE Users (
     email       VARCHAR UNIQUE NOT NULL,
     name        VARCHAR NOT NULL,
     role        SMALLINT NOT NULL,
+    active      SMALLINT DEFAULT '1' NOT NULL,
     CHECK (email LIKE '%@%'),
     CHECK (name <> ''),
     --Role: 0 -> Customer, 1 -> Restaurant Staff, 2 -> Rider, 3 -> FDS manager
-    CHECK (role IN (0,1,2,3))
+    CHECK (role IN (0,1,2,3)),
+    -- active 0 -> inactive, 1 -> active
+    CHECK (active in (0, 1))
 );
 
 --BCNF--
@@ -69,8 +72,11 @@ CREATE TABLE Restaurants (
     location    VARCHAR REFERENCES Area,
     minamt      NUMERIC(12, 2) NOT NULL,
     imgurl      VARCHAR DEFAULT 'https://zabas.com/wp-content/uploads/2017/01/food-placeholder.png',
+    active      SMALLINT DEFAULT '1' NOT NULL,
     CHECK (rname <> ''),
-    CHECK (minamt >= 0)
+    CHECK (minamt >= 0),
+    -- active 0 -> inactive, 1 -> active
+    CHECK (active in (0, 1))
 );
 
 --BCNF--
