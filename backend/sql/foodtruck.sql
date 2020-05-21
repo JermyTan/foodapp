@@ -106,12 +106,12 @@ CREATE TABLE RPromotions (
 );
 
 --BCNF--
-CREATE TABLE Food (
-    fname       VARCHAR PRIMARY KEY,
-    cat         VARCHAR NOT NULL,
-    CHECK (fname <> ''),
-    CHECK (cat <> '')
-);
+-- CREATE TABLE Food (
+--     fname       VARCHAR PRIMARY KEY,
+--     cat         VARCHAR NOT NULL,
+--     CHECK (fname <> ''),
+--     CHECK (cat <> '')
+-- );
 
 --BCNF--
 CREATE TABLE MWSShift (
@@ -197,15 +197,31 @@ CREATE TABLE Reviews (
 
 --BCNF--
 CREATE TABLE Sells (
+    fid         SERIAL PRIMARY KEY,
     fname       VARCHAR,
     rname       VARCHAR REFERENCES Restaurants,
+    avail       BOOLEAN NOT NULL DEFAULT true,
     category    VARCHAR NOT NULL,
     flimit      INTEGER NOT NULL,
     price       NUMERIC(12, 2) NOT NULL,
     imgurl      VARCHAR DEFAULT 'https://platerate.com/images/tempfoodnotext.png',
-    PRIMARY KEY (fname, rname),
+    CONSTRAINT unique_fname_rname UNIQUE (fname, rname),
     CHECK (flimit >= 0),
     CHECK (price >= 0)
+);
+
+
+CREATE TABLE SellsHistory (
+    fid         INTEGER NOT NULL REFERENCES Sells,
+    fname       VARCHAR,
+    rname       VARCHAR REFERENCES Restaurants,
+    avail       BOOLEAN NOT NULL,
+    category    VARCHAR NOT NULL,
+    flimit      INTEGER NOT NULL,
+    price       NUMERIC(12, 2) NOT NULL,
+    imgurl      VARCHAR DEFAULT 'https://platerate.com/images/tempfoodnotext.png',
+    datetime    INTEGER NOT NULL,
+    PRIMARY KEY (fid, datetime)
 );
 
 --BCNF--
