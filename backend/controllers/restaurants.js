@@ -44,6 +44,7 @@ exports.getRestaurant = async (req, response) => {
         AND S.rname = O.rname), 0) as qtylefttoday
     FROM Sells S
     WHERE S.rname = '${rname}'
+    AND S.avail = true
     ORDER BY S.fname;`;
 
   db.query(getRestaurantFoodQuery, (err, result) => {
@@ -98,41 +99,59 @@ exports.createRestaurant = async (req, response) => {
   });
 };
 
+getSellsErrorMessage = (err) => {
+  let msg = "";
+  switch (err.constraint) {
+    case "unique_fname_rname":
+      msg = "Record with same food name already exists.";
+      break;
+    case "sells_flimit_check":
+      msg = "Food daily limit must be more than or equal to 0.";
+      break;
+    case "sells_price_check":
+      msg = "Food price must be more than or equal to 0.";
+      break;
+    case "restaurants_minamt_check":
+      msg = "Restaurant minamt must be more than or equal to 0.";
+      break;
+    default:
+      msg = "Some error occurred while adding menu item.";
+      break;
+  }
+  return msg;
+}
+
+
 // @desc    Add new food to sells table
 // @route   POST /restaurant/:rname
 // @acess   Private
 exports.addFoodToSells = async (req, response) => {
   const { name, price, category, limit, imgurl } = req.body;
   const rname = req.params.rname;
-  const addFoodToSellsQuery = `BEGIN;
-    SET CONSTRAINTS ALL DEFERRED;
-    INSERT INTO Food
-    SELECT * FROM 
-    (SELECT ${name}, ${category}) AS tmp 
-    WHERE NOT EXISTS (SELECT fname FROM Food WHERE fname = ${name})
-    LIMIT 1
-    returning *;
+  const addFoodToSellsQuery =
+    `INSERT INTO Sells (fname, rname, flimit, price, imgurl, category)
+    VALUES('${name}', '${rname}', ${limit}, ${price}, '${imgurl}', '${category}')
+    RETURNING *;`;
+  console.log("body:", req.body, "params:", req.params)
 
-    INSERT INTO Sells (fname, rname, flimit, price, imgurl)
-    VALUES(${name}, ${rname}, ${limit}, ${price}, ${imgurl})
-    returning *;
-    COMMIT;`;
-  const rows = await db.query(addFoodToSellsQuery, (err, result) => {
+  db.query(addFoodToSellsQuery, (err, result) => {
     if (err) {
-      console.log("ERROR:", err);
-      if (err.constraint === "sells_pkey") {
-        response.status(400).json("Record already exists.");
+      console.log("Error adding item into menu:", err.constraint);
+      console.log(err.constraint);
+      if (err.constraint) {
+        let msg = getSellsErrorMessage(err)
+        response.status(400).json({ success: false, msg: msg });
       } else {
-        response.status(400).json("Unable to add food. Please try again.");
+        response.status(400).json({ success: false, msg: "Unable to add food. Please try again." });
       }
     } else {
-      console.log("RESULT", result);
-      if (result[3].rows) {
-        console.log(result[3].rows);
-        response.status(200).json(result[3].rows);
+      console.log("Insert new record into sells:", result);
+      if (result.rows[0]) {
+        console.log("Added new item:", result.rows[0]);
+        response.status(200).json({ success: true, msg: "Successfully added new item", data: result.rows[0] });
       } else {
         console.log("Failed to add new record in sells");
-        response.status(400).json(`Failed to add new record in sells`);
+        response.status(400).json({ success: false, msg: "Failed to add new item" });
       }
     }
   });
@@ -177,10 +196,10 @@ exports.getStaffMenu = async (req, response) => {
       'minamt', (SELECT minamt FROM Restaurants WHERE rname = '${rname}'),
       'menu', (SELECT json_agg(rows) as menu
       FROM (
-        SELECT fname as name, fname as ogname, flimit as limit, price, imgurl, category
+        SELECT fname as name, flimit as limit, price, imgurl, category, fid, avail
         FROM Sells S
         WHERE S.rname = '${rname}'
-        ORDER BY S.fname
+        ORDER BY (S.fname)
       ) as rows)
     ) as staffMenu`
 
@@ -218,9 +237,10 @@ exports.updateMenu = async (req, response) => {
       category = '${fooditem.category}',
       flimit = ${fooditem.limit},
       price = ${fooditem.price},
-      imgurl = '${fooditem.imgurl}'
+      imgurl = '${fooditem.imgurl}',
+      avail = ${fooditem.avail}
       WHERE rname = '${rname}'
-      AND fname = '${fooditem.ogname}'
+      AND fid = '${fooditem.fid}'
       RETURNING *;`
   })
 
@@ -228,10 +248,11 @@ exports.updateMenu = async (req, response) => {
 
   db.query(updateMenuQuery, async (err, result) => {
     if (err) {
-      console.log("Error updating menu:", err.stack)
-      response.status(400).json({ success: "false", msg: "Unable to update menu items. Check that all items have unique names!" })
+      console.log("Error updating menu:", err)
+      let msg = getSellsErrorMessage(err)
+      response.status(400).json({ msg: msg })
     } else {
-      response.status(200).json({ success: "true", msg: "Successfully updated menu items and min amount" })
+      response.status(200).json({ msg: "Successfully updated menu items and min amount" })
     }
   })
 };

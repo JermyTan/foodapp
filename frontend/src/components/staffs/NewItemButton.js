@@ -26,6 +26,7 @@ function NewItemButton(props) {
         break;
       case "imgurl":
         setImgurl(value);
+        break;
       default:
         console.log("Unknown key in creating new food item");
     }
@@ -75,11 +76,11 @@ function NewItemButton(props) {
           disabled={!isValid}
           onClick={() => {
             props.createFoodItem({
-              name: `'${name}'`,
-              price: `'${price}'`,
-              category: `'${category}'`,
-              limit: `${limit}`,
-              imgurl: `'${imgurl}'`
+              name: name,
+              price: parseFloat(price),
+              category: category,
+              limit: parseInt(limit),
+              imgurl: imgurl
             });
             setModalOpened(false);
           }}

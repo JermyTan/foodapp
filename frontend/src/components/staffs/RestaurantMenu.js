@@ -4,6 +4,7 @@ import FoodItemEditor from "./FoodItemEditor";
 import NewItemButton from "./NewItemButton";
 import Axios from "axios";
 import UserContext from "utils/UserContext";
+import ItemHistoryViewer from "./ItemHistoryViewer";
 
 // const data = [
 //   {
@@ -65,7 +66,8 @@ function RestaurantMenu() {
       category: affectedItem.category,
       limit: affectedItem.limit,
       imgurl: affectedItem.imgurl,
-      ogname: affectedItem.ogname
+      fid: affectedItem.fid,
+      avail: affectedItem.avail
     };
     itemClone[key] = value;
     clone[index] = itemClone;
@@ -100,7 +102,7 @@ function RestaurantMenu() {
   // const deleteFoodItem = (index) => {
   const deleteFoodItem = (name) => {
     console.log("Delete this item:", name);
-    const url = `http://localhost:5000/api/restaurants/'${restaurantName}'/menu`;
+    const url = `http://localhost:5000/api/restaurants/${restaurantName}/menu`;
     Axios.delete(url, { data: { fname: `'${name}'` } })
       .then((response) => {
         console.log("Deleted item from menu:", response.data);
@@ -115,7 +117,7 @@ function RestaurantMenu() {
   };
 
   const createFoodItem = (foodItem) => {
-    const url = `http://localhost:5000/api/restaurants/'${restaurantName}'/menu`;
+    const url = `http://localhost:5000/api/restaurants/${restaurantName}/menu`;
     console.log(foodItem);
     Axios.post(url, foodItem)
       .then((response) => {
@@ -123,27 +125,12 @@ function RestaurantMenu() {
         console.log("Item successfully added to the menu");
         fetchData();
       })
-      .catch((error) => {
+      .catch(({ response }) => {
         console.log("An error occured while adding new item to the menu");
-        console.log(error.data);
+        alert(response.data.msg);
       });
     //setRestaurantFoodItems([foodItem].concat(restaurantFoodItems));
   };
-
-  //parses data in menu
-  // const getChanges = () => {
-  //   let updatedItems = [];
-  //   restaurantFoodItems.forEach((item) => {
-  //     let updatedItem = {};
-  //     updatedItem.fname = `'${item.name}'`;
-  //     updatedItem.cat = `'${item.category}'`;
-  //     updatedItem.imgurl = `'${item.imgurl}'`;
-  //     updatedItem.flimit = `${item.limit}`;
-  //     updatedItem.price = `${item.price}`;
-  //     updatedItems.push(updatedItem);
-  //   });
-  //   return updatedItems;
-  // };
 
   const handleSaveChanges = () => {
     // API call to patch new changes
@@ -156,14 +143,16 @@ function RestaurantMenu() {
     Axios.put(url, updatedData)
       .then((response) => {
         console.log(response.data);
+        // if success
+        setSaveChanges(true);
         fetchData();
       })
-      .catch((error) => {
-        console.log("Error updating menu:", error);
+      .catch(({ response }) => {
+        if (response.status === 400) {
+          alert("Error updating menu: " + response.data.msg);
+        }
+        return;
       });
-
-    // if success
-    setSaveChanges(true);
   };
 
   return (
@@ -225,6 +214,7 @@ function RestaurantMenu() {
                   category={value.category}
                   limit={value.limit}
                   imgurl={value.imgurl}
+                  avail={value.avail}
                   updateFoodItem={updateFoodItem}
                   deleteFoodItem={deleteFoodItem}
                 />
