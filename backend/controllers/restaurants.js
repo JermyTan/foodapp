@@ -413,7 +413,7 @@ exports.createDeliveryFee = async (req, response) => {
 
 // @desc    Delete a delivery fee entry
 // @route   DELETE /restaurants/dfee/?rname=:rname&region=:region
-// @access   Private
+// @access  Private
 exports.deleteDeliveryFee = async (req, response) => {
   const { rname, region } = req.query;
   let deleteDeliveryFeeQuery =
@@ -439,7 +439,7 @@ exports.deleteDeliveryFee = async (req, response) => {
           });
         }
       })
-      response.status(200).json(rowsDeleted)
+      response.status(200).json(rowsDeleted);
     }
   })
 }

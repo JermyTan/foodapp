@@ -104,7 +104,6 @@ exports.createUser = async (req, response) => {
 exports.updateUser = async (req, response) => {
   const id = parseInt(req.params.id);
   const { email, name } = req.body;
-  const checkUserEmailQuery = `SELECT * FROM Users WHERE email = '${email}'`;
 
   const updateUserQuery = `UPDATE users
     SET email = '${email}',
@@ -112,55 +111,101 @@ exports.updateUser = async (req, response) => {
     WHERE id = ${id}
     RETURNING *;`;
 
-  db.query(checkUserEmailQuery, async (err, result) => {
-    console.log("Checking if email exists:", result.rows);
+  const rows = db.query(updateUserQuery, async (err, result) => {
     if (err) {
-      console.log("Error:", err.stack);
-      response.status(500).json("Failed to verify if email exists.");
+      const msg = getUserErrorMsg(err);
+      response.status(500).json({ msg : msg, err: err});
     } else {
-      console.log(result.rows.id, id);
-      if (result.rows.length !== 0 && result.rows[0].id !== id) {
-        //If email already exists in users table, and the one changing email is not the same person
-        response.status(400).json("This email is already registered.");
-      } else {
-        db.query(updateUserQuery, async (err2, result2) => {
-          if (err2) {
-            console.log("Error creating customer", err2.stack);
-            response.status(500).json("Failed to update user account.");
-          } else {
-            console.log("Update:", result2);
-            if (result2.rows)
-              response
-                .status(200)
-                .json({ msg: `Updated customer with id ${id}` });
-            else {
-              response.status(404).json({ msg: `Failed to create customer.` });
-            }
-          }
-        });
+      console.log("Update:", result);
+      if (result.rows)
+        response
+          .status(200)
+          .json({ msg: `Updated customer with id ${id}` });
+      else {
+        response.status(404).json({ msg: `Failed to create user.` });
       }
     }
   });
 };
 
-// @desc    Delete user
-// @route   DELETE /users/:id
+// @desc    Toggle active status of user (ie. set user active/inactive)
+// @route   PUT /users/active/toggle
 // @acess   Private
-exports.deleteUser = async (req, response) => {
-  const id = req.params.id;
-  const row = await db.query(
-    "DELETE FROM users WHERE id = $1",
-    [id],
-    (err, result) => {
-      if (err) {
-        console.error(err.stack);
-        throw err;
-      } else {
-        // TODO: detect case and handle when nothing is deleted
+exports.toggleActiveUser = async (req, response) => {
+  // shape of request body: json of an array arr containing json with { id, active }
+  let toggleActiveUserQuery = 
+  `BEGIN;
+  SET CONSTRAINTS ALL DEFERRED;
+  `;
 
-        console.log(`Successfully deleted user with id ${id}`);
-        response.status(200).json(`Successfully deleted user with id ${id}`);
+  const arr = req.body;
+
+  if (!Array.isArray(arr) || arr.length == 0) {
+    response.status(400).json(`Bad request. Request body missing or not in array.`);
+  }
+
+  arr.map((data) => {
+    const { id, active } = data;
+
+    if (typeof id == 'undefined' || typeof active == 'undefined' ) { // throw bad request response if data missing
+      console.error(`Partial data missing id: ${id}, active: ${active}`)
+      throw response.status(400).json({msg : `Bad request. Data missing.`, id: `${id}`, active: `${active}`});
+    }
+
+    toggleActiveUserQuery += `UPDATE users
+    SET active = '${active}'
+    WHERE id = ${id}
+    RETURNING *;
+    `
+  });
+
+  toggleActiveUserQuery += `COMMIT;`
+
+  console.log(`Toggle active user query is ${toggleActiveUserQuery}`);
+  
+  const rows = await db.query(toggleActiveUserQuery, (err, result) => {
+      if (err) {
+        const msg = getUserErrorMsg(err);
+        response.status(500).json({ msg : msg, err: err});
+      } else {
+        console.log('Successfully toggled user active status.')
+        rowsToggled = [];
+        result.map((data) => {
+          // console.log(data);
+          if (data.rows.length > 0) {
+            data.rows.forEach(element => {
+              rowsToggled.push(element);
+            });
+          }
+        })
+        response.status(200).json(rowsToggled);
       }
     }
   );
 };
+
+const getUserErrorMsg = (err) => {
+  msg = ``;
+  console.error(err);
+  switch (err.constraint) {
+  case "users_active_check":
+    msg = `Invalid user active status value. Only number 0 (inactive) or 1 (active) is allowed.`;
+    break;
+  case "users_email_check":
+    msg = `Invalid email field. Email field entered is empty or in the wrong format.`;
+    break;
+  case "users_name_check":
+    msg = `Invalid user name. User name entered is empty.`;
+    break;
+  case "users_pkey":
+    msg = `Invalid user id. User id field entered is either empty, or id already exists in the database.`;
+    break;
+  case "users_email_key":
+    msg = `Invalid user email. User email already exists in the database.`;
+    break;
+  default:
+    msg = `A constraint is violated in the Users table of the database.`;
+    break;
+  }
+  return msg;
+}

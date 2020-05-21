@@ -11,7 +11,7 @@ const {
     getUser,
     createUser,
     updateUser,
-    deleteUser
+    toggleActiveUser
 } = require('../controllers/users');
 
 // map routes to controller
@@ -21,8 +21,10 @@ router
     .post(createUser);
 
 router.route('/:id')
-    .put(updateUser)
-    .delete(deleteUser);
+    .put(updateUser);
+
+router.route('/active/toggle')
+    .put(toggleActiveUser);
 
 router.route('/login')
     .get(getUser);
