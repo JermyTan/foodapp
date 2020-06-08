@@ -1,31 +1,41 @@
 const db = require("../db");
+const ErrorResponse = require('../utils/errorResponse');
 
 // @desc    Get all customers
-// @route   GET /customers
-// @acess   Public
-exports.getCustomers = async (req, response) => {
-  const rows = await db.query("SELECT * FROM customers", (err, result) => {
-    if (err) {
-      console.error(err.stack);
-      throw err;
-    } else {
-      if (!result.rows[0]) {
-        response
-          .status(404)
-          .json(
-            `Failed to get all customers. There could be no customers yet.`
-          );
-      } else {
-        console.log("Successfully get all customers");
-        response.status(200).json(result.rows);
-      }
-    }
-  });
+// @route   GET /api/customers
+// @access  Public
+exports.getCustomers = async (req, res, next) => {
+  try {
+    const rows = await db.query(`SELECT * FROM CUSTOMERS`, (err, result) => {
+      res.status(200).json(result.rows);
+    });
+  } catch (err) {
+    next(err);
+  }
 };
+// exports.getCustomers = async (req, response) => {
+//   const rows = await db.query("SELECT * FROM customers", (err, result) => {
+//     if (err) {
+//       console.error(err.stack);
+//       throw err;
+//     } else {
+//       if (!result.rows[0]) {
+//         response
+//           .status(404)
+//           .json(
+//             `Failed to get all customers. There could be no customers yet.`
+//           );
+//       } else {
+//         console.log("Successfully get all customers");
+//         response.status(200).json(result.rows);
+//       }
+//     }
+//   });
+// };
 
 // @desc    Create new customer
-// @route   POST /customers
-// @acess   Private
+// @route   POST /api/customers
+// @access  Private
 exports.createCustomer = async (req, response) => {
   const { email, name } = req.body;
   let joindate = new Date().getTime() / 1000;
@@ -70,32 +80,44 @@ exports.createCustomer = async (req, response) => {
 };
 
 // @desc    Get a customer
-// @route   GET /customers/id
-// @acess   Private
-exports.getCustomer = async (req, response) => {
-  let id = req.params.id;
-  db.query(
-    "SELECT * FROM customers NATURAL JOIN users WHERE id = $1",
-    [id],
-    (err, result) => {
-      if (err) {
-        console.error(err.stack);
-      } else {
-        let info = result.rows[0];
-        if (!info) {
-          response.status(404).json(`Failed to get customer.`);
-        } else {
-          console.log("Successfully get customer");
-          response.status(200).json(info);
-        }
+// @route   GET /api/customers/:id
+// @access  Public
+exports.getCustomer = async (req, res, next) => {
+  try {
+    const rows = await db.query(`SELECT * FROM CUSTOMERS WHERE id = ${req.params.id}`, (err, result) => {
+      if (result.rows.length == 0) {
+        return next(new ErrorResponse(`Customer with id ${req.params.id} not found`, 404));
       }
-    }
-  );
+      res.status(200).json(result.rows[0]);
+    });
+  } catch (err) {
+    next(err);
+  }
 };
+// exports.getCustomer = async (req, response) => {
+//   let id = req.params.id;
+//   db.query(
+//     "SELECT * FROM customers NATURAL JOIN users WHERE id = $1",
+//     [id],
+//     (err, result) => {
+//       if (err) {
+//         console.error(err.stack);
+//       } else {
+//         let info = result.rows[0];
+//         if (!info) {
+//           response.status(404).json(`Failed to get customer.`);
+//         } else {
+//           console.log("Successfully get customer");
+//           response.status(200).json(info);
+//         }
+//       }
+//     }
+//   );
+// };
 
 // @desc    Update a customer's card details
-// @route   PUT /customers/:id
-// @acess   Private
+// @route   PUT /api/customers/:id
+// @access  Private
 exports.updateCustomerCard = async (req, response) => {
   let cardnum = req.body.cardnum;
   let id = req.params.id;
@@ -122,8 +144,8 @@ exports.updateCustomerCard = async (req, response) => {
 };
 
 // @desc    Get all orders and related information made by a customer
-// @route   GET /customer/:id/orders
-// @acess   Private
+// @route   GET /api/customer/:id/orders
+// @access  Private
 exports.getCustomerOrders = async (req, response) => {
   const cid = req.params.id;
 
@@ -165,8 +187,8 @@ exports.getCustomerOrders = async (req, response) => {
 };
 
 // @desc    Post a review for a completed order, or updates an existing one
-// @route   POST /customers/review
-// @acess   Private
+// @route   POST /api/customers/review
+// @access  Private
 exports.addOrderReview = async (req, response) => {
   let { review, oid, reviewdatetime } = req.body;
 
@@ -193,8 +215,8 @@ exports.addOrderReview = async (req, response) => {
 };
 
 // @desc    Add a rating for a completed order, or updates an existing one
-// @route   POST /customers/rating
-// @acess   Private
+// @route   POST /api/customers/rating
+// @access  Private
 exports.addOrderRating = async (req, response) => {
   let { rating, oid } = req.body;
 
@@ -221,8 +243,8 @@ exports.addOrderRating = async (req, response) => {
 };
 
 // @desc    Gets the 5 most recent order locations of the user
-// @route   GET /customers/:id/locations
-// @acess   Private
+// @route   GET /api/customers/:id/locations
+// @access  Private
 exports.getRecentOrderLocations = async (req, response) => {
   let id = req.params.id;
 

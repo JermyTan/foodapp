@@ -1,4 +1,4 @@
-// const ErrorResponse = require('../utils/ErrorResponse');
+const ErrorResponse = require('../utils/errorResponse');
 
 const errorHandler = (err, req, res, next) => {
     // Log to console for dev
@@ -9,6 +9,12 @@ const errorHandler = (err, req, res, next) => {
 
     let error = { ...err };
     error.message = err.message;
+
+    // Sample template to add sql query errors
+    // if (err.name === 'CastError') {
+    //     const message = `Resource not found`;
+    //     error = new ErrorResponse(message, 404);
+    // }
 
     res.status(error.statusCode || 500).json({
         success: false,
