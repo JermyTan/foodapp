@@ -16,6 +16,7 @@ import {
   RIDER_SUMMARY_PATH,
   STAFF_MENU_PATH,
   STAFF_SUMMARY_PATH,
+  STAFF_PROMO_PATH,
   MANAGER_SUMMARY_PATH,
   MANAGER_PROMOTION_PATH,
   ROOT_PATH,
@@ -32,6 +33,7 @@ import RiderActivityPage from "./components/pages/RiderActivityPage";
 import RiderSummaryPage from "./components/pages/RiderSummaryPage";
 import StaffSummaryPage from "./components/pages/StaffSummaryPage";
 import StaffMenuPage from "./components/pages/StaffMenuPage";
+import StaffPromoPage from "./components/pages/StaffPromoPage";
 import ManagerSummaryPage from "./components/pages/ManagerSummaryPage";
 import ManagerPromotionPage from "./components/pages/ManagerPromotionPage";
 import UserContext from "utils/UserContext";
@@ -114,6 +116,13 @@ function App() {
                     path={STAFF_MENU_PATH}
                     exact
                     component={StaffMenuPage}
+                  />
+                )}
+                {role === STAFF && (
+                  <Route
+                    path={STAFF_PROMO_PATH}
+                    exact
+                    component={StaffPromoPage}
                   />
                 )}
                 {role === MANAGER && (

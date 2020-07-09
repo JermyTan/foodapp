@@ -1,7 +1,7 @@
 const db = require("../db");
-const getUnixTime = require("date-fns/getUnixTime")
-const addHours = require("date-fns/addHours")
-const startOfToday = require("date-fns/startOfToday")
+const getUnixTime = require("date-fns/getUnixTime");
+const addHours = require("date-fns/addHours");
+const startOfToday = require("date-fns/startOfToday");
 
 // @desc    Get all restaurants with info rname, category
 // @route   GET /api/restaurants
@@ -31,8 +31,7 @@ exports.getRestaurant = async (req, response) => {
   let start = getUnixTime(addHours(startOfToday(), 10));
   let end = getUnixTime(addHours(startOfToday(), 22));
 
-  const getRestaurantFoodQuery =
-    `SELECT *, flimit - COALESCE(
+  const getRestaurantFoodQuery = `SELECT *, flimit - COALESCE(
       (SELECT SUM(C.quantity) AS qtysoldtoday
         FROM (
           SELECT * FROM Orders O
@@ -54,7 +53,11 @@ exports.getRestaurant = async (req, response) => {
     } else {
       console.log("Restaurant and food items data:", result.rows);
       if (!result.rows) {
-        response.status(404).json(`Failed to get restaurant and food items, or no restaurants exist.`);
+        response
+          .status(404)
+          .json(
+            `Failed to get restaurant and food items, or no restaurants exist.`
+          );
       } else {
         console.log(result.rows);
         response.status(200).json(result.rows);
@@ -119,8 +122,7 @@ getSellsErrorMessage = (err) => {
       break;
   }
   return msg;
-}
-
+};
 
 // @desc    Add new food to sells table
 // @route   POST /restaurant/:rname
@@ -128,30 +130,38 @@ getSellsErrorMessage = (err) => {
 exports.addFoodToSells = async (req, response) => {
   const { name, price, category, limit, imgurl } = req.body;
   const rname = req.params.rname;
-  const addFoodToSellsQuery =
-    `INSERT INTO Sells (fname, rname, flimit, price, imgurl, category)
+  const addFoodToSellsQuery = `INSERT INTO Sells (fname, rname, flimit, price, imgurl, category)
     VALUES('${name}', '${rname}', ${limit}, ${price}, '${imgurl}', '${category}')
     RETURNING *;`;
-  console.log("body:", req.body, "params:", req.params)
+  console.log("body:", req.body, "params:", req.params);
 
   db.query(addFoodToSellsQuery, (err, result) => {
     if (err) {
       console.log("Error adding item into menu:", err.constraint);
       console.log(err.constraint);
       if (err.constraint) {
-        let msg = getSellsErrorMessage(err)
+        let msg = getSellsErrorMessage(err);
         response.status(400).json({ success: false, msg: msg });
       } else {
-        response.status(400).json({ success: false, msg: "Unable to add food. Please try again." });
+        response.status(400).json({
+          success: false,
+          msg: "Unable to add food. Please try again.",
+        });
       }
     } else {
       console.log("Insert new record into sells:", result);
       if (result.rows[0]) {
         console.log("Added new item:", result.rows[0]);
-        response.status(200).json({ success: true, msg: "Successfully added new item", data: result.rows[0] });
+        response.status(200).json({
+          success: true,
+          msg: "Successfully added new item",
+          data: result.rows[0],
+        });
       } else {
         console.log("Failed to add new record in sells");
-        response.status(400).json({ success: false, msg: "Failed to add new item" });
+        response
+          .status(400)
+          .json({ success: false, msg: "Failed to add new item" });
       }
     }
   });
@@ -191,26 +201,55 @@ exports.viewNewOrders = async (req, response) => {
 // @acess   Private
 exports.getStaffMenu = async (req, response) => {
   let rname = req.params.rname;
-  const getMenuQuery =
-    `SELECT json_build_object (
-      'minamt', (SELECT minamt FROM Restaurants WHERE rname = '${rname}'),
-      'menu', (SELECT json_agg(rows) as menu
+  const getHistoryScalarSubquery = `SELECT json_agg(history_rows) AS history
       FROM (
-        SELECT fname as name, flimit as limit, price, imgurl, category, fid, avail
+        SELECT * FROM
+        SellsHistory SH
+        WHERE SH.fid = S.fid
+        ORDER BY SH.datetime DESC
+      ) AS history_rows
+    `;
+  const getMenuQuery = `SELECT json_build_object (
+      'minamt', (SELECT minamt FROM Restaurants WHERE rname = '${rname}'),
+      'menu', (SELECT json_agg(rows) AS menu
+      FROM (
+        SELECT fname AS name, flimit AS limit, price, imgurl, category, fid, avail, (${getHistoryScalarSubquery})
         FROM Sells S
         WHERE S.rname = '${rname}'
         ORDER BY (S.fname)
-      ) as rows)
-    ) as staffMenu`
+      ) AS rows)
+    ) AS staffMenu`;
 
   db.query(getMenuQuery, (err, result) => {
     if (err) {
       console.log(err.stack);
       response.status(404).json("Unable to view staff menu.");
     } else {
-      let staffMenu = result.rows[0].staffmenu
+      let staffMenu = result.rows[0].staffmenu;
       console.log("Restaurant information retreived:", staffMenu);
-      response.status(200).json({ menu: staffMenu.menu, minamt: staffMenu.minamt })
+      response
+        .status(200)
+        .json({ menu: staffMenu.menu, minamt: staffMenu.minamt });
+    }
+  });
+};
+
+// @desc    Update min amount for restaurant order
+// @route   PATCH /restaurant/rname/minamt
+// @acess   Private
+exports.updateMinAmt = async (req, response) => {
+  let { rname, restMinAmt } = req.params;
+  let updateMinAmtQuery = `
+  UPDATE Restaurants SET minamt = ${restMinAmt} WHERE rname = '${rname}';`;
+  db.query(updateMinAmtQuery, async (err, result) => {
+    if (err) {
+      console.log("Error updating min amount:", err);
+      let msg = getSellsErrorMessage(err);
+      response.status(400).json({ msg: msg });
+    } else {
+      response
+        .status(200)
+        .json({ msg: "Successfully updated restaurant min amount" });
     }
   });
 };
@@ -223,15 +262,12 @@ exports.updateMenu = async (req, response) => {
   let updatedMenu = req.body.updatedMenu;
   let restMinAmt = req.body.minamt;
 
-  let updateMenuQuery =
-    `BEGIN;
-  UPDATE Restaurants SET minamt = ${restMinAmt} WHERE rname = '${rname}';`
+  let updateMenuQuery = `BEGIN;
+  UPDATE Restaurants SET minamt = ${restMinAmt} WHERE rname = '${rname}';`;
 
-  console.log(updatedMenu)
   //append queries to ensure that menu updates for individual items are all made together
   updatedMenu.forEach((fooditem) => {
-    updateMenuQuery +=
-      `UPDATE Sells
+    updateMenuQuery += `UPDATE Sells
       SET
       fname = '${fooditem.name}',
       category = '${fooditem.category}',
@@ -241,20 +277,50 @@ exports.updateMenu = async (req, response) => {
       avail = ${fooditem.avail}
       WHERE rname = '${rname}'
       AND fid = '${fooditem.fid}'
-      RETURNING *;`
-  })
+      RETURNING *;`;
+  });
 
-  updateMenuQuery += `COMMIT;`
+  updateMenuQuery += `COMMIT;`;
 
   db.query(updateMenuQuery, async (err, result) => {
     if (err) {
-      console.log("Error updating menu:", err)
-      let msg = getSellsErrorMessage(err)
-      response.status(400).json({ msg: msg })
+      console.log("Error updating menu:", err);
+      let msg = getSellsErrorMessage(err);
+      response.status(400).json({ msg: msg });
     } else {
-      response.status(200).json({ msg: "Successfully updated menu items and min amount" })
+      response
+        .status(200)
+        .json({ msg: "Successfully updated menu items and min amount" });
     }
-  })
+  });
+};
+
+// @desc    Update individual food item details
+// @route   PATCH /restaurant/rname/fid
+// @acess   Private
+exports.updateMenuItem = async (req, response) => {
+  let { rname, fooditem } = req.params;
+  let updateMenuItemQuery = `UPDATE Sells
+      SET
+      fname = '${fooditem.name}',
+      category = '${fooditem.category}',
+      flimit = ${fooditem.limit},
+      price = ${fooditem.price},
+      imgurl = '${fooditem.imgurl}',
+      avail = ${fooditem.avail}
+      WHERE rname = '${rname}'
+      AND fid = '${fooditem.fid}'
+      RETURNING *;`;
+
+  db.query(updateMenuItemQuery, async (err, result) => {
+    if (err) {
+      console.log("Error updating menu:", err);
+      let msg = getSellsErrorMessage(err);
+      response.status(400).json({ msg: msg });
+    } else {
+      response.status(200).json({ msg: "Successfully updated menu item" });
+    }
+  });
 };
 
 // @desc    Deletes an item from the menu
@@ -325,8 +391,7 @@ exports.getSummaryInfo = async (req, response) => {
   let { starttime, endtime } = req.query;
   let rname = req.params.rname;
 
-  const getRestaurantsSummary =
-    `WITH SO AS (
+  const getRestaurantsSummary = `WITH SO AS (
     SELECT *
     FROM Orders O
     WHERE O.status = 2

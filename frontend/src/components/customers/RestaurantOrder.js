@@ -3,7 +3,6 @@ import { Button, Icon, Label, Input, Item, Segment } from "semantic-ui-react";
 import FoodItemSelector from "./FoodItemSelector";
 import CheckoutButton from "./CheckoutButton";
 import Axios from "axios";
-import { startOfToday, addHours, getUnixTime } from "date-fns";
 
 const data = [
   {
@@ -51,11 +50,9 @@ function RestaurantOrder(props) {
   const [restaurantFoodItems, setRestaurantFoodItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const rname = props.restaurant;
-  const start = getUnixTime(addHours(startOfToday(), 10)); //10am today
-  const end = getUnixTime(addHours(startOfToday(), 22)); //10pm today
 
   useEffect(() => {
-    const url = `http://localhost:5000/api/restaurants/'${rname}'?start=${start}&end=${end}`;
+    const url = `http://localhost:5000/api/restaurants/${rname}`;
     Axios.get(url)
       .then((response) => {
         let processedData = [];
@@ -160,23 +157,23 @@ function RestaurantOrder(props) {
           textAlign="center"
         />
       ) : (
-        <Item.Group divided>
-          {restaurantFoodItems.map((foodItem, index) => {
-            return (
-              <FoodItemSelector
-                key={index}
-                name={foodItem.name}
-                price={foodItem.price}
-                category={foodItem.category}
-                limit={foodItem.limit}
-                count={0}
-                updateSelectedFoodItems={updateSelectedFoodItems}
-                imgurl={foodItem.imgurl}
-              />
-            );
-          })}
-        </Item.Group>
-      )}
+          <Item.Group divided>
+            {restaurantFoodItems.map((foodItem, index) => {
+              return (
+                <FoodItemSelector
+                  key={index}
+                  name={foodItem.name}
+                  price={foodItem.price}
+                  category={foodItem.category}
+                  limit={foodItem.limit}
+                  count={0}
+                  updateSelectedFoodItems={updateSelectedFoodItems}
+                  imgurl={foodItem.imgurl}
+                />
+              );
+            })}
+          </Item.Group>
+        )}
     </>
   );
 }

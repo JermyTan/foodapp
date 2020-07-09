@@ -46,7 +46,13 @@ function NewItemButton(props) {
       }}
       onClose={() => setModalOpened(false)}
       trigger={
-        <Button color="teal" onClick={() => setModalOpened(true)} icon="plus" />
+        <Button
+          color="teal"
+          onClick={() => setModalOpened(true)}
+          icon="plus"
+          content="Add new menu item"
+          labelPosition="right"
+        />
       }
     >
       <Modal.Header>Add new food item</Modal.Header>
@@ -80,7 +86,7 @@ function NewItemButton(props) {
               price: parseFloat(price),
               category: category,
               limit: parseInt(limit),
-              imgurl: imgurl
+              imgurl: imgurl,
             });
             setModalOpened(false);
           }}

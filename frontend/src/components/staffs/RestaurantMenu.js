@@ -1,49 +1,19 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Item, Button, Message, Segment, Form, Input, Label, Loader } from "semantic-ui-react";
+import {
+  Item,
+  Button,
+  Message,
+  Segment,
+  Form,
+  Input,
+  Label,
+  Loader,
+} from "semantic-ui-react";
 import FoodItemEditor from "./FoodItemEditor";
 import NewItemButton from "./NewItemButton";
 import Axios from "axios";
 import UserContext from "utils/UserContext";
 import ItemHistoryViewer from "./ItemHistoryViewer";
-
-// const data = [
-//   {
-//     name: "Curry Chicken with Rice",
-//     price: 6.3,
-//     category: "Asian",
-//     limit: 5,
-//   },
-//   {
-//     name: "Dry Mee Siam",
-//     price: 5.6,
-//     category: "Malay",
-//     limit: 3,
-//   },
-//   {
-//     name: "Ice Milo",
-//     price: 1.3,
-//     category: "Drinks",
-//     limit: 10,
-//   },
-//   {
-//     name: "Fried Bee Hoon",
-//     price: 4.3,
-//     category: "Asian",
-//     limit: 8,
-//   },
-//   {
-//     name: "Lu Rou Fan",
-//     price: 7.99,
-//     category: "Asian",
-//     limit: 5,
-//   },
-//   {
-//     name: "Peanut Butter Thick Toast",
-//     price: 2.1,
-//     category: "Asian",
-//     limit: 10,
-//   },
-// ];
 
 function RestaurantMenu() {
   const [restaurantName, setRestaurantName] = useState("");
@@ -67,7 +37,7 @@ function RestaurantMenu() {
       limit: affectedItem.limit,
       imgurl: affectedItem.imgurl,
       fid: affectedItem.fid,
-      avail: affectedItem.avail
+      avail: affectedItem.avail,
     };
     itemClone[key] = value;
     clone[index] = itemClone;
@@ -168,9 +138,9 @@ function RestaurantMenu() {
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <h1>{loading ? <Loader inline active /> : restaurantName}</h1>
         <span>
-          <Button color="blue" onClick={handleSaveChanges}>
+          {/* <Button color="blue" onClick={handleSaveChanges}>
             Save changes
-          </Button>
+          </Button> */}
           <NewItemButton createFoodItem={createFoodItem} />
         </span>
       </div>
@@ -203,25 +173,27 @@ function RestaurantMenu() {
           loading={loading}
         />
       ) : (
-          <Item.Group divided>
-            {restaurantFoodItems.map((value, index) => {
-              return (
-                <FoodItemEditor
-                  key={index}
-                  index={index}
-                  name={value.name}
-                  price={value.price}
-                  category={value.category}
-                  limit={value.limit}
-                  imgurl={value.imgurl}
-                  avail={value.avail}
-                  updateFoodItem={updateFoodItem}
-                  deleteFoodItem={deleteFoodItem}
-                />
-              );
-            })}
-          </Item.Group>
-        )}
+        <Item.Group divided>
+          {restaurantFoodItems.map((value, index) => {
+            return (
+              <FoodItemEditor
+                key={index}
+                index={index}
+                name={value.name}
+                price={value.price}
+                category={value.category}
+                limit={value.limit}
+                imgurl={value.imgurl}
+                avail={value.avail}
+                history={value.history}
+                updateFoodItem={updateFoodItem}
+                deleteFoodItem={deleteFoodItem}
+                isEditor
+              />
+            );
+          })}
+        </Item.Group>
+      )}
     </>
   );
 }

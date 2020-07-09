@@ -1,7 +1,15 @@
 import React, { useState } from "react";
-import { Item, Label, Input, Button, Modal, Radio, Icon } from "semantic-ui-react";
+import {
+  Item,
+  Label,
+  Input,
+  Button,
+  Modal,
+  Radio,
+  Icon,
+} from "semantic-ui-react";
 import NumberInput from "semantic-ui-react-numberinput";
-import ItemHistoryViewer from "./ItemHistoryViewer"
+import ItemHistoryViewer from "./ItemHistoryViewer";
 import "styles/FoodItem.scss";
 
 function FoodItemEditor(props) {
@@ -130,19 +138,25 @@ function FoodItemEditor(props) {
             toggle
             checked={props.avail}
             onChange={() => {
-              console.log()
-              let newAvail = !props.avail
-              props.updateFoodItem("avail", newAvail, props.index)
+              console.log();
+              let newAvail = !props.avail;
+              props.updateFoodItem("avail", newAvail, props.index);
             }}
           />
 
-          <div>
-            <Button icon labelPosition='left' floated="right" color="olive">
-              <Icon name='plus' />
-              Add offer for item
-            </Button>
-            <ItemHistoryViewer></ItemHistoryViewer>
-          </div>
+          {props.isEditor && (
+            <div>
+              <Button
+                content="Promotions"
+                labelPosition="left"
+                icon="percent"
+                floated="right"
+                color="olive"
+              />
+              <ItemHistoryViewer history={props.history} />
+              <Button floated="right" color="green" icon="save" />
+            </div>
+          )}
         </Item.Extra>
       </Item.Content>
     </Item>
