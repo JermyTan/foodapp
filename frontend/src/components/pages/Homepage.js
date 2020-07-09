@@ -21,7 +21,7 @@ function Homepage() {
           <RestaurantOrder
             deliveryInfo={{
               location: location,
-              deliveryFee: 3.99
+              deliveryFee: 3.99 // TODO: change to restaurant dfee wrt to user's location (will require request to backend)
             }}
             restaurant={selectedRestaurant}
             setSelectedRestaurant={setSelectedRestaurant}
@@ -36,3 +36,4 @@ function Homepage() {
 }
 
 export default Homepage;
+ 

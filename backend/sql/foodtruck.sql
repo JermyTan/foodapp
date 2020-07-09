@@ -66,6 +66,7 @@ CREATE TABLE Customers (
 --BCNF--
 CREATE TABLE Restaurants (
     rname       VARCHAR PRIMARY KEY,
+    location    VARCHAR REFERENCES Area,
     minamt      NUMERIC(12, 2) NOT NULL,
     imgurl      VARCHAR DEFAULT 'https://zabas.com/wp-content/uploads/2017/01/food-placeholder.png',
     CHECK (rname <> ''),
@@ -148,11 +149,10 @@ CREATE TABLE WWS (
 CREATE TABLE Orders (
     oid         SERIAL PRIMARY KEY,
 
-    location    VARCHAR NOT NULL
-                CHECK (location <> ''),
-
     dfee        NUMERIC(12, 2) NOT NULL
                 CHECK (dfee >= 0),
+
+    location    VARCHAR REFERENCES Area,
 
     -- status: 0 -> processing, 1 -> delivering, 2 -> delivered, 3 -> cancelled
     status      SMALLINT NOT NULL
@@ -230,7 +230,7 @@ CREATE TABLE Consists (
     fname       VARCHAR NOT NULL,
     quantity    INTEGER NOT NULL,
     itemprice   NUMERIC(12, 2) NOT NULL,
-    PRIMARY KEY (oid, fname)
+    PRIMARY KEY (oid, fname),
     CHECK (quantity > 0)
 );
 
@@ -247,4 +247,17 @@ CREATE TABLE FDSOffers (
     pid         INTEGER REFERENCES Promotions,
     oid         INTEGER REFERENCES Orders,
     PRIMARY KEY (pid, oid)
+);
+
+CREATE TABLE DeliveryFee (
+    rname       VARCHAR REFERENCES Restaurant,
+    region      VARCHAR REFERENCES Area,
+    dfee        NUMERIC(12, 2) NOT NULL DEFAULT 5.00,
+    PRIMARY KEY (rname, region),
+    CHECK (dfee >= 0)
+);
+
+CREATE TABLE Area (
+    location       VARCHAR PRIMARY KEY,
+    region         VARCHAR
 );
