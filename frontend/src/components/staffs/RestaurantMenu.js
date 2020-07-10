@@ -138,9 +138,9 @@ function RestaurantMenu() {
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         <h1>{loading ? <Loader inline active /> : restaurantName}</h1>
         <span>
-          {/* <Button color="blue" onClick={handleSaveChanges}>
+          <Button color="blue" onClick={handleSaveChanges}>
             Save changes
-          </Button> */}
+          </Button>
           <NewItemButton createFoodItem={createFoodItem} />
         </span>
       </div>
