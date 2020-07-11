@@ -17,32 +17,32 @@ Explore restaurants and order items.
 ![Screenshot for customer order](/img/customer_order.png)
 
 Keep track of all current and past orders. Upon order completion, customers can also rate the delivery, or write a review for the restaurant.
-![Screenshot for viewing past orders](/img/customer_view_orders.png)
+![Customer history](/img/customer_history.png)
 
 ### Restaurants
 
 Showcase menu of food items for customers to order. Edit the food item details at any time!
 
-![Screenshot for restaurant edit menu](/img/restaurant_menu.png)
+![Restaurant menu](/img/restaurant_menu)
 
 View sales statistics for any period of time.
 
-![Screenshot for restaurant edit menu](/img/restaurant_summary.png)
+![Restaurant summary](/img/restaurant_summary)
 
 ### Delivery Riders
 
 Orders are assigned based on work schedule. Keep track of all orders and delivery status.
 
-![Screenshot for rider activity](/img/rider_activity.png)
+![Rider activity](/img/rider_activity.png)
 
 View statistics about work hours, salary and deliveries completed.
 
-![Screenshot for rider activity](/img/rider_summary.png)
+![Rider summary](/img/rider_summary.png)
 
 ### FDS Managers
 
 Keep track of important summary information.
-![Screenshot for manager summary](/img/manager_summary.png)
+![Manager summary](/img/manager_summary.png)
 
 Create platform-wide promotions which can be applied to users.
-![Screenshot for manager promotions](/img/manager_promotions.png)
+![Manager promotions](/img/manager_promotions.png)
