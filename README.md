@@ -14,20 +14,22 @@ The application provides functionalities for 4 types of users:
 ### Customers
 
 Explore restaurants and order items.
+
 ![Screenshot for customer order](/img/customer_order.png)
 
 Keep track of all current and past orders. Upon order completion, customers can also rate the delivery, or write a review for the restaurant.
+
 ![Customer history](/img/customer_history.png)
 
 ### Restaurants
 
 Showcase menu of food items for customers to order. Edit the food item details at any time!
 
-![Restaurant menu](/img/restaurant_menu)
+![Restaurant menu](/img/restaurant_menu.png)
 
 View sales statistics for any period of time.
 
-![Restaurant summary](/img/restaurant_summary)
+![Restaurant summary](/img/restaurant_summary.png)
 
 ### Delivery Riders
 
@@ -42,7 +44,9 @@ View statistics about work hours, salary and deliveries completed.
 ### FDS Managers
 
 Keep track of important summary information.
+
 ![Manager summary](/img/manager_summary.png)
 
 Create platform-wide promotions which can be applied to users.
+
 ![Manager promotions](/img/manager_promotions.png)
